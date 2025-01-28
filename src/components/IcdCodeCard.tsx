@@ -8,6 +8,7 @@ interface IcdCodeCardProps {
     code: string;
     description: string;
     sourceDoc: string;
+    found: boolean;
   }>;
   onSourceClick: (doc: string) => void;
 }
@@ -23,13 +24,30 @@ export const IcdCodeCard = ({ title, codes, onSourceClick }: IcdCodeCardProps) =
           {codes.map((code) => (
             <div
               key={code.code}
-              className="flex items-start justify-between p-3 bg-white rounded-lg shadow-sm"
+              className={`flex items-start justify-between p-3 ${
+                code.found ? "bg-white" : "bg-red-50"
+              } rounded-lg shadow-sm`}
             >
               <div>
-                <span className="font-semibold text-medical-primary">
+                <span
+                  className={`font-semibold ${
+                    code.found
+                      ? "text-medical-primary"
+                      : "text-red-500 font-bold"
+                  }`}
+                >
                   {code.code}
                 </span>
-                <p className="text-medical-text mt-1">{code.description}</p>
+                <p
+                  className={`${
+                    code.found ? "text-medical-text" : "text-red-600"
+                  } mt-1`}
+                >
+                  {code.description}
+                </p>
+                {!code.found && (
+                  <p className="text-sm text-red-500 mt-1">Not found in EHR</p>
+                )}
               </div>
               <Button
                 variant="ghost"

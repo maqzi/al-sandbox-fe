@@ -1,16 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface RuleNode {
   title: string;
   children?: RuleNode[];
   threshold?: string;
+  action?: string;
 }
 
 interface RuleTreeProps {
   data: RuleNode;
+  onRefer?: () => void;
 }
 
-export const RuleTree = ({ data }: RuleTreeProps) => {
+export const RuleTree = ({ data, onRefer }: RuleTreeProps) => {
   const renderNode = (node: RuleNode, level: number = 0) => {
     return (
       <div
@@ -30,6 +33,9 @@ export const RuleTree = ({ data }: RuleTreeProps) => {
                 Threshold: {node.threshold}
               </span>
             )}
+            {node.action && (
+              <div className="mt-2 text-sm text-red-500">{node.action}</div>
+            )}
           </div>
         </div>
         {node.children && (
@@ -46,7 +52,20 @@ export const RuleTree = ({ data }: RuleTreeProps) => {
       <CardHeader>
         <CardTitle className="text-medical-primary">Decision Rules</CardTitle>
       </CardHeader>
-      <CardContent>{renderNode(data)}</CardContent>
+      <CardContent>
+        {renderNode(data)}
+        {onRefer && (
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={onRefer}
+              variant="destructive"
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Refer Case
+            </Button>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 };

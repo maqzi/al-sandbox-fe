@@ -8,9 +8,16 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [step, setStep] = useState(1);
+  const [isReferred, setIsReferred] = useState(false);
 
   const handleSourceClick = (doc: string) => {
     toast.info(`Opening source document: ${doc}`);
+  };
+
+  const handleRefer = () => {
+    setIsReferred(true);
+    setStep(3);
+    toast.info("Case has been referred for manual review");
   };
 
   const diabetesIcdCodes = [
@@ -18,11 +25,13 @@ const Index = () => {
       code: "E11.9",
       description: "Type 2 diabetes mellitus without complications",
       sourceDoc: "Medical Record 2023-01-15",
+      found: true,
     },
     {
       code: "E11.65",
       description: "Type 2 diabetes mellitus with hyperglycemia",
       sourceDoc: "Lab Results 2023-02-01",
+      found: true,
     },
   ];
 
@@ -31,6 +40,13 @@ const Index = () => {
       code: "G47.33",
       description: "Obstructive sleep apnea (adult) (pediatric)",
       sourceDoc: "Sleep Study 2023-03-10",
+      found: true,
+    },
+    {
+      code: "G47.30",
+      description: "Sleep apnea, unspecified",
+      sourceDoc: "Required for AHI score",
+      found: false,
     },
   ];
 
@@ -43,6 +59,7 @@ const Index = () => {
           {
             title: "A1c Level",
             threshold: "≤ 7.0%",
+            action: "If not found, refer case",
           },
         ],
       },
@@ -52,6 +69,7 @@ const Index = () => {
           {
             title: "AHI Score",
             threshold: "< 5 events/hour",
+            action: "If not found, refer case",
           },
         ],
       },
@@ -64,12 +82,14 @@ const Index = () => {
       value: "6.4%",
       sourceDoc: "Lab Results 2023-02-01",
       isNormal: true,
+      found: true,
     },
     {
       parameter: "AHI Score",
-      value: "3.2 events/hour",
+      value: "Not Found",
       sourceDoc: "Sleep Study 2023-03-10",
-      isNormal: true,
+      isNormal: false,
+      found: false,
     },
   ];
 
@@ -96,7 +116,7 @@ const Index = () => {
       case 2:
         return (
           <div>
-            <RuleTree data={ruleTreeData} />
+            <RuleTree data={ruleTreeData} onRefer={handleRefer} />
             <div className="flex justify-between mt-6">
               <Button variant="outline" onClick={() => setStep(1)}>
                 ← Back to ICD Codes
@@ -109,9 +129,11 @@ const Index = () => {
         return (
           <div>
             <AssessmentResult
-              riskClass="Standard"
+              riskClass={isReferred ? "Referred" : "Standard"}
               extractedData={extractedData}
               onSourceClick={handleSourceClick}
+              isReferred={isReferred}
+              referralReason="Missing AHI Score data in EHR"
             />
             <div className="flex justify-start mt-6">
               <Button variant="outline" onClick={() => setStep(2)}>
