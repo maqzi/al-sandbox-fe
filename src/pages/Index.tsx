@@ -11,13 +11,37 @@ const Index = () => {
   const [isReferred, setIsReferred] = useState(false);
 
   const handleSourceClick = (doc: string) => {
+    // Track source document views
+    if (typeof window !== 'undefined' && 'gtag' in window) {
+      (window as any).gtag('event', 'view_source', {
+        document_name: doc,
+        step: step
+      });
+    }
     toast.info(`Opening source document: ${doc}`);
   };
 
   const handleRefer = () => {
+    // Track case referrals
+    if (typeof window !== 'undefined' && 'gtag' in window) {
+      (window as any).gtag('event', 'refer_case', {
+        reason: 'Missing AHI Score data in EHR'
+      });
+    }
     setIsReferred(true);
     setStep(3);
     toast.info("Case has been referred for manual review");
+  };
+
+  const handleStepChange = (newStep: number) => {
+    // Track step navigation
+    if (typeof window !== 'undefined' && 'gtag' in window) {
+      (window as any).gtag('event', 'navigation', {
+        from_step: step,
+        to_step: newStep
+      });
+    }
+    setStep(newStep);
   };
 
   const diabetesIcdCodes = [
@@ -109,7 +133,7 @@ const Index = () => {
               onSourceClick={handleSourceClick}
             />
             <div className="flex justify-end mt-6">
-              <Button onClick={() => setStep(2)}>View Rules Analysis →</Button>
+              <Button onClick={() => handleStepChange(2)}>View Rules Analysis →</Button>
             </div>
           </div>
         );
@@ -118,10 +142,10 @@ const Index = () => {
           <div>
             <RuleTree data={ruleTreeData} onRefer={handleRefer} />
             <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button variant="outline" onClick={() => handleStepChange(1)}>
                 ← Back to ICD Codes
               </Button>
-              <Button onClick={() => setStep(3)}>View Assessment →</Button>
+              <Button onClick={() => handleStepChange(3)}>View Assessment →</Button>
             </div>
           </div>
         );
@@ -136,7 +160,7 @@ const Index = () => {
               referralReason="Missing AHI Score data in EHR"
             />
             <div className="flex justify-start mt-6">
-              <Button variant="outline" onClick={() => setStep(2)}>
+              <Button variant="outline" onClick={() => handleStepChange(2)}>
                 ← Back to Rules Analysis
               </Button>
             </div>

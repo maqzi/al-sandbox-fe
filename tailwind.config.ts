@@ -25,11 +25,14 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         medical: {
-          primary: "#2C5282",
-          secondary: "#F7FAFC",
-          success: "#48BB78",
-          warning: "#ECC94B",
-          text: "#2D3748",
+          primary: "#2C5282", // Deep medical blue
+          secondary: "#F7FAFC", // Light blue-gray
+          success: "#48BB78", // Medical green
+          warning: "#ECC94B", // Warning yellow
+          text: "#2D3748", // Dark gray text
+          light: "#EDF2F7", // Very light blue-gray
+          accent: "#4299E1", // Bright medical blue
+          error: "#E53E3E", // Medical red
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
