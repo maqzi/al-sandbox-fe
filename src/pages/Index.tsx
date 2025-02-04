@@ -5,17 +5,20 @@ import { RuleTree } from "@/components/RuleTree";
 import { AssessmentResult } from "@/components/AssessmentResult";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { DemoSignupForm } from "@/components/DemoSignupForm";
 
 const Index = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // 0 = signup form, 1-3 = main flow
   const [isReferred, setIsReferred] = useState(false);
+  const [userInfo, setUserInfo] = useState<{ name: string; email: string } | null>(null);
 
   const handleSourceClick = (doc: string) => {
     // Track source document views
     if (typeof window !== 'undefined' && 'gtag' in window) {
       (window as any).gtag('event', 'view_source', {
         document_name: doc,
-        step: step
+        step: step,
+        user_email: userInfo?.email
       });
     }
     toast.info(`Opening source document: ${doc}`);
@@ -25,7 +28,8 @@ const Index = () => {
     // Track case referrals
     if (typeof window !== 'undefined' && 'gtag' in window) {
       (window as any).gtag('event', 'refer_case', {
-        reason: 'Missing AHI Score data in EHR'
+        reason: 'Missing AHI Score data in EHR',
+        user_email: userInfo?.email
       });
     }
     setIsReferred(true);
@@ -38,10 +42,16 @@ const Index = () => {
     if (typeof window !== 'undefined' && 'gtag' in window) {
       (window as any).gtag('event', 'navigation', {
         from_step: step,
-        to_step: newStep
+        to_step: newStep,
+        user_email: userInfo?.email
       });
     }
     setStep(newStep);
+  };
+
+  const handleSignupComplete = (data: { name: string; email: string }) => {
+    setUserInfo(data);
+    handleStepChange(1);
   };
 
   const diabetesIcdCodes = [
@@ -118,6 +128,10 @@ const Index = () => {
   ];
 
   const renderStep = () => {
+    if (step === 0) {
+      return <DemoSignupForm onComplete={handleSignupComplete} />;
+    }
+
     switch (step) {
       case 1:
         return (
