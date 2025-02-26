@@ -1,16 +1,21 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { IcdCodeCard } from "@/components/IcdCodeCard";
-import { RuleTree } from "@/components/RuleTree";
-import { AssessmentResult } from "@/components/AssessmentResult";
-import { Button } from "@/components/ui/button";
+import { Button, Menu, MenuItem, Typography } from "@mui/material";
 import { toast } from "sonner";
 import { DemoSignupForm } from "@/components/DemoSignupForm";
+import EHRsComponent from "@/components/EHRsComponent";
+import RulesDesignerComponent from "@/components/RulesDesignerComponent";
+import AssessmentComponent from "@/components/AssessmentComponent";
+import WorkbenchComponent from "@/components/WorkbenchComponent";
+import WelcomePage from "@/components/WelcomePage";
 
 const Index = () => {
   const [step, setStep] = useState(0); // 0 = signup form, 1-3 = main flow
   const [isReferred, setIsReferred] = useState(false);
   const [userInfo, setUserInfo] = useState<{ name: string; email: string } | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [workbenchSection, setWorkbenchSection] = useState<string | null>("EHRs");
+  const [pageTitle, setPageTitle] = useState("");
 
   const handleSourceClick = (doc: string) => {
     // Track source document views
@@ -51,7 +56,30 @@ const Index = () => {
 
   const handleSignupComplete = (data: { name: string; email: string }) => {
     setUserInfo(data);
-    handleStepChange(1);
+    handleStepChange(5);
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (newStep: number, title: string) => {
+    setPageTitle(title);
+    handleStepChange(newStep);
+    handleMenuClose();
+  };
+
+  const handleWorkbenchSectionClick = (section: string) => {
+    setWorkbenchSection(section);
+  };
+
+  const handleLogout = () => {
+    setUserInfo(null);
+    setStep(0);
   };
 
   const diabetesIcdCodes = [
@@ -84,32 +112,6 @@ const Index = () => {
     },
   ];
 
-  const ruleTreeData = {
-    title: "Medical Assessment",
-    children: [
-      {
-        title: "Type 2 Diabetes",
-        children: [
-          {
-            title: "A1c Level",
-            threshold: "≤ 7.0%",
-            action: "If not found, refer case",
-          },
-        ],
-      },
-      {
-        title: "Sleep Apnea",
-        children: [
-          {
-            title: "AHI Score",
-            threshold: "< 5 events/hour",
-            action: "If not found, refer case",
-          },
-        ],
-      },
-    ],
-  };
-
   const extractedData = [
     {
       parameter: "A1c Level",
@@ -128,64 +130,57 @@ const Index = () => {
   ];
 
   const renderStep = () => {
-    if (step === 0) {
-      return <DemoSignupForm onComplete={handleSignupComplete} />;
-    }
-
     switch (step) {
+      case 0:
+        return (<DemoSignupForm onComplete={handleSignupComplete} />);
       case 1:
-        return (
-          <div>
-            <IcdCodeCard
-              title="Type 2 Diabetes ICD-10 Codes"
-              codes={diabetesIcdCodes}
-              onSourceClick={handleSourceClick}
-            />
-            <IcdCodeCard
-              title="Sleep Apnea ICD-10 Codes"
-              codes={sleepApneaIcdCodes}
-              onSourceClick={handleSourceClick}
-            />
-            <div className="flex justify-end mt-6">
-              <Button onClick={() => handleStepChange(2)}>View Rules Analysis →</Button>
-            </div>
-          </div>
-        );
+        return <RulesDesignerComponent handleStepChange={handleStepChange} />;
       case 2:
         return (
-          <div>
-            <RuleTree data={ruleTreeData} onRefer={handleRefer} />
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => handleStepChange(1)}>
-                ← Back to ICD Codes
-              </Button>
-              <Button onClick={() => handleStepChange(3)}>View Assessment →</Button>
-            </div>
-          </div>
+          <WorkbenchComponent
+            workbenchSection={workbenchSection}
+            handleWorkbenchSectionClick={handleWorkbenchSectionClick}
+            diabetesIcdCodes={diabetesIcdCodes}
+            sleepApneaIcdCodes={sleepApneaIcdCodes}
+            handleSourceClick={handleSourceClick}
+            isReferred={isReferred}
+            extractedData={extractedData}
+            referralReason="Missing AHI Score data in EHR"
+          />
         );
-      case 3:
-        return (
-          <div>
-            <AssessmentResult
-              riskClass={isReferred ? "Referred" : "Standard"}
-              extractedData={extractedData}
-              onSourceClick={handleSourceClick}
-              isReferred={isReferred}
-              referralReason="Missing AHI Score data in EHR"
-            />
-            <div className="flex justify-start mt-6">
-              <Button variant="outline" onClick={() => handleStepChange(2)}>
-                ← Back to Rules Analysis
-              </Button>
-            </div>
-          </div>
-        );
+      case 5:
+        return <WelcomePage userInfo={userInfo} handleLogout={handleLogout} />;
       default:
         return null;
     }
   };
 
-  return <Layout step={step}>{renderStep()}</Layout>;
+  return (
+    <Layout step={step}>
+      <Typography variant="h4" align="center" gutterBottom>
+        {pageTitle}
+      </Typography>
+      {userInfo && (
+        <div className="flex justify-between mb-4">
+          <Button
+        variant="outlined"
+        onClick={handleMenuClick}
+          >
+        Menu
+          </Button>
+          <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+          >
+        <MenuItem onClick={() => handleMenuItemClick(1, "Rules Designer")}>Rules Designer</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick(2, "Workbench")}>Workbench</MenuItem>
+          </Menu>
+        </div>
+      )}
+      {renderStep()}
+    </Layout>
+  );
 };
 
 export default Index;

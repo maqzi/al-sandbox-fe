@@ -7,16 +7,44 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependency directories
 node_modules
+.yarn
+
+# Build artifacts
 dist
 dist-ssr
+build
+out
+
+# Local environment files
 *.local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.yarn
+
+# Yarn Plug'n'Play
+.pnp.cjs
+.pnp.loader.mjs
+
+# Coverage reports
+coverage
+
+# Temporary files
+tmp
+temp
+
+# Operating system files
+.DS_Store
+Thumbs.db
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
