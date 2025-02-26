@@ -9,89 +9,112 @@ import ReactFlow, {
   useNodesState,
 } from 'react-flow-renderer';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import CircleNode from './CircleNode';
+import DiamondNode from './DiamondNode';
 
 const initialNodes = [
   {
-    id: '1',
-    type: 'input',
-    data: { label: 'INITIAL RATING 0' },
-    position: { x: 5, y: 250 },
+    id: 'start',
+    type: 'circle',
+    data: { label: 'Start' },
+    position: { x: 0, y: 250 },
   },
   {
-    id: '2',
-    data: { label: 'How many years ago were you diagnosed with diabetes?' },
+    id: '1',
+    data: { label: 'INITIAL RATING 0' },
     position: { x: 200, y: 250 },
   },
   {
-    id: '3',
-    data: { label: 'Age when diagnosed with diabetes' },
+    id: '2',
+    type: 'diamond',
+    data: { label: 'Applicant Age' },
     position: { x: 400, y: 250 },
   },
   {
-    id: '4',
+    id: '3',
     type: 'diamond',
-    data: { label: 'Age > 50?' },
+    data: { label: 'When were you diagnosed with this condition' },
     position: { x: 600, y: 250 },
   },
   {
+    id: '4',
+    data: { label: 'Calculate age at diagnosis' },
+    position: { x: 800, y: 250 },
+  },
+  {
     id: '5',
-    data: { label: 'RATING ADD 100' },
-    position: { x: 800, y: 100 },
+    type: 'diamond',
+    data: { label: 'Age > 50?' },
+    position: { x: 1000, y: 250 },
   },
   {
     id: '6',
-    data: { label: 'RATING ADD 50' },
-    position: { x: 800, y: 400 },
+    data: { label: 'RATING ADD 100' },
+    position: { x: 1200, y: 150 },
   },
   {
     id: '7',
-    data: { label: 'Have you had a mammogram in the last year and do you know the result?' },
-    position: { x: 1000, y: 250 },
+    data: { label: 'RATING ADD 50' },
+    position: { x: 1200, y: 350 },
   },
   {
     id: '8',
     type: 'diamond',
-    data: { label: 'Mammogram result known?' },
-    position: { x: 1200, y: 250 },
+    data: { label: 'Have you had a hemoglobin A1c test done in the last year and do you know the result?' },
+    position: { x: 1400, y: 250 },
   },
   {
     id: '9',
-    data: { label: 'ENTER EMR' },
-    position: { x: 1400, y: 100 },
+    type: 'diamond',
+    data: { label: 'What was your last known A1c?' },
+    position: { x: 1800, y: 250 },
   },
   {
     id: '10',
-    data: { label: 'STANDARDIZED KIT' },
-    position: { x: 1400, y: 400 },
+    data: { label: 'ORDER EHR' },
+    position: { x: 1800, y: 150 },
   },
   {
     id: '11',
-    data: { label: 'CHECKING' },
-    position: { x: 1600, y: 250 },
+    data: { label: 'STANDARDIZED NT' },
+    position: { x: 2000, y: 350 },
   },
   {
     id: '12',
-    type: 'output',
-    data: { label: 'END' },
-    position: { x: 1800, y: 250 },
+    data: { label: 'DECLINE' },
+    position: { x: 2000, y: 250 },
+  },
+  {
+    id: 'end',
+    type: 'circle',
+    data: { label: 'End' },
+    position: { x: 2200, y: 250 },
   },
 ];
 
 const initialEdges = [
+  { id: 'e-start-1', source: 'start', target: '1', animated: true },
   { id: 'e1-2', source: '1', target: '2', animated: true },
   { id: 'e2-3', source: '2', target: '3', animated: true },
   { id: 'e3-4', source: '3', target: '4', animated: true },
-  { id: 'e4-5', source: '4', target: '5', animated: true, label: 'Yes' },
-  { id: 'e4-6', source: '4', target: '6', animated: true, label: 'No' },
-  { id: 'e5-7', source: '5', target: '7', animated: true },
-  { id: 'e6-7', source: '6', target: '7', animated: true },
+  { id: 'e4-5', source: '4', target: '5', animated: true },
+  { id: 'e5-6', source: '5', target: '6', animated: true, label: '<50' },
+  { id: 'e5-7', source: '5', target: '7', animated: true, label: '>=50' },
+  { id: 'e6-8', source: '6', target: '8', animated: true },
   { id: 'e7-8', source: '7', target: '8', animated: true },
   { id: 'e8-9', source: '8', target: '9', animated: true, label: 'Yes' },
   { id: 'e8-10', source: '8', target: '10', animated: true, label: 'No' },
-  { id: 'e9-11', source: '9', target: '11', animated: true },
-  { id: 'e10-11', source: '10', target: '11', animated: true },
-  { id: 'e11-12', source: '11', target: '12', animated: true },
+  { id: 'e9-11', source: '9', target: '11', animated: true, label: '<=8' },
+  { id: 'e9-12', source: '9', target: '12', animated: true, label: '>=10' },
+  { id: 'e10-9', source: '10', target: '9', animated: true },
+  { id: 'e11-end', source: '11', target: 'end', animated: true },
+  { id: 'e12-end', source: '12', target: 'end', animated: true },
 ];
+
+const nodeTypes = {
+  circle: CircleNode,
+  diamond: DiamondNode,
+};
 
 const Whiteboard = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -120,11 +143,11 @@ const Whiteboard = () => {
     setNodes((nds) => nds.concat(newNode));
   };
 
-  const addCircle = (type: 'input' | 'output') => {
+  const addCircle = (label) => {
     const newNode = {
       id: (nodes.length + 1).toString(),
-      type,
-      data: { label: type === 'input' ? 'Start' : 'End' },
+      type: 'circle',
+      data: { label },
       position: { x: Math.random() * 400, y: Math.random() * 400 },
     };
     setNodes((nds) => nds.concat(newNode));
@@ -146,29 +169,24 @@ const Whiteboard = () => {
 
   return (
     <div style={{ height: 600, border: '1px solid black', position: 'relative' }}>
-      <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 10 }}>
-        <Button variant="contained" color="primary" onClick={addRectangle}>
-          Add Rectangle
+      <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 10, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <Button variant="contained" color="primary" onClick={() => addCircle('Start')}>
+          Start
         </Button>
-        <Button variant="contained" color="primary" onClick={() => addCircle('input')}>
-          Add Start Node
-        </Button>
-        <Button variant="contained" color="primary" onClick={() => addCircle('output')}>
-          Add End Node
+        <Button variant="contained" color="primary" onClick={() => addCircle('End')}>
+          End
         </Button>
         <Button variant="contained" color="primary" onClick={addDiamond}>
-          Add Decision Rhombus
+          Gateway
+        </Button>
+        <Button variant="contained" color="primary" onClick={addRectangle}>
+          Calculation
         </Button>
         <Button variant="contained" color="secondary" onClick={removeNode}>
-          Remove Node
+          Remove Last Node
         </Button>
       </div>
-      <Button
-        variant="contained"
-        color="primary"
-        style={{ position: 'absolute', top: 10, right: 10 }}
-        onClick={handleDialogOpen}
-      >
+      <Button variant="contained" color="primary" style={{ position: 'absolute', top: 10, right: 10, zIndex: 20 }} onClick={handleDialogOpen}>
         Test Rule
       </Button>
       <ReactFlow
@@ -178,6 +196,7 @@ const Whiteboard = () => {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         fitView
+        nodeTypes={nodeTypes}
       >
         <MiniMap />
         <Controls />
@@ -186,7 +205,7 @@ const Whiteboard = () => {
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Feature Locked</DialogTitle>
         <DialogContent>
-          Feature locked! Please visit Alitheia Labs booth.
+          Feature locked! Please visit the alitheia Labs booth to try it.
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} color="primary">
