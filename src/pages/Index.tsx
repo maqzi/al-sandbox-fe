@@ -8,6 +8,7 @@ import RulesDesignerComponent from "@/components/RulesDesignerComponent";
 import AssessmentComponent from "@/components/AssessmentComponent";
 import WorkbenchComponent from "@/components/WorkbenchComponent";
 import WelcomePage from "@/components/WelcomePage";
+import EHRsAssessmentComponent from "@/components/EHRsAssessmentComponent";
 
 const Index = () => {
   const [step, setStep] = useState(0); // 0 = signup form, 1-3 = main flow
@@ -129,10 +130,121 @@ const Index = () => {
     },
   ];
 
+  // Workbench > EHRs > Alitheia EHR 
+  const alitheiaEHRAssessments = [{
+    referralReason:"Missing AHI Score data in EHR",
+    rule:"Diabetes Type 2",
+    bestRiskClass:"Standard NT",
+    rating:100,
+    flatExtras:"[]",
+    declineFlag:false,
+    referFlag:false,
+    inputsDataUsed: [
+    { inputs: "ICD-10", dataUsed: "E119 - Type 2 diabetes mellitus" },
+    { inputs: "CPT", dataUsed: "83036 - Hemoglobin A1c" },
+    { inputs: "LOINC", dataUsed: "4548-4 Hemoglobin A1c total in Blood - 7.4" },
+    { inputs: "Age at time of Application", dataUsed: "45" },
+    { inputs: "Age at diagnosis", dataUsed: "41"}]  ,
+ }]
+
+  // Workbench > Risks > Carrier Rule Decisions
+  const carrierRuleDecisions = [
+    {
+      rule: "Financial Limits",
+      riskClass: "",
+      mortalityRating: "",
+      refer: "No",
+      decline: "No",
+      tobacco: "",
+      flatExtraRating: "",
+    },
+  ];
+
+  // Workbench > Risks > alitheia Assessments
+  const alitheiaAssessments = [
+    {
+      rule: "Diabetes Type 2",
+      riskClass: "",
+      mortalityRating: "",
+      refer: "Yes - Override",
+      decline: "No",
+      tobacco: "No",
+      flatExtraRating: "",
+      targetOrder: "EHR",
+      overrideReason: "EHR - Diabetes Type 2",
+      overrideComment: "Missing A1c Score in APS",
+    },
+    {
+      rule: "EHR Screening",
+      riskClass: "",
+      mortalityRating: "",
+      refer: "Yes",
+      decline: "No",
+      tobacco: "No",
+      flatExtraRating: "",
+      targetOrder: "",
+      overrideReason: "",
+      overrideComment: "",
+    },
+    {
+      rule: "EHR - Diabetes Type 2",
+      riskClass: "Standard NT",
+      mortalityRating: "100",
+      refer: "No",
+      decline: "No",
+      tobacco: "No",
+      flatExtraRating: "",
+      targetOrder: "",
+      overrideReason: "",
+      overrideComment: "",
+    },
+  ];
+
+  // Workbench > EHR > Summarizer
+  const coreLabResultsTableData = [
+    {
+      date: "2024-02-27",
+      feature: "Glucose",
+      value: 90,
+      unit: "mg/dL",
+      range: "70-100",
+      flag: "Normal",
+      code: "GLU",
+    },
+    {
+      date: "2024-08-21",
+      feature: "Hemoglobin A1c",
+      value: 7.4,
+      unit: "% of total Hgb",
+      range: "",
+      flag: "Normal",
+      code: "4548-4",
+    },
+    // Add more rows as needed
+  ];
+  
+  const buildTableData = [
+    {
+      date: "2025-02-27",
+      build: "5.10.180",
+      bmi: 25,
+      class: "Normal",
+    },
+    // Add more rows as needed
+  ];
+
+  const bloodPressureTableData = [
+    {
+      date: "2025-02-27",
+      systolic: 120,
+      diastolic: 80,
+      flag: "Normal",
+    },]
+
   const renderStep = () => {
     switch (step) {
       case 0:
-        return (<DemoSignupForm onComplete={handleSignupComplete} />);
+        return <DemoSignupForm onComplete={handleSignupComplete} />;
       case 1:
         return <RulesDesignerComponent handleStepChange={handleStepChange} />;
       case 2:
@@ -144,8 +256,14 @@ const Index = () => {
             sleepApneaIcdCodes={sleepApneaIcdCodes}
             handleSourceClick={handleSourceClick}
             isReferred={isReferred}
+            referralReason="Missing AHI Score in EHR"
             extractedData={extractedData}
-            referralReason="Missing AHI Score data in EHR"
+            alitheiaEHRAssessments={alitheiaEHRAssessments}
+            carrierRuleDecisions={carrierRuleDecisions}
+            alitheiaAssessments={alitheiaAssessments}
+            bloodPressureTableData={bloodPressureTableData}
+            buildTableData={buildTableData}
+            coreLabResultsTableData={coreLabResultsTableData}
           />
         );
       case 5:
@@ -163,18 +281,18 @@ const Index = () => {
       {userInfo && (
         <div className="flex justify-between mb-4">
           <Button
-        variant="outlined"
-        onClick={handleMenuClick}
+            variant="outlined"
+            onClick={handleMenuClick}
           >
-        Menu
+            Menu
           </Button>
           <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
           >
-        <MenuItem onClick={() => handleMenuItemClick(1, "Rules Designer")}>Rules Designer</MenuItem>
-        <MenuItem onClick={() => handleMenuItemClick(2, "Workbench")}>Workbench</MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick(1, "Rules Designer")}>Rules Designer</MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick(2, "Workbench")}>Workbench</MenuItem>
           </Menu>
         </div>
       )}

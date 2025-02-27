@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import ReactFlow, {
   addEdge,
   Background,
@@ -8,7 +8,7 @@ import ReactFlow, {
   useEdgesState,
   useNodesState,
 } from 'react-flow-renderer';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import CircleNode from './CircleNode';
 import DiamondNode from './DiamondNode';
 
@@ -120,11 +120,22 @@ const Whiteboard = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [lockedDialogOpen, setLockedDialogOpen] = React.useState(false);
+  const [selectedEdge, setSelectedEdge] = useState(null);
+  const [edgeLabel, setEdgeLabel] = useState('');
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
+
+  const handleLockedDialogOpen = () => {
+    setLockedDialogOpen(true);
+  };
+
+  const handleLockedDialogClose = () => {
+    setLockedDialogOpen(false);
+  };
 
   const handleDialogOpen = () => {
     setDialogOpen(true);
@@ -132,6 +143,28 @@ const Whiteboard = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    setSelectedEdge(null);
+    setEdgeLabel('');
+  };
+
+  const handleEdgeClick = (event, edge) => {
+    event.stopPropagation();
+    setSelectedEdge(edge);
+    setEdgeLabel(edge.label || '');
+    setDialogOpen(true);
+  };
+
+  const handleLabelChange = (event) => {
+    setEdgeLabel(event.target.value);
+  };
+
+  const handleLabelSubmit = () => {
+    setEdges((eds) =>
+      eds.map((edge) =>
+        edge.id === selectedEdge.id ? { ...edge, label: edgeLabel } : edge
+      )
+    );
+    handleDialogClose();
   };
 
   const addRectangle = () => {
@@ -186,7 +219,7 @@ const Whiteboard = () => {
           Remove Last Node
         </Button>
       </div>
-      <Button variant="contained" color="primary" style={{ position: 'absolute', top: 10, right: 10, zIndex: 20 }} onClick={handleDialogOpen}>
+      <Button variant="contained" color="primary" style={{ position: 'absolute', top: 10, right: 10, zIndex: 20 }} onClick={handleLockedDialogOpen}>
         Test Rule
       </Button>
       <ReactFlow
@@ -195,6 +228,7 @@ const Whiteboard = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onEdgeClick={handleEdgeClick}
         fitView
         nodeTypes={nodeTypes}
       >
@@ -203,12 +237,34 @@ const Whiteboard = () => {
         <Background />
       </ReactFlow>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Update Edge Label</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Edge Label"
+            type="text"
+            fullWidth
+            value={edgeLabel}
+            onChange={handleLabelChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleLabelSubmit} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={lockedDialogOpen} onClose={handleLockedDialogClose}>
         <DialogTitle>Feature Locked</DialogTitle>
         <DialogContent>
           Feature locked! Please visit the alitheia Labs booth to try it.
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">
+          <Button onClick={handleLockedDialogClose} color="primary">
             Close
           </Button>
         </DialogActions>
