@@ -4,7 +4,6 @@ import EHRsComponent from "@/components/EHRsComponent";
 import { AssessmentResult } from '@/components/AssessmentResult';
 import EHRsAssessmentComponent from '@/components/EHRsAssessmentComponent';
 import RisksComponent from '@/components/RisksComponent';
-import SummarizerComponent from '@/components/SummarizerComponent';
 
 const LockIcon = () => (
   <img src="/lock.svg" alt="Lock Icon" style={{ width: 24, height: 24 }} />
@@ -14,17 +13,14 @@ const WorkbenchComponent = ({ workbenchSection,
     handleWorkbenchSectionClick, 
     diabetesIcdCodes, 
     sleepApneaIcdCodes, 
-    isReferred,
-    referralReason,
-    extractedData,
     handleSourceClick, 
+    isReferred,
+    extractedData,
+    referralReason,
     alitheiaEHRAssessments,
     carrierRuleDecisions,
     alitheiaAssessments,
-    bloodPressureTableData,
-    buildTableData,
-    coreLabResultsTableData,
-     }) => {
+    summarizerComponentProps }) => {
   return (
     <div className="flex">
       <div className="w-1/4 p-4 bg-gray-100">
@@ -54,15 +50,15 @@ const WorkbenchComponent = ({ workbenchSection,
             <ListItemText primary="Risks" />
           </ListItem>
           <ListItem button={false} style={{ opacity: 0.5 }}>
-          <ListItemIcon>
+            <ListItemIcon>
               <LockIcon />
             </ListItemIcon>
             <ListItemText primary="Amendments" />
           </ListItem>
-        </List>
-        <ListItem button={true} onClick={() => handleWorkbenchSectionClick('Ideas')}>
+          <ListItem button={true} onClick={() => handleWorkbenchSectionClick('Ideas')}>
             <ListItemText primary="Ideas" />
           </ListItem>
+        </List>
       </div>
       <div className="w-3/4 p-4">
         {workbenchSection === 'Risks' && (
@@ -75,21 +71,15 @@ const WorkbenchComponent = ({ workbenchSection,
         )}
         {workbenchSection === 'EHRs' && (
           <div>
-          <EHRsAssessmentComponent 
-            assessments={alitheiaEHRAssessments}
+            <EHRsAssessmentComponent 
+              assessments={alitheiaEHRAssessments}
+              summarizerComponentProps={summarizerComponentProps}
             />
           </div>
         )}
         {workbenchSection === 'Ideas' && (
           <div>
-            <SummarizerComponent 
-                bloodPressureTableData={bloodPressureTableData}
-                buildTableData={bloodPressureTableData}
-                coreLabResultsTableData={bloodPressureTableData}
-                />
-
-                
-            <br/><br/><br/> Other Stuff
+            Other Stuff
             <EHRsComponent
               diabetesIcdCodes={diabetesIcdCodes}
               sleepApneaIcdCodes={sleepApneaIcdCodes}

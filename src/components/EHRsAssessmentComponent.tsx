@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, Tab, Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import SummarizerComponent from '@/components/SummarizerComponent';
+import SummarizerComponent, { SummarizerComponentProps } from '@/components/SummarizerComponent';
 
 interface EHRsAssessment {
   rule: string;
@@ -14,9 +14,10 @@ interface EHRsAssessment {
 
 interface EHRsAssessmentComponentProps {
   assessments: EHRsAssessment[];
+  summarizerComponentProps: SummarizerComponentProps['summarizerComponentProps'];
 }
 
-const EHRsAssessmentComponent: React.FC<EHRsAssessmentComponentProps> = ({ assessments }) => {
+const EHRsAssessmentComponent: React.FC<EHRsAssessmentComponentProps> = ({ assessments, summarizerComponentProps }) => {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -30,8 +31,7 @@ const EHRsAssessmentComponent: React.FC<EHRsAssessmentComponentProps> = ({ asses
         <Tab label="alitheia EHR" />
       </Tabs>
       <TabPanel value={value} index={0}>
-        {/* <SummarizerComponent /> */}
-        "Summarizer here"
+        <SummarizerComponent summarizerComponentProps={summarizerComponentProps} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <TableContainer component={Paper}>

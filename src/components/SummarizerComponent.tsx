@@ -2,56 +2,54 @@ import React from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Grid } from '@mui/material';
 
 interface SummarizerComponentProps {
-  impairments: string;
-  unprocessedDocuments: string;
-  mostRecentBMI: number;
-  avgBP: string;
-  smokerStatus: string;
-  buildTableData: Array<{
-    date: string;
-    build: string;
-    bmi: number;
-    class: string;
-  }>;
-  bloodPressureTableData: Array<{
-    date: string;
-    systolic: number;
-    diastolic: number;
-    flag: string;
-  }>;
-  coreLabResultsTableData: Array<{
-    date: string;
-    feature: string;
-    value: number | string;
-    unit: string;
-    range: string;
-    flag: string;
-    code: string;
-  }>;
+  summarizerComponentProps: {
+    impairments: string;
+    unprocessedDocuments: string;
+    mostRecentBMI: number;
+    avgBP: string;
+    smokerStatus: string;
+    buildTableData: Array<{
+      date: string;
+      build: string;
+      bmi: number;
+      class: string;
+    }>;
+    bloodPressureTableData: Array<{
+      date: string;
+      systolic: number;
+      diastolic: number;
+      flag: string;
+    }>;
+    coreLabResultsTableData: Array<{
+      date: string;
+      feature: string;
+      value: number | string;
+      unit: string;
+      range: string;
+      flag: string;
+      code: string;
+    }>;
+  };
 }
 
-const SummarizerComponent: React.FC<SummarizerComponentProps> = ({
-  impairments,
-  unprocessedDocuments,
-  mostRecentBMI,
-  avgBP,
-  smokerStatus,
-  buildTableData,
-  bloodPressureTableData,
-  coreLabResultsTableData
-}) => {
+const SummarizerComponent: React.FC<SummarizerComponentProps> = ({ summarizerComponentProps }) => {
+  const {
+    impairments,
+    unprocessedDocuments,
+    mostRecentBMI,
+    avgBP,
+    smokerStatus,
+    buildTableData,
+    bloodPressureTableData,
+    coreLabResultsTableData,
+  } = summarizerComponentProps;
+
   return (
     <Box sx={{ width: '100%' }}>
       <Typography variant="h6" gutterBottom>
         Summarizer
       </Typography>
-      <ButtonBar
-        impairments={impairments}
-        unprocessedDocuments={unprocessedDocuments}
-        mostRecentBMI={mostRecentBMI}
-        avgBP={avgBP}
-        smokerStatus={smokerStatus}
-      />
+      <ButtonBar summarizerComponentProps={summarizerComponentProps} />
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <Typography variant="h6" gutterBottom>
@@ -74,46 +72,44 @@ const SummarizerComponent: React.FC<SummarizerComponentProps> = ({
   );
 };
 
-const ButtonBar: React.FC<{
-  impairments: string;
-  unprocessedDocuments: string;
-  mostRecentBMI: number;
-  avgBP: string;
-  smokerStatus: string;
-}> = ({ impairments, unprocessedDocuments, mostRecentBMI, avgBP, smokerStatus }) => (
-  <Grid container spacing={2} sx={{ mb: 2 }}>
-    <Grid item>
-      <Button variant="contained" sx={{ backgroundColor: 'yellow', color: 'black', textAlign: 'left' }}>
-        <Typography variant="body1">{impairments}</Typography>
-        <Typography variant="caption">Flagged</Typography>
-      </Button>
+const ButtonBar: React.FC<{ summarizerComponentProps: SummarizerComponentProps['summarizerComponentProps'] }> = ({ summarizerComponentProps }) => {
+  const { impairments, unprocessedDocuments, mostRecentBMI, avgBP, smokerStatus } = summarizerComponentProps;
+
+  return (
+    <Grid container spacing={2} sx={{ mb: 2 }}>
+      <Grid item>
+        <Button variant="contained" sx={{ backgroundColor: 'yellow', color: 'black', textAlign: 'left' }}>
+          <Typography variant="body1">{impairments}</Typography>
+          <Typography variant="caption">Flagged</Typography>
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button variant="contained" sx={{ backgroundColor: 'yellow', color: 'black', textAlign: 'left' }}>
+          <Typography variant="body1">{unprocessedDocuments}</Typography>
+          <Typography variant="caption">Flagged</Typography>
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button variant="contained" sx={{ backgroundColor: 'teal', color: 'white', textAlign: 'left' }}>
+          <Typography variant="body1">{mostRecentBMI}</Typography>
+          <Typography variant="caption">Most Recent BMI</Typography>
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button variant="contained" sx={{ backgroundColor: 'darkgrey', color: 'white', textAlign: 'left' }}>
+          <Typography variant="body1">{avgBP}</Typography>
+          <Typography variant="caption">Avg BP last year</Typography>
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button variant="contained" sx={{ backgroundColor: 'grey', color: 'white', textAlign: 'left' }}>
+          <Typography variant="body1">{smokerStatus}</Typography>
+          <Typography variant="caption">Smoker Status</Typography>
+        </Button>
+      </Grid>
     </Grid>
-    <Grid item>
-      <Button variant="contained" sx={{ backgroundColor: 'yellow', color: 'black', textAlign: 'left' }}>
-        <Typography variant="body1">{unprocessedDocuments}</Typography>
-        <Typography variant="caption">Flagged</Typography>
-      </Button>
-    </Grid>
-    <Grid item>
-      <Button variant="contained" sx={{ backgroundColor: 'teal', color: 'white', textAlign: 'left' }}>
-        <Typography variant="body1">{mostRecentBMI}</Typography>
-        <Typography variant="caption">Most Recent BMI</Typography>
-      </Button>
-    </Grid>
-    <Grid item>
-      <Button variant="contained" sx={{ backgroundColor: 'darkgrey', color: 'white', textAlign: 'left' }}>
-        <Typography variant="body1">{avgBP}</Typography>
-        <Typography variant="caption">Avg BP last year</Typography>
-      </Button>
-    </Grid>
-    <Grid item>
-      <Button variant="contained" sx={{ backgroundColor: 'grey', color: 'white', textAlign: 'left' }}>
-        <Typography variant="body1">{smokerStatus}</Typography>
-        <Typography variant="caption">Smoker Status</Typography>
-      </Button>
-    </Grid>
-  </Grid>
-);
+  );
+};
 
 const BuildTable: React.FC<{ data: Array<{ date: string; build: string; bmi: number; class: string }> }> = ({ data }) => (
   <TableContainer component={Paper}>

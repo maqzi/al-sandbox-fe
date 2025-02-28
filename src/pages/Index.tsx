@@ -3,12 +3,9 @@ import { Layout } from "@/components/Layout";
 import { Button, Menu, MenuItem, Typography } from "@mui/material";
 import { toast } from "sonner";
 import { DemoSignupForm } from "@/components/DemoSignupForm";
-import EHRsComponent from "@/components/EHRsComponent";
 import RulesDesignerComponent from "@/components/RulesDesignerComponent";
-import AssessmentComponent from "@/components/AssessmentComponent";
 import WorkbenchComponent from "@/components/WorkbenchComponent";
 import WelcomePage from "@/components/WelcomePage";
-import EHRsAssessmentComponent from "@/components/EHRsAssessmentComponent";
 
 const Index = () => {
   const [step, setStep] = useState(0); // 0 = signup form, 1-3 = main flow
@@ -201,45 +198,64 @@ const Index = () => {
   ];
 
   // Workbench > EHR > Summarizer
-  const coreLabResultsTableData = [
-    {
-      date: "2024-02-27",
-      feature: "Glucose",
-      value: 90,
-      unit: "mg/dL",
-      range: "70-100",
-      flag: "Normal",
-      code: "GLU",
-    },
-    {
-      date: "2024-08-21",
-      feature: "Hemoglobin A1c",
-      value: 7.4,
-      unit: "% of total Hgb",
-      range: "",
-      flag: "Normal",
-      code: "4548-4",
-    },
-    // Add more rows as needed
-  ];
-  
-  const buildTableData = [
-    {
-      date: "2025-02-27",
-      build: "5.10.180",
-      bmi: 25,
-      class: "Normal",
-    },
-    // Add more rows as needed
-  ];
-
-  const bloodPressureTableData = [
-    {
-      date: "2025-02-27",
-      systolic: 120,
-      diastolic: 80,
-      flag: "Normal",
-    },]
+  const summarizerComponent = {
+    impairments: "Diabetes, Hypertension",
+    unprocessedDocuments: "Lab Results, Medical Records",
+    mostRecentBMI: 27.5,
+    avgBP: "130/85",
+    smokerStatus: "Non-Tobacco",
+    buildTableData: [
+      {
+        date: "2025-02-27",
+        build: "5.10.180",
+        bmi: 27.5,
+        class: "Overweight",
+      },
+      {
+        date: "2024-08-15",
+        build: "5.9.170",
+        bmi: 25.1,
+        class: "Normal",
+      },
+      // Add more rows as needed
+    ],
+    bloodPressureTableData: [
+      {
+        date: "2025-02-27",
+        systolic: 130,
+        diastolic: 85,
+        flag: "Elevated",
+      },
+      {
+        date: "2024-08-15",
+        systolic: 120,
+        diastolic: 80,
+        flag: "Normal",
+      },
+      // Add more rows as needed
+    ],
+    coreLabResultsTableData: [
+      {
+        date: "2025-02-27",
+        feature: "Glucose",
+        value: 95,
+        unit: "mg/dL",
+        range: "70-100",
+        flag: "Normal",
+        code: "GLU",
+      },
+      {
+        date: "2024-08-21",
+        feature: "Hemoglobin A1c",
+        value: 7.4,
+        unit: "% of total Hgb",
+        range: "6.0-7.9",
+        flag: "Normal",
+        code: "4548-4",
+      },
+      // Add more rows as needed
+    ],
+  };
 
   const renderStep = () => {
     switch (step) {
@@ -261,9 +277,7 @@ const Index = () => {
             alitheiaEHRAssessments={alitheiaEHRAssessments}
             carrierRuleDecisions={carrierRuleDecisions}
             alitheiaAssessments={alitheiaAssessments}
-            bloodPressureTableData={bloodPressureTableData}
-            buildTableData={buildTableData}
-            coreLabResultsTableData={coreLabResultsTableData}
+            summarizerComponentProps={summarizerComponent}
           />
         );
       case 5:
