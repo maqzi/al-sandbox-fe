@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Button, Grid, Paper, Container } from '@mui/material';
+import { Typography, Button, Grid, Paper, Container, Box } from '@mui/material';
 
 const WelcomePage = ({ userInfo, handleLogout }) => {
   return (
@@ -11,9 +11,11 @@ const WelcomePage = ({ userInfo, handleLogout }) => {
         <Typography variant="body1" gutterBottom align="center">
           You have successfully logged in.
         </Typography>
-        <Button variant="contained" color="primary" onClick={handleLogout} style={{ marginBottom: '20px', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
-          Logout
-        </Button>
+        <Box display="flex" justifyContent="center" mb={3}>
+            <Button variant="contained" color="primary" onClick={handleLogout} style={{ marginBottom: '20px', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+            Logout
+            </Button>
+        </Box>
         <Typography variant="h5" gutterBottom align="center">
           An automated day in the life of a modern life insurance Underwriter
         </Typography>
