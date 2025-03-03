@@ -1,10 +1,10 @@
 import React from 'react';
 import WhiteboardWrapper from '@/components/Whiteboard';
 
-const RulesDesignerComponent = ({ handleStepChange }) => {
+const RulesDesignerComponent = ({ handleStepChange, nodes, edges }) => {
   return (
     <div>
-      <WhiteboardWrapper />
+      <WhiteboardWrapper initialNodes={nodes} initialEdges={edges}/>
     </div>
   );
 };

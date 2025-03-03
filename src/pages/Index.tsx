@@ -6,6 +6,7 @@ import { DemoSignupForm } from "@/components/DemoSignupForm";
 import RulesDesignerComponent from "@/components/RulesDesignerComponent";
 import WorkbenchComponent from "@/components/WorkbenchComponent";
 import WelcomePage from "@/components/WelcomePage";
+import RulesDesignerPage from "@/pages/RulesDesignerPage";
 
 const Index = () => {
   const [step, setStep] = useState(0); // 0 = signup form, 1-3 = main flow
@@ -262,7 +263,7 @@ const Index = () => {
       case 0:
         return <DemoSignupForm onComplete={handleSignupComplete} />;
       case 1:
-        return <RulesDesignerComponent handleStepChange={handleStepChange} />;
+        return <RulesDesignerPage handleStepChange={handleStepChange} selectRule={null}/>;
       case 2:
         return (
           <WorkbenchComponent
@@ -293,10 +294,11 @@ const Index = () => {
         {pageTitle}
       </Typography>
       {userInfo && (
-        <div className="flex justify-between mb-4">
+        <div className="flex left-between mb-4">
           <Button
             variant="outlined"
             onClick={handleMenuClick}
+            style={{ marginRight: '10px' }} // Add margin to create gap
           >
             Menu
           </Button>
@@ -308,6 +310,11 @@ const Index = () => {
             <MenuItem onClick={() => handleMenuItemClick(1, "Rules Designer")}>Rules Designer</MenuItem>
             <MenuItem onClick={() => handleMenuItemClick(2, "Workbench")}>Workbench</MenuItem>
           </Menu>
+          <Button
+            onClick={() => handleMenuItemClick(5, "")}
+          >
+            Home
+          </Button>
         </div>
       )}
       {renderStep()}

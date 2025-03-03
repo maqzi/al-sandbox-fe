@@ -31,14 +31,14 @@ export function DemoSignupForm({ onComplete }: DemoSignupFormProps) {
         email: values.email
       });
     }
-    toast.success("Welcome to the demo!");
+    toast.success("Welcome to the EHR Prototype!");
     onComplete(values);
   }
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6 p-6 bg-white rounded-lg shadow-md">
       <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-bold">Welcome to the Demo</h1>
+        <h1 className="text-2xl font-bold">Welcome to the Prototype</h1>
         <p className="text-gray-500">Please enter your details to begin</p>
       </div>
       
