@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { List, ListItem, ListItemText, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import {MarkerType} from 'react-flow-renderer';
 import { Layout } from '@/components/Layout';
 import RulesDesignerComponent from "@/components/RulesDesignerComponent";
 
@@ -52,7 +53,7 @@ const diabetesNodes = [
   {
     id: '8',
     type: 'diamond',
-    data: { label: 'Have you had a hemoglobin A1c test done in the last year and do you know the result?' },
+    data: { label: 'Have you done an A1c test in the last year and know the result?' },
     position: { x: 1400, y: 250 },
   },
   {
@@ -85,7 +86,7 @@ const diabetesNodes = [
 ];
 
 const diabetesEdges = [
-  { id: 'e-start-1', source: 'start', target: '1', animated: true },
+  { id: 'e-start-1', source: 'start', target: '1', animated: true},
   { id: 'e1-2', source: '1', target: '2', animated: true },
   { id: 'e2-3', source: '2', target: '3', animated: true },
   { id: 'e3-4', source: '3', target: '4', animated: true },

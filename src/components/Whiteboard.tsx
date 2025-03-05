@@ -162,9 +162,9 @@ const Whiteboard = ({ initialNodes, initialEdges }) => {
         </DialogActions>
       </Dialog>
       <Dialog open={lockedDialogOpen} onClose={handleLockedDialogClose}>
-        <DialogTitle>Feature Locked</DialogTitle>
+        <DialogTitle>Coming Soon!</DialogTitle>
         <DialogContent>
-          Feature locked! Please visit the alitheia Labs booth to try it.
+          Please sign up for alitheia Labs to participate in our upcoming trials!
         </DialogContent>
         <DialogActions>
           <Button onClick={handleLockedDialogClose} color="primary">
