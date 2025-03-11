@@ -6,7 +6,7 @@ interface LayoutProps {
   step: number;
 }
 
-export const Layout = ({ children, step }: LayoutProps) => {
+const Layout = ({ children, step }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-medical-secondary">
       <header className="bg-medical-primary text-white p-4">
@@ -19,3 +19,5 @@ export const Layout = ({ children, step }: LayoutProps) => {
     </div>
   );
 };
+
+export default Layout;

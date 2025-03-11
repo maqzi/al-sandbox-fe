@@ -16,7 +16,7 @@ interface DemoSignupFormProps {
   onComplete: (data: z.infer<typeof formSchema>) => void;
 }
 
-export function DemoSignupForm({ onComplete }: DemoSignupFormProps) {
+const DemoSignupForm = ({ onComplete }: DemoSignupFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,3 +82,5 @@ export function DemoSignupForm({ onComplete }: DemoSignupFormProps) {
     </div>
   )
 }
+
+export default DemoSignupForm;
