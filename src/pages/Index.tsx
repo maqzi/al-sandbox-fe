@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button, Menu, MenuItem, Typography } from "@mui/material";
 import { toast } from "sonner";
 import { DemoSignupForm } from "@/components/DemoSignupForm";
-import RulesDesignerComponent from "@/components/RulesDesignerComponent";
-import WorkbenchComponent from "@/components/WorkbenchComponent";
-import WelcomePage from "@/components/WelcomePage";
 import RulesDesignerPage from "@/pages/RulesDesignerPage";
+import WorkbenchPage from "@/pages/WorkbenchPage";
+import WelcomePage from "@/components/WelcomePage";
+import medicalData from "@/data/medicalData.json";
+import applicationData from "@/data/applicationData.json";
 
 const Index = () => {
   const [step, setStep] = useState(0); // 0 = signup form, 1-3 = main flow
@@ -81,183 +82,6 @@ const Index = () => {
     setStep(0);
   };
 
-  const diabetesIcdCodes = [
-    {
-      code: "E11.9",
-      description: "Type 2 diabetes mellitus without complications",
-      sourceDoc: "Medical Record 2023-01-15",
-      found: true,
-    },
-    {
-      code: "E11.65",
-      description: "Type 2 diabetes mellitus with hyperglycemia",
-      sourceDoc: "Lab Results 2023-02-01",
-      found: true,
-    },
-  ];
-
-  const sleepApneaIcdCodes = [
-    {
-      code: "G47.33",
-      description: "Obstructive sleep apnea (adult) (pediatric)",
-      sourceDoc: "Sleep Study 2023-03-10",
-      found: true,
-    },
-    {
-      code: "G47.30",
-      description: "Sleep apnea, unspecified",
-      sourceDoc: "Required for AHI score",
-      found: false,
-    },
-  ];
-
-  const extractedData = [
-    {
-      parameter: "A1c Level",
-      value: "6.4%",
-      sourceDoc: "Lab Results 2023-02-01",
-      isNormal: true,
-      found: true,
-    },
-    {
-      parameter: "AHI Score",
-      value: "Not Found",
-      sourceDoc: "Sleep Study 2023-03-10",
-      isNormal: false,
-      found: false,
-    },
-  ];
-
-  // Workbench > EHRs > Alitheia EHR 
-  const alitheiaEHRAssessments = [{
-    referralReason:"Missing AHI Score data in EHR",
-    rule:"Diabetes Type 2",
-    bestRiskClass:"Standard NT",
-    rating:100,
-    flatExtras:"[]",
-    declineFlag:false,
-    referFlag:false,
-    inputsDataUsed: [
-    { inputs: "ICD-10", dataUsed: "E119 - Type 2 diabetes mellitus" },
-    { inputs: "CPT", dataUsed: "83036 - Hemoglobin A1c" },
-    { inputs: "LOINC", dataUsed: "4548-4 Hemoglobin A1c total in Blood - 7.4" },
-    { inputs: "Age at time of Application", dataUsed: "45" },
-    { inputs: "Age at diagnosis", dataUsed: "41"}]  ,
- }]
-
-  // Workbench > Risks > Carrier Rule Decisions
-  const carrierRuleDecisions = [
-    {
-      rule: "Financial Limits",
-      riskClass: "",
-      mortalityRating: "",
-      refer: "No",
-      decline: "No",
-      tobacco: "",
-      flatExtraRating: "",
-    },
-  ];
-
-  // Workbench > Risks > alitheia Assessments
-  const alitheiaAssessments = [
-    {
-      rule: "Diabetes Type 2",
-      riskClass: "",
-      mortalityRating: "",
-      refer: "Yes - Override",
-      decline: "No",
-      tobacco: "No",
-      flatExtraRating: "",
-      targetOrder: "EHR",
-      overrideReason: "EHR - Diabetes Type 2",
-      overrideComment: "Missing A1c Score in APS",
-    },
-    {
-      rule: "EHR Screening",
-      riskClass: "",
-      mortalityRating: "",
-      refer: "Yes",
-      decline: "No",
-      tobacco: "No",
-      flatExtraRating: "",
-      targetOrder: "",
-      overrideReason: "",
-      overrideComment: "",
-    },
-    {
-      rule: "EHR - Diabetes Type 2",
-      riskClass: "Standard NT",
-      mortalityRating: "100",
-      refer: "No",
-      decline: "No",
-      tobacco: "No",
-      flatExtraRating: "",
-      targetOrder: "",
-      overrideReason: "",
-      overrideComment: "",
-    },
-  ];
-
-  // Workbench > EHR > Summarizer
-  const summarizerComponent = {
-    impairments: "Diabetes, Hypertension",
-    unprocessedDocuments: "Lab Results, Medical Records",
-    mostRecentBMI: 27.5,
-    avgBP: "130/85",
-    smokerStatus: "Non-Tobacco",
-    buildTableData: [
-      {
-        date: "2025-02-27",
-        build: "5.10.180",
-        bmi: 27.5,
-        class: "Overweight",
-      },
-      {
-        date: "2024-08-15",
-        build: "5.9.170",
-        bmi: 25.1,
-        class: "Normal",
-      },
-      // Add more rows as needed
-    ],
-    bloodPressureTableData: [
-      {
-        date: "2025-02-27",
-        systolic: 130,
-        diastolic: 85,
-        flag: "Elevated",
-      },
-      {
-        date: "2024-08-15",
-        systolic: 120,
-        diastolic: 80,
-        flag: "Normal",
-      },
-      // Add more rows as needed
-    ],
-    coreLabResultsTableData: [
-      {
-        date: "2025-02-27",
-        feature: "Glucose",
-        value: 95,
-        unit: "mg/dL",
-        range: "70-100",
-        flag: "Normal",
-        code: "GLU",
-      },
-      {
-        date: "2024-08-21",
-        feature: "Hemoglobin A1c",
-        value: 7.4,
-        unit: "% of total Hgb",
-        range: "6.0-7.9",
-        flag: "Normal",
-        code: "4548-4",
-      },
-      // Add more rows as needed
-    ],
-  };
-
   const renderStep = () => {
     switch (step) {
       case 0:
@@ -265,22 +89,23 @@ const Index = () => {
       case 1:
         return <RulesDesignerPage handleStepChange={handleStepChange} selectRule={null}/>;
       case 2:
-        return (
-          <WorkbenchComponent
-            workbenchSection={workbenchSection}
-            handleWorkbenchSectionClick={handleWorkbenchSectionClick}
-            diabetesIcdCodes={diabetesIcdCodes}
-            sleepApneaIcdCodes={sleepApneaIcdCodes}
-            handleSourceClick={handleSourceClick}
-            isReferred={isReferred}
-            referralReason="Missing AHI Score in EHR"
-            extractedData={extractedData}
-            alitheiaEHRAssessments={alitheiaEHRAssessments}
-            carrierRuleDecisions={carrierRuleDecisions}
-            alitheiaAssessments={alitheiaAssessments}
-            summarizerComponentProps={summarizerComponent}
-          />
-        );
+        return <WorkbenchPage handleStepChange={handleStepChange} cases={applicationData.cases} workbenchData={applicationData.workbench} summarizerComponentProps={medicalData.ehrSummarizer} handleWorkbenchSectionClick={handleWorkbenchSectionClick} handleSourceClick={handleSourceClick}/>;
+        // return (
+          // <WorkbenchComponent
+          //   workbenchSection={workbenchSection}
+            // handleWorkbenchSectionClick={handleWorkbenchSectionClick}
+          //   diabetesIcdCodes={diabetesIcdCodes}
+          //   sleepApneaIcdCodes={sleepApneaIcdCodes}
+            // handleSourceClick={handleSourceClick}
+          //   isReferred={isReferred}
+          //   referralReason="Missing AHI Score in EHR"
+          //   extractedData={extractedData}
+          //   alitheiaEHRAssessments={alitheiaEHRAssessments}
+          //   carrierRuleDecisions={carrierRuleDecisions}
+          //   alitheiaAssessments={alitheiaAssessments}
+          //   summarizerComponentProps={summarizerComponent}
+          // />
+        // );
       case 5:
         return <WelcomePage userInfo={userInfo} handleLogout={handleLogout} />;
       default:

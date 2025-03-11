@@ -1,0 +1,119 @@
+{
+  "applicant": {
+    "name": "John Doe",
+    "ssn": "123-45-6789",
+    "gender": "Male",
+    "birthJurisdiction": "California",
+    "birthCountry": "USA",
+    "dateOfBirth": "1980-01-01",
+    "address": "123 Main St, Anytown, CA 12345",
+    "phone": "555-123-4567",
+    "driverLicense": "D1234567",
+    "heightInches": 70,
+    "weightPounds": 180,
+    "residenceStateZip": "CA 12345",
+    "licenseState": "CA",
+    "occupation": "Software Engineer"
+  },
+  "patientInfo": {
+    "diabetesIcdCodes": [
+      {
+        "code": "E11.9",
+        "description": "Type 2 diabetes mellitus without complications",
+        "sourceDoc": "Medical Record 2023-01-15",
+        "found": true
+      },
+      {
+        "code": "E11.65",
+        "description": "Type 2 diabetes mellitus with hyperglycemia",
+        "sourceDoc": "Lab Results 2023-02-01",
+        "found": true
+      }
+    ],
+    "sleepApneaIcdCodes": [
+      {
+        "code": "G47.33",
+        "description": "Obstructive sleep apnea (adult) (pediatric)",
+        "sourceDoc": "Sleep Study 2023-03-10",
+        "found": true
+      },
+      {
+        "code": "G47.30",
+        "description": "Sleep apnea, unspecified",
+        "sourceDoc": "Required for AHI score",
+        "found": false
+      }
+    ],
+    "extractedData": [
+      {
+        "parameter": "A1c Level",
+        "value": "6.4%",
+        "sourceDoc": "Lab Results 2023-02-01",
+        "isNormal": true,
+        "found": true
+      },
+      {
+        "parameter": "AHI Score",
+        "value": "Not Found",
+        "sourceDoc": "Sleep Study 2023-03-10",
+        "isNormal": false,
+        "found": false
+      }
+    ]
+  },
+  "ehrSummarizer": {
+    "impairments": "Diabetes, Hypertension",
+    "unprocessedDocuments": "Lab Results, Medical Records",
+    "mostRecentBMI": 27.5,
+    "avgBP": "130/85",
+    "smokerStatus": "Non-Tobacco",
+    "buildTableData": [
+      {
+        "date": "2025-02-27",
+        "build": "5.10.180",
+        "bmi": 27.5,
+        "class": "Overweight"
+      },
+      {
+        "date": "2024-08-15",
+        "build": "5.9.170",
+        "bmi": 25.1,
+        "class": "Normal"
+      }
+    ],
+    "bloodPressureTableData": [
+      {
+        "date": "2025-02-27",
+        "systolic": 130,
+        "diastolic": 85,
+        "flag": "Elevated"
+      },
+      {
+        "date": "2024-08-15",
+        "systolic": 120,
+        "diastolic": 80,
+        "flag": "Normal"
+      }
+    ],
+    "coreLabResultsTableData": [
+      {
+        "date": "2025-02-27",
+        "feature": "Glucose",
+        "value": 95,
+        "unit": "mg/dL",
+        "range": "70-100",
+        "flag": "Normal",
+        "code": "GLU"
+      },
+      {
+        "date": "2024-08-21",
+        "feature": "Hemoglobin A1c",
+        "value": 7.4,
+        "unit": "% of total Hgb",
+        "range": "6.0-7.9",
+        "flag": "Normal",
+        "code": "4548-4"
+      }
+    ]
+  }
+}

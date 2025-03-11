@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { List, ListItem, ListItemText, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
-import {MarkerType} from 'react-flow-renderer';
 import { Layout } from '@/components/Layout';
 import RulesDesignerComponent from "@/components/RulesDesignerComponent";
 
