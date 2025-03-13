@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, Button, Typography } from '@mui/material';
-import { Layout } from '@/components/Layout';
 import WorkbenchComponent from '@/components/WorkbenchComponent';
 
 const WorkbenchPage = ({ cases, workbenchData, summarizerComponentProps, handleWorkbenchSectionClick, handleSourceClick, handleStepChange }) => {

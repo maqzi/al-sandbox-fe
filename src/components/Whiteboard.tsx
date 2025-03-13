@@ -11,19 +11,44 @@ import ReactFlow, {
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import CircleNode from './CircleNode';
 import DiamondNode from './DiamondNode';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 
 const nodeTypes = {
   circle: CircleNode,
   diamond: DiamondNode,
 };
 
-const Whiteboard = ({ initialNodes, initialEdges }) => {
+interface WhiteboardProps {
+  onClose: () => void;
+}
+
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, initialNodes, initialEdges }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [lockedDialogOpen, setLockedDialogOpen] = React.useState(false);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [edgeLabel, setEdgeLabel] = useState('');
+
+  const activeRule = useSelector((state: RootState) => state.rules.activeRule);
+  const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
+
+  if (!activeRule || !activeVersion) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>Error: No active rule or version found.</p>
+          <button 
+            onClick={onClose}
+            className="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -176,9 +201,9 @@ const Whiteboard = ({ initialNodes, initialEdges }) => {
   );
 };
 
-const WhiteboardWrapper = ({ initialNodes, initialEdges }) => (
+const WhiteboardWrapper = ({ initialNodes, initialEdges, onClose }) => (
   <ReactFlowProvider>
-    <Whiteboard initialNodes={initialNodes} initialEdges={initialEdges} />
+    <Whiteboard initialNodes={initialNodes} initialEdges={initialEdges} onClose={onClose} />
   </ReactFlowProvider>
 );
 

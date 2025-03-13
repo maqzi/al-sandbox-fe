@@ -1,22 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { Button, Menu, MenuItem, Typography } from "@mui/material";
 import { toast } from "sonner";
-import { DemoSignupForm } from "@/components/DemoSignupForm";
 import RulesDesignerPage from "@/pages/RulesDesignerPage";
 import WorkbenchPage from "@/pages/WorkbenchPage";
 import WelcomePage from "@/components/WelcomePage";
-import Layout from "@/components/Layout";
 import medicalData from "@/data/medicalData.json";
 import applicationData from "@/data/applicationData.json";
+import { setRules } from '@/store/rulesSlice';
+import rulesData from '@/data/rulesTree.json';
 import { setUser, setStep } from "@/store/userSlice";
 
 const Index = () => {
   const dispatch = useDispatch();
   const userInfo = useSelector((state: RootState) => state.user);
   const step = useSelector((state: RootState) => state.user.step);
-  const [isReferred, setIsReferred] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [workbenchSection, setWorkbenchSection] = useState<string | null>("EHRs");
   const [pageTitle, setPageTitle] = useState("");
@@ -33,19 +32,6 @@ const Index = () => {
     toast.info(`Opening source document: ${doc}`);
   };
 
-  const handleRefer = () => {
-    // Track case referrals
-    if (typeof window !== 'undefined' && 'gtag' in window) {
-      (window as any).gtag('event', 'refer_case', {
-        reason: 'Missing AHI Score data in EHR',
-        user_email: userInfo.email
-      });
-    }
-    setIsReferred(true);
-    dispatch(setStep(3));
-    toast.info("Case has been referred for manual review");
-  };
-
   const handleStepChange = (newStep: number) => {
     // Track step navigation
     if (typeof window !== 'undefined' && 'gtag' in window) {
@@ -56,11 +42,6 @@ const Index = () => {
       });
     }
     dispatch(setStep(newStep));
-  };
-
-  const handleSignupComplete = (data: { name: string; email: string }) => {
-    dispatch(setUser(data));
-    handleStepChange(5);
   };
 
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -85,6 +66,10 @@ const Index = () => {
     dispatch(setUser({ name: '', email: '' }));
     dispatch(setStep(0));
   };
+
+  useEffect(() => {
+    dispatch(setRules(rulesData.rules));
+  }, [dispatch]);
 
   const renderStep = () => {
     switch (step) {
