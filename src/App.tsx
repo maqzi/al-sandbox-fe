@@ -11,7 +11,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import RulesDesignerPage from "./pages/RulesDesignerPage";
 import WorkbenchPage from "./pages/WorkbenchPage";
-import WelcomePage from "./components/WelcomePage";
+import WelcomePage from "./pages/WelcomePage";
 import DemoSignupPage from "./pages/DemoSignupPage";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -21,7 +21,8 @@ const AppContent = () => {
   const step = useSelector((state: RootState) => state.user.step);
 
   return (
-    <Layout step={step}>
+    // <Layout step={step}>
+    <div>
       <Routes>
         <Route path="/" element={<DemoSignupPage />} />
         <Route path="/signup" element={<DemoSignupPage />} />
@@ -59,7 +60,8 @@ const AppContent = () => {
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </Layout>
+    {/* </Layout> */}
+    </div>
   );
 };
 

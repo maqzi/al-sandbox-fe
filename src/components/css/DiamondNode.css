@@ -1,0 +1,71 @@
+.diamond-node {
+  width: 200px;
+  height: 120px; /* Reduced height to create a wider than tall diamond */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+}
+
+.diamond-shape {
+  width: 100%;
+  height: 100%;
+  transform: rotate(45deg);
+  background-color: #e3f2fd;
+  border: 2px solid #42a5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.diamond-node:hover .diamond-shape {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: rotate(45deg) scale(1.05);
+  border-color: #1976d2;
+}
+
+.diamond-label {
+  transform: rotate(-45deg);
+  font-weight: 600 !important;
+  color: #0d47a1;
+  text-align: center;
+  padding: 0 10px;
+  width: 100%;
+  max-width: 120px;
+  overflow-wrap: break-word;
+  font-size: 0.8rem !important;
+}
+
+/* Handle positioning for diamond shape */
+.diamond-handle {
+  background-color: #42a5f5;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Adjust handle positions to align with the diamond points */
+.diamond-handle-top {
+  top: 0;
+  transform: translateY(-50%);
+}
+
+.diamond-handle-bottom {
+  bottom: 0;
+  transform: translateY(50%);
+}
+
+.diamond-handle-left {
+  left: 0;
+  transform: translateX(-50%);
+}
+
+.diamond-handle-right {
+  right: 0;
+  transform: translateX(50%);
+}

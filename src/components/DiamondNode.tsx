@@ -1,14 +1,49 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Handle, Position } from 'react-flow-renderer';
+import { Box, Typography } from '@mui/material';
+import './css/DiamondNode.css';
 
-const DiamondNode = ({ data }) => {
+interface DiamondNodeProps {
+  data: {
+    label: string;
+  };
+  isConnectable: boolean;
+}
+
+const DiamondNode: React.FC<DiamondNodeProps> = ({ data, isConnectable }) => {
   return (
-    <div style={{ width: 150, height: 150, background: '#fff', border: '1px solid #222', transform: 'rotate(45deg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Handle type="target" position={Position.Left} style={{ borderRadius: 0, transform: 'rotate(-45deg)' }} />
-      <div style={{ transform: 'rotate(-45deg)' }}>{data.label}</div>
-      <Handle type="source" position={Position.Right} style={{ borderRadius: 0, transform: 'rotate(-45deg)' }} />
+    <div className="diamond-node">
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-top"
+      />
+      <div className="diamond-shape">
+        <Typography variant="body2" className="diamond-label">
+          {data.label}
+        </Typography>
+      </div>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-bottom"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-right"
+      />
+      <Handle
+        type="source"
+        position={Position.Left}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-left"
+      />
     </div>
   );
 };
 
-export default DiamondNode;
+export default memo(DiamondNode);

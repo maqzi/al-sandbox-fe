@@ -50,7 +50,7 @@ export const RuleTree = ({ data, onRefer }: RuleTreeProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-medical-primary">Decision Rules</CardTitle>
+        <CardTitle className="text-medical-primary">Rules Designer</CardTitle>
       </CardHeader>
       <CardContent>
         {renderNode(data)}

@@ -5,14 +5,14 @@
       "name": "Diabetes Type 2",
       "versions": [
         {
-          "version": "v2",
+          "version": "1.1",
           "nodes": [
             { "id": "start", "type": "circle", "data": { "label": "Start" }, "position": { "x": 0, "y": 250 } },
             { "id": "1", "data": { "label": "INITIAL RATING 0" }, "position": { "x": 200, "y": 250 } },
             { "id": "2", "type": "diamond", "data": { "label": "Applicant Age" }, "position": { "x": 400, "y": 250 } },
             { "id": "3", "type": "diamond", "data": { "label": "When were you diagnosed with this condition" }, "position": { "x": 600, "y": 250 } },
             { "id": "4", "data": { "label": "Calculate age at diagnosis" }, "position": { "x": 800, "y": 250 } },
-            { "id": "5", "type": "diamond", "data": { "label": "Age > 50?" }, "position": { "x": 1000, "y": 250 } },
+            { "id": "5", "type": "diamond", "data": { "label": "What is the applicant's age at diagnosis?" }, "position": { "x": 1000, "y": 250 } },
             { "id": "6", "data": { "label": "RATING ADD 100" }, "position": { "x": 1200, "y": 150 } },
             { "id": "7", "data": { "label": "RATING ADD 50" }, "position": { "x": 1200, "y": 350 } },
             { "id": "8", "type": "diamond", "data": { "label": "Have you done an A1c test in the last year and know the result?" }, "position": { "x": 1400, "y": 250 } },
@@ -44,7 +44,7 @@
           "note": "Updated A1c threshold to 8"
         },
         {
-          "version": "v1",
+          "version": "1.0",
           "nodes": [
             { "id": "start", "type": "circle", "data": { "label": "Start" }, "position": { "x": 0, "y": 250 } },
             { "id": "1", "data": { "label": "INITIAL RATING 0" }, "position": { "x": 200, "y": 250 } },

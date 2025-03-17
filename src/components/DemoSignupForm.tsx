@@ -1,86 +1,170 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { User, Mail } from "lucide-react"
-import { toast } from "sonner"
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." })
-})
+import React, { useState } from 'react';
+import { 
+  TextField, 
+  Button, 
+  Box, 
+  Typography, 
+  InputAdornment,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import { 
+  Person as PersonIcon, 
+  Email as EmailIcon 
+} from '@mui/icons-material';
 
 interface DemoSignupFormProps {
-  onComplete: (data: z.infer<typeof formSchema>) => void;
+  onComplete: (data: { name: string; email: string }) => void;
 }
 
-const DemoSignupForm = ({ onComplete }: DemoSignupFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: ""
-    },
-  })
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (typeof window !== 'undefined' && 'gtag' in window) {
-      (window as any).gtag('event', 'demo_signup', {
-        email: values.email
-      });
+const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+  
+  const validateName = () => {
+    if (!name.trim()) {
+      setNameError('Name is required');
+      return false;
     }
-    toast.success("Welcome to alitheia Labs!");
-    onComplete(values);
-  }
-
-  return (
-    <div className="w-full max-w-md mx-auto space-y-6 p-6 bg-white rounded-lg shadow-md">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-bold">Welcome to alitheia Labs</h1>
-        <p className="text-gray-500">Please sign up below to begin:</p>
-      </div>
+    setNameError('');
+    return true;
+  };
+  
+  const validateEmail = () => {
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const isNameValid = validateName();
+    const isEmailValid = validateEmail();
+    
+    if (isNameValid && isEmailValid) {
+      setIsSubmitting(true);
+      setFormError('');
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input className="pl-10" placeholder="John Doe" {...field} />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input className="pl-10" placeholder="john@example.com" type="email" {...field} />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full">Start Demo</Button>
-        </form>
-      </Form>
-    </div>
-  )
-}
+      // Simulate API call
+      setTimeout(() => {
+        onComplete({ name, email });
+        setIsSubmitting(false);
+      }, 800);
+    }
+  };
+  
+  return (
+    <Box component="form" onSubmit={handleSubmit} noValidate>
+      {formError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {formError}
+        </Alert>
+      )}
+      
+      <TextField
+        margin="normal"
+        required
+        fullWidth
+        id="name"
+        label="Full Name"
+        name="name"
+        autoComplete="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={validateName}
+        error={!!nameError}
+        helperText={nameError}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <PersonIcon color="action" />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ 
+          mb: 2,
+          '.MuiOutlinedInput-root': {
+            borderRadius: 2,
+          } 
+        }}
+      />
+      
+      <TextField
+        margin="normal"
+        required
+        fullWidth
+        id="email"
+        label="Email Address"
+        name="email"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onBlur={validateEmail}
+        error={!!emailError}
+        helperText={emailError}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <EmailIcon color="action" />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ 
+          mb: 3,
+          '.MuiOutlinedInput-root': {
+            borderRadius: 2,
+          } 
+        }}
+      />
+      
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        disabled={isSubmitting}
+        sx={{
+          py: 1.5,
+          fontWeight: 600,
+          borderRadius: 2,
+          textTransform: 'none',
+          fontSize: '1rem',
+          boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+          '&:hover': {
+            boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
+          }
+        }}
+      >
+        {isSubmitting ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          'Get Started'
+        )}
+      </Button>
+      
+      <Typography 
+        variant="caption" 
+        color="text.secondary" 
+        display="block" 
+        align="center" 
+        sx={{ mt: 2 }}
+      >
+        By signing up, you agree to our Terms of Service and Privacy Policy
+      </Typography>
+    </Box>
+  );
+};
 
 export default DemoSignupForm;

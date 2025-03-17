@@ -1,0 +1,585 @@
+.summarizer-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+  overflow: visible;
+  border: 1px solid #eaecef;
+}
+
+.summarizer-header {
+  padding: 16px 24px;
+  background-color: #f8faff;
+  border-bottom: 1px solid #e0e0e0;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.summarizer-content {
+  padding: 24px;
+  background-color: white;
+}
+
+.avatar-blue {
+  background-color: rgba(85, 105, 255, 0.1);
+  color: #5569ff;
+}
+
+.avatar-red {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.avatar-green {
+  background-color: rgba(0, 171, 85, 0.1);
+  color: #00ab55;
+}
+
+.avatar-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.metric-card {
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.metric-card.warning {
+  background-color: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.metric-card.success {
+  background-color: rgba(0, 171, 85, 0.08);
+  border: 1px solid rgba(0, 171, 85, 0.2);
+}
+
+.metric-card.error {
+  background-color: rgba(244, 67, 54, 0.08);
+  border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.tabs-container {
+  margin-top: 32px;
+}
+
+.custom-tabs .MuiTab-root {
+  text-transform: none;
+  font-weight: 600;
+  min-width: 120px;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.custom-tabs .Mui-selected {
+  color: #5569ff;
+}
+
+.custom-tabs .MuiTabs-indicator {
+  background-color: #5569ff;
+}
+
+.table-header {
+  background-color: #f5f7fa;
+  font-weight: 600;
+}
+
+.table-row:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-row:hover {
+  background-color: rgba(85, 105, 255, 0.04);
+}
+
+.button-container {
+  margin-bottom: 16px;
+}
+
+.status-chip {
+  border-radius: 16px;
+  font-size: 0.75rem;
+  height: 24px;
+}
+
+.status-chip-high {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.status-chip-medium {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.status-chip-normal {
+  background-color: rgba(0, 171, 85, 0.1);
+  color: #00ab55;
+}
+
+/* Skeleton loading styles */
+.skeleton-container {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.skeleton-card {
+  padding: 24px;
+  height: 200px;
+  background-color: #f8f8f8;
+}
+
+.data-grid {
+  margin-top: 16px;
+}
+
+.summary-card {
+  border: 1px solid #eaecef;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.bmi-warning-high {
+  color: #f44336;
+  margin-left: 4px;
+  font-size: 18px;
+}
+
+.bmi-warning-medium {
+  color: #ff9800;
+  margin-left: 4px;
+  font-size: 18px;
+}
+
+/* Enhanced Tables */
+.enhanced-table-container {
+  margin-bottom: 24px;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-title {
+  background-color: #fafbfc;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eaecef;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a3353;
+}
+
+.table-icon {
+  margin-right: 8px;
+  font-size: 18px !important;
+  color: #5569ff;
+}
+
+.table-icon-red {
+  color: #f44336;
+}
+
+.table-icon-green {
+  color: #00ab55;
+}
+
+.table-wrapper {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.table-actions {
+  margin-left: auto;
+}
+
+.table-count-chip {
+  height: 24px !important;
+  font-size: 11px !important;
+  background-color: rgba(85, 105, 255, 0.08);
+  color: #5569ff;
+  border: none;
+  font-weight: 500;
+}
+
+.table-footer {
+  padding: 10px 16px;
+  background-color: #fafbfc;
+  border-top: 1px solid #eaecef;
+  font-size: 12px;
+  color: #637381;
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Table rows and cells */
+.date-cell {
+  color: #637381;
+  font-size: 13px;
+}
+
+.value-with-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.value-alert {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.value-warning {
+  color: #ff9800;
+  font-weight: 600;
+}
+.value-normal {
+  color: #738674;
+  font-weight: 600;
+}
+
+.row-alert {
+  background-color: rgba(244, 67, 54, 0.04) !important;
+}
+
+.row-warning {
+  background-color: rgba(255, 152, 0, 0.04) !important;
+}
+
+/* Blood pressure legend */
+.bp-legend-item {
+  margin-right: 16px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.bp-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.bp-legend-dot.normal {
+  background-color: #738674;
+}
+
+.bp-legend-dot.elevated {
+  background-color: #ff9800;
+}
+
+.bp-legend-dot.high {
+  background-color: #f44336;
+}
+
+/* Core Lab Results */
+.core-lab-container {
+  margin-top: 24px;
+}
+
+.lab-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.lab-result-card {
+  padding: 16px;
+  border-radius: 8px !important;
+  border: 1px solid #eaecef;
+  box-shadow: none !important;
+  transition: all 0.2s;
+}
+
+.lab-result-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+  transform: translateY(-2px);
+}
+
+.lab-result-card-alert {
+  border-left: 3px solid #f44336;
+}
+
+.lab-result-card-high {
+  border-left: 3px solid #f44336;
+}
+
+.lab-result-card-low {
+  border-left: 3px solid #ff9800;
+}
+
+.lab-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.lab-result-value {
+  display: flex;
+  align-items: baseline;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.lab-result-value .MuiTypography-caption {
+  margin-left: 4px;
+}
+
+.trend-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+}
+
+.trend-icon-up {
+  color: #f44336;
+  font-size: 16px;
+  margin-left: 4px;
+}
+
+.trend-icon-down {
+  color: #ff9800;
+}
+
+.trend-icon-warning {
+  color: #ff9800;
+  font-size: 16px;
+  margin-left: 4px;
+}
+
+.lab-result-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.lab-result-history {
+  margin-top: 8px;
+}
+
+.history-chart {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  height: 24px;
+}
+
+.history-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.history-point:hover {
+  transform: scale(1.5);
+}
+
+.history-point-high {
+  background-color: #f44336;
+}
+
+.history-point-low {
+  background-color: #ff9800;
+}
+
+.history-point-normal {
+  background-color: #00ab55;
+}
+
+.lab-results-table-container {
+  margin-top: 24px;
+}
+
+.lab-results-filter {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  background-color: #f9fafc;
+  border-radius: 8px;
+  border: 1px solid #eaecef;
+}
+
+.lab-results-filter .MuiChip-root {
+  margin-right: 8px;
+}
+
+.filter-active {
+  background-color: rgba(85, 105, 255, 0.1);
+  color: #5569ff;
+  font-weight: 500;
+}
+
+/* Add these styles to your existing CSS file */
+
+.full-width {
+  width: 100%;
+  max-width: 100%;
+}
+
+.full-width-table {
+  width: 100%;
+  max-width: 100%;
+}
+
+.full-width .table-wrapper {
+  width: 100%;
+  max-width: 100%;
+}
+
+.full-width-table .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Make sure the "All Lab Results" table takes up the entire container */
+.summary-card.full-width {
+  width: 100%;
+  margin: 0;
+}
+
+.summary-card.full-width .table-wrapper {
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* Ensure table doesn't overflow on small screens */
+.table-wrapper table {
+  width: 100%;
+  min-width: 800px; /* Minimum width to prevent squishing */
+}
+
+/* Add these styles at the end of your CSS file */
+
+/* Compact styling for Build Table and BP Table */
+.compact-table .MuiTableCell-root {
+  padding: 8px 12px; /* Reduced padding */
+}
+
+.compact-table .table-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.compact-table table {
+  min-width: auto; /* Allow table to be narrower */
+}
+
+/* Make date columns narrower */
+.compact-table .date-cell {
+  width: 80px;
+  white-space: nowrap;
+}
+
+/* Adjust value columns */
+.compact-table .value-cell {
+  width: 70px;
+  text-align: right;
+}
+
+/* Unit column - make it very narrow */
+.compact-table .unit-cell {
+  width: 40px;
+  padding-left: 4px;
+}
+
+/* Make sure the trend icon fits well */
+.compact-table .value-with-indicator {
+  justify-content: flex-end;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 960px) {
+  .compact-table .MuiTableCell-root {
+    padding: 6px 8px; /* Even more compact on small screens */
+  }
+  
+  /* Force columns to stay visibly compact */
+  .compact-table table {
+    table-layout: fixed;
+  }
+}
+
+/* Ensure the All Lab Results table still scrolls properly */
+.full-width-table .table-wrapper table {
+  min-width: 800px; /* Keep this minimum width for the full lab results table */
+}
+
+/* For the smaller tables, we don't need a minimum width */
+.compact-table .table-wrapper table {
+  min-width: unset;
+}
+
+/* Additional styling for the compact-table */
+.compact-table {
+  margin-bottom: 16px;
+}
+
+.compact-table .MuiTableCell-root {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.compact-table .table-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Add these styles to ensure equal height tables */
+
+.compact-table {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-table .table-wrapper {
+  flex-grow: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-table .MuiPaper-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-table table {
+  flex-grow: 1;
+}
+
+/* Ensure tables have equal height when placed side by side */
+.data-grid .MuiGrid-item {
+  display: flex;
+}
+
+/* Make the headers consistent height */
+.table-title {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table-icon {
+  margin-right: 8px;
+}
+
+.table-actions {
+  margin-left: auto;
+}
