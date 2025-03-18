@@ -14,8 +14,6 @@ import { toast } from "sonner";
 import RulesDesignerPage from "@/pages/RulesDesignerPage";
 import WorkbenchPage from "@/pages/WorkbenchPage";
 import WelcomePage from "@/pages/WelcomePage";
-import medicalData from "@/data/medicalData.json";
-import applicationData from "@/data/applicationData.json";
 import { setUser, setStep } from "@/store/userSlice";
 
 const Index = () => {
@@ -123,9 +121,6 @@ const Index = () => {
       case 2:
         return <WorkbenchPage 
           handleStepChange={handleStepChange} 
-          cases={applicationData.cases} 
-          workbenchData={applicationData.workbench} 
-          summarizerComponentProps={medicalData.ehrSummarizer} 
           handleWorkbenchSectionClick={handleWorkbenchSectionClick} 
           handleSourceClick={handleSourceClick} 
         />;

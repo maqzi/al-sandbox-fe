@@ -214,7 +214,7 @@ const DemoSignupPage = () => {
                     }
                   }}
                 >
-                  Client-Driven Innovation at alitheia Labs
+                  We build with you, as you build for your clients
                 </Typography>
 
                 <Grid container spacing={3}>

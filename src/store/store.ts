@@ -1,15 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { applicationReducer } from './applicationSlice';
+import applicationReducer from './applicationSlice';
+import rulesReducer from './rulesSlice';
 import { medicalReducer } from './medicalSlice';
 import { userReducer } from './userSlice';
-import { rulesReducer } from './rulesSlice';
+import workbenchReducer from './workbenchSlice';
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
-    application: applicationReducer,
-    medical: medicalReducer,
-    user: userReducer,
+    // application: applicationReducer,
     rules: rulesReducer,
+    // medical: medicalReducer,
+    user: userReducer,
+    workbench: workbenchReducer,
   },
 });
 

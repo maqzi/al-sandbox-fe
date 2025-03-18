@@ -11,23 +11,36 @@ import {
   Warning, CheckCircle, Info, DirectionsRun, AccessTime, Flag, 
   ErrorOutline, Timeline
 } from '@mui/icons-material';
-import { RootState } from '@/store/store';
 import './css/SummarizerComponent.css';
+import { selectSelectedCase } from '@/store/selectors';
 
 const SummarizerComponent: React.FC = () => {
   // Get data directly from Redux state
-  const ehrSummarizer = useSelector((state: RootState) => state.medical.ehrSummarizer);
-  
+  const selectedCase = useSelector(selectSelectedCase);
+  // Ensure we have case data
+  if (!selectedCase) {
+    return null;
+  }
+
   const {
-    impairments,
-    unprocessedDocuments,
-    mostRecentBMI,
-    avgBP,
-    smokerStatus,
-    buildTableData,
-    bloodPressureTableData,
-    coreLabResultsTableData,
-  } = ehrSummarizer;
+    impairments = '',
+    unprocessedDocuments = '',
+    mostRecentBMI = 0,
+    avgBP = '',
+    smokerStatus = '',
+    buildTableData = [],
+    bloodPressureTableData = [],
+    coreLabResultsTableData = []
+  } = {
+    impairments: selectedCase.health.ehrSummary?.impairments,
+    unprocessedDocuments: selectedCase.health.ehrSummary?.unprocessedDocuments,
+    mostRecentBMI: selectedCase.person.physical?.bmi,
+    avgBP: selectedCase.health.vitals?.bloodPressure?.average,
+    smokerStatus: selectedCase.health.smokerStatus,
+    buildTableData: selectedCase.person.physical?.buildHistory,
+    bloodPressureTableData: selectedCase.health.vitals?.bloodPressure?.history,
+    coreLabResultsTableData: selectedCase.health.labs
+  };
 
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -224,11 +237,11 @@ const SummarizerComponent: React.FC = () => {
               ) : (
                 <>
                   {activeTab === 0 && (
-                    <Grid container className="data-grid" spacing={2}>
-                      <Grid item>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
                       <BuildTable data={buildTableData} />
                       </Grid>
-                      <Grid item >
+                      <Grid item xs={6}>
                       <BloodPressureTable data={bloodPressureTableData} />
                       </Grid>
                       <Grid item xs={12}>
@@ -275,7 +288,7 @@ const BuildTable: React.FC<{ data: Array<{ date: string; height: string; weight:
           <TableHead>
             <TableRow>
               <TableCell className="table-header date-cell">Date</TableCell>
-              <TableCell className="table-header">ft.in.lbs</TableCell>
+              <TableCell className="table-header value-cell">ft.in.lbs</TableCell>
               <TableCell className="table-header value-cell">BMI</TableCell>
             </TableRow>
           </TableHead>
@@ -287,7 +300,7 @@ const BuildTable: React.FC<{ data: Array<{ date: string; height: string; weight:
               return (
                 <TableRow key={index} className="table-row">
                   <TableCell className="date-cell">{row.date}</TableCell>
-                  <TableCell>
+                  <TableCell className="value-cell">
                     <Typography variant="body2">
                       {row.build}
                     </Typography>

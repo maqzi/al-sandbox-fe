@@ -575,3 +575,39 @@
   color: #5569ff;
   margin-bottom: 8px;
 }
+
+.workbench-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.workbench-main-content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}
+
+.detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.detail-list-item {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-list-label {
+  width: 140px;
+  font-weight: 500;
+  color: #5f6368;
+  font-size: 0.875rem;
+}
+
+.detail-list-value {
+  flex: 1;
+  font-size: 0.875rem;
+}

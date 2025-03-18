@@ -1,0 +1,498 @@
+{
+    "cases": [
+      {
+        "id": "C12345",
+        "workbench": {
+          "currentSection": "Case Details",
+          "activeSource": ""
+        },
+        "case": {
+          "policyNum": "12345",
+          "taskId": "T001",
+          "queue": "Underwriting",
+          "workType": "Review",
+          "nextAction": "Approve",
+          "receivedDate": "2025-03-01",
+          "dueDate": "2025-03-05",
+          "priority": "High",
+          "assignmentStatus": "Assigned"
+        },
+        "policy": {
+          "product": "Life Insurance",
+          "state": "Pending",
+          "faceAmount": 500000,
+          "applicationDate": "2025-01-01",
+          "hipaaAuthDate": "2025-01-01",
+          "hasPriorPolicy": "Yes",
+          "status": "Active",
+          "premium": 1200
+        },
+        "person": {
+          "firstName": "John",
+          "lastName": "Smith",
+          "fullName": "John Smith",
+          "ssn": "123-45-6789",
+          "gender": "Male",
+          "birthDate": "1980-04-15",
+          "age": 45,
+          "birthPlace": {
+            "state": "New York",
+            "country": "USA"
+          },
+          "contact": {
+            "address": "456 Oak St, Springfield, NY 10001",
+            "phone": "555-987-6543"
+          },
+          "occupation": "Financial Analyst",
+          "physical": {
+            "heightInches": 71,
+            "weightPounds": 185,
+            "bmi": 27.5,
+            "buildHistory": [
+              {
+                "date": "2025-02-27",
+                "build": "5.10.180",
+                "bmi": 27.5,
+                "class": "Overweight"
+              },
+              {
+                "date": "2024-08-15",
+                "build": "5.9.160",
+                "bmi": 25.1,
+                "class": "Normal"
+              }
+            ]
+          },
+          "identification": {
+            "driverLicense": "S9876543",
+            "licenseState": "NY",
+            "residenceStateZip": "NY 10001"
+          }
+        },
+        "health": {
+          "smokerStatus": "Non-Tobacco",
+          "conditions": [
+            {
+              "name": "Type 2 diabetes mellitus",
+              "diagnosed": "Jan 2020",
+              "treatment": "Metformin",
+              "reported": true,
+              "verified": true,
+              "codes": [
+                {
+                  "code": "E11.9",
+                  "description": "Type 2 diabetes mellitus without complications",
+                  "sourceDoc": "Medical Record 2023-01-15",
+                  "found": true
+                },
+                {
+                  "code": "E11.65",
+                  "description": "Type 2 diabetes mellitus with hyperglycemia",
+                  "sourceDoc": "Lab Results 2023-02-01",
+                  "found": true
+                }
+              ]
+            },
+            {
+              "name": "Obstructive Sleep Apnea",
+              "diagnosed": "Mar 2021",
+              "treatment": "CPAP",
+              "reported": true,
+              "verified": true,
+              "codes": [
+                {
+                  "code": "G47.33",
+                  "description": "Obstructive sleep apnea (adult) (pediatric)",
+                  "sourceDoc": "Sleep Study 2023-03-10",
+                  "found": true
+                },
+                {
+                  "code": "G47.30",
+                  "description": "Sleep apnea, unspecified",
+                  "sourceDoc": "Required for AHI score",
+                  "found": false
+                }
+              ]
+            }
+          ],
+          "vitals": {
+            "bloodPressure": {
+              "average": "130/85",
+              "history": [
+                {
+                  "date": "2025-02-27",
+                  "systolic": 130,
+                  "diastolic": 85,
+                  "flag": "Elevated"
+                },
+                {
+                  "date": "2024-08-15",
+                  "systolic": 120,
+                  "diastolic": 80,
+                  "flag": "Normal"
+                }
+              ]
+            }
+          },
+          "labs": [
+            {
+              "date": "2025-02-27",
+              "feature": "Glucose",
+              "value": 95,
+              "unit": "mg/dL",
+              "range": "70-100",
+              "flag": "Normal",
+              "code": "GLU"
+            },
+            {
+              "date": "2024-08-21",
+              "feature": "Hemoglobin A1c",
+              "value": 7.4,
+              "unit": "% of total Hgb",
+              "range": "6.0-7.9",
+              "flag": "Normal",
+              "code": "4548-4"
+            }
+          ],
+          "criticalValues": [
+            {
+              "parameter": "A1c Level",
+              "value": "6.4%",
+              "sourceDoc": "Lab Results 2023-02-01",
+              "isNormal": true,
+              "found": true
+            },
+            {
+              "parameter": "AHI Score",
+              "value": "Not Found",
+              "sourceDoc": "Sleep Study 2023-03-10",
+              "isNormal": false,
+              "found": false
+            }
+          ],
+          "ehrSummary": {
+            "impairments": "Diabetes, Hypertension",
+            "unprocessedDocuments": "Lab Results, Medical Records"
+          }
+        },
+        "assessment": {
+          "ehrAssessments": [
+            {
+              "referralReason": "Missing AHI Score data in EHR",
+              "rule": "Diabetes Type 2",
+              "bestRiskClass": "Standard NT",
+              "rating": 100,
+              "flatExtras": "[]",
+              "declineFlag": false,
+              "referFlag": false,
+              "inputsDataUsed": [
+                { "inputs": "ICD-10", "dataUsed": "E119 - Type 2 diabetes mellitus" },
+                { "inputs": "CPT", "dataUsed": "83036 - Hemoglobin A1c" },
+                { "inputs": "LOINC", "dataUsed": "4548-4 Hemoglobin A1c total in Blood - 7.4" },
+                { "inputs": "Age at time of Application", "dataUsed": "45" },
+                { "inputs": "Age at diagnosis", "dataUsed": "41" }
+              ]
+            }
+          ],
+          "ruleDecisions": {
+            "carrier": [
+              {
+                "rule": "Financial Limits",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "No",
+                "decline": "No",
+                "tobacco": "",
+                "flatExtraRating": ""
+              }
+            ],
+            "alitheia": [
+              {
+                "rule": "Diabetes Type 2",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "Yes - Override",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "EHR",
+                "overrideReason": "EHR - Diabetes Type 2",
+                "overrideComment": "Missing A1c Score in APS"
+              },
+              {
+                "rule": "EHR Screening",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "Yes",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "",
+                "overrideReason": "",
+                "overrideComment": ""
+              },
+              {
+                "rule": "EHR - Diabetes Type 2",
+                "riskClass": "Standard NT",
+                "mortalityRating": "100",
+                "refer": "No",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "",
+                "overrideReason": "",
+                "overrideComment": ""
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "C67890",
+        "workbench": {
+          "currentSection": "Case Details",
+          "activeSource": ""
+        },
+        "case": {
+          "policyNum": "67890",
+          "taskId": "T002",
+          "queue": "Claims",
+          "workType": "Investigation",
+          "nextAction": "Investigate",
+          "receivedDate": "2025-03-02",
+          "dueDate": "2025-03-06",
+          "priority": "Medium",
+          "assignmentStatus": "Unassigned"
+        },
+        "policy": {
+          "product": "Term Life Insurance",
+          "state": "In Review",
+          "faceAmount": 750000,
+          "applicationDate": "2025-02-01",
+          "hipaaAuthDate": "2025-02-01",
+          "hasPriorPolicy": "No",
+          "status": "Pending",
+          "premium": 1500
+        },
+        "person": {
+          "firstName": "John",
+          "lastName": "Doe",
+          "fullName": "John Doe",
+          "ssn": "123-45-6789",
+          "gender": "Male",
+          "birthDate": "1980-01-01",
+          "age": 45,
+          "birthPlace": {
+            "state": "California",
+            "country": "USA"
+          },
+          "contact": {
+            "address": "123 Main St, San Clemente, CA 96272",
+            "phone": "555-123-4567"
+          },
+          "occupation": "Software Engineer",
+          "physical": {
+            "heightInches": 70,
+            "weightPounds": 180,
+            "bmi": 25.8,
+            "buildHistory": [
+              {
+                "date": "2025-01-15",
+                "build": "5.10.180",
+                "bmi": 25.8,
+                "class": "Overweight"
+              },
+              {
+                "date": "2024-07-20",
+                "build": "5.10.175",
+                "bmi": 25.1,
+                "class": "Normal"
+              }
+            ]
+          },
+          "identification": {
+            "driverLicense": "D1234567",
+            "licenseState": "CA",
+            "residenceStateZip": "CA 12345"
+          }
+        },
+        "health": {
+          "smokerStatus": "Non-Tobacco",
+          "conditions": [
+            {
+              "name": "Type 2 diabetes mellitus",
+              "diagnosed": "Jan 2020",
+              "treatment": "Metformin",
+              "reported": true,
+              "verified": true,
+              "codes": [
+                {
+                  "code": "E11.9",
+                  "description": "Type 2 diabetes mellitus without complications",
+                  "sourceDoc": "Medical Record 2023-01-15",
+                  "found": true
+                },
+                {
+                  "code": "E11.65",
+                  "description": "Type 2 diabetes mellitus with hyperglycemia",
+                  "sourceDoc": "Lab Results 2023-02-01",
+                  "found": true
+                }
+              ]
+            },
+            {
+              "name": "Obstructive Sleep Apnea",
+              "diagnosed": "Mar 2021",
+              "treatment": "CPAP",
+              "reported": true,
+              "verified": true,
+              "codes": [
+                {
+                  "code": "G47.33",
+                  "description": "Obstructive sleep apnea (adult) (pediatric)",
+                  "sourceDoc": "Sleep Study 2023-03-10",
+                  "found": true
+                },
+                {
+                  "code": "G47.30",
+                  "description": "Sleep apnea, unspecified",
+                  "sourceDoc": "Required for AHI score",
+                  "found": false
+                }
+              ]
+            }
+          ],
+          "vitals": {
+            "bloodPressure": {
+              "average": "125/80",
+              "history": [
+                {
+                  "date": "2025-01-15",
+                  "systolic": 125,
+                  "diastolic": 80,
+                  "flag": "Normal"
+                },
+                {
+                  "date": "2024-07-20",
+                  "systolic": 120,
+                  "diastolic": 78,
+                  "flag": "Normal"
+                }
+              ]
+            }
+          },
+          "labs": [
+            {
+              "date": "2025-01-15",
+              "feature": "Glucose",
+              "value": 98,
+              "unit": "mg/dL",
+              "range": "70-100",
+              "flag": "Normal",
+              "code": "GLU"
+            },
+            {
+              "date": "2024-07-20",
+              "feature": "Hemoglobin A1c",
+              "value": 6.8,
+              "unit": "% of total Hgb",
+              "range": "6.0-7.9",
+              "flag": "Normal",
+              "code": "4548-4"
+            }
+          ],
+          "criticalValues": [
+            {
+              "parameter": "A1c Level",
+              "value": "6.4%",
+              "sourceDoc": "Lab Results 2023-02-01",
+              "isNormal": true,
+              "found": true
+            },
+            {
+              "parameter": "AHI Score",
+              "value": "Not Found",
+              "sourceDoc": "Sleep Study 2023-03-10",
+              "isNormal": false,
+              "found": false
+            }
+          ],
+          "ehrSummary": {
+            "impairments": "Diabetes, Sleep Apnea",
+            "unprocessedDocuments": "Sleep Study, Lab Results"
+          }
+        },
+        "assessment": {
+          "ehrAssessments": [
+            {
+              "referralReason": "Missing AHI Score data in EHR",
+              "rule": "Sleep Apnea",
+              "bestRiskClass": "Standard NT",
+              "rating": 100,
+              "flatExtras": "[]",
+              "declineFlag": false,
+              "referFlag": true,
+              "inputsDataUsed": [
+                { "inputs": "ICD-10", "dataUsed": "G47.33 - Obstructive sleep apnea" },
+                { "inputs": "CPT", "dataUsed": "95810 - Sleep Study" },
+                { "inputs": "AHI Score", "dataUsed": "Not Found" },
+                { "inputs": "Age at time of Application", "dataUsed": "45" },
+                { "inputs": "Age at diagnosis", "dataUsed": "43" }
+              ]
+            }
+          ],
+          "ruleDecisions": {
+            "carrier": [
+              {
+                "rule": "Financial Limits",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "No",
+                "decline": "No",
+                "tobacco": "",
+                "flatExtraRating": ""
+              }
+            ],
+            "alitheia": [
+              {
+                "rule": "Sleep Apnea",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "Yes",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "EHR",
+                "overrideReason": "",
+                "overrideComment": "Missing AHI Score in EHR"
+              },
+              {
+                "rule": "EHR Screening",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "Yes",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "",
+                "overrideReason": "",
+                "overrideComment": ""
+              },
+              {
+                "rule": "EHR - Diabetes Type 2",
+                "riskClass": "Standard NT",
+                "mortalityRating": "100",
+                "refer": "No",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "",
+                "overrideReason": "",
+                "overrideComment": ""
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }

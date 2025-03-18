@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   Table, TableBody, TableCell, TableHead, TableRow, Button, Typography,
@@ -10,9 +10,17 @@ import {
   Schedule, ArrowBack 
 } from '@mui/icons-material';
 import WorkbenchComponent from '@/components/WorkbenchComponent';
-import { setStep } from '@/store/userSlice';
+import { setSelectedCase, setWorkbenchSection, setActiveSource } from '@/store/workbenchSlice';
+import { 
+  selectAllCases, 
+  selectSelectedCase, 
+  selectCurrentWorkbenchSection,
+  selectActiveSource
+} from '@/store/selectors';
 
-interface Case {
+// Define interface for filtered case data (displayed in the table)
+interface CaseTableData {
+  id: string;
   taskId: string;
   policyNum: string;
   queue: string;
@@ -25,50 +33,50 @@ interface Case {
 }
 
 const WorkbenchPage: React.FC = () => {
-  // Use Redux hooks to access state and dispatch
   const dispatch = useDispatch();
   
-  // Get data directly from applicantData in Redux store
-  const applicantData = useSelector((state: any) => state || {});
-  const cases = useSelector((state: any) => state.application.cases || []);
-  const workbenchSection = useSelector((state: any) => state.application.workbench.activeSection || 'EHRs');
+  // Get data from our new workbench redux state
+  const allCases = useSelector(selectAllCases);
+  const selectedCaseData = useSelector(selectSelectedCase);
+  const workbenchSection = useSelector(selectCurrentWorkbenchSection);
+  const activeSource = useSelector(selectActiveSource);
+  
+  // Transform cases for table display format
+  const tableCases = allCases.map(caseItem => ({
+    id: caseItem.id,
+    taskId: caseItem.case.taskId,
+    policyNum: caseItem.case.policyNum,
+    queue: caseItem.case.queue,
+    workType: caseItem.case.workType,
+    nextAction: caseItem.case.nextAction,
+    receivedDate: caseItem.case.receivedDate,
+    dueDate: caseItem.case.dueDate,
+    priority: caseItem.case.priority,
+    assignmentStatus: caseItem.case.assignmentStatus
+  }));
 
-  const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redux action dispatchers
-  const handleWorkbenchSectionClick = (section: string) => {
-    dispatch(setWorkbenchSection(section));
-  };
-
-  const handleSourceClick = (source: string) => {
-    dispatch(setActiveSource(source));
-  };
-
-  const handleStepChange = (step: number) => {
-    dispatch(setStep(step));
-  };
-
   // Local component handlers
-  const handleCaseClick = (caseData: Case) => {
+  const handleCaseClick = (caseData: CaseTableData) => {
     setIsLoading(true);
-    // Simulate loading delay
+    // Simulate loading delay, then update Redux store with selected case ID
     setTimeout(() => {
-      setSelectedCase(caseData);
+      dispatch(setSelectedCase(caseData.id));
       setIsLoading(false);
     }, 800);
   };
 
   const handleBackClick = () => {
-    setSelectedCase(null);
+    dispatch(setSelectedCase(null));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredCases = cases.filter(caseData => 
+  const filteredCases = tableCases.filter(caseData => 
     caseData.taskId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     caseData.policyNum.toLowerCase().includes(searchTerm.toLowerCase()) ||
     caseData.workType.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,7 +101,23 @@ const WorkbenchPage: React.FC = () => {
     }
   };
 
-  if (selectedCase) {
+  // No need for getFullCaseData as we now use the selectedCaseData from Redux
+
+  if (selectedCaseData) {
+    // Transform selected case data to match the CaseTableData interface for display
+    const displayCase = {
+      id: selectedCaseData.id,
+      taskId: selectedCaseData.case.taskId,
+      policyNum: selectedCaseData.case.policyNum,
+      queue: selectedCaseData.case.queue,
+      workType: selectedCaseData.case.workType,
+      nextAction: selectedCaseData.case.nextAction,
+      receivedDate: selectedCaseData.case.receivedDate,
+      dueDate: selectedCaseData.case.dueDate,
+      priority: selectedCaseData.case.priority,
+      assignmentStatus: selectedCaseData.case.assignmentStatus
+    };
+
     return (
       <Box sx={{ padding: '24px', backgroundColor: '#f8f9fc', minHeight: '100vh' }}>
           <Button 
@@ -111,14 +135,14 @@ const WorkbenchPage: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <Box>
                 <Typography variant="h5" sx= {{fontWeight: 600}}>
-                  Case {selectedCase.taskId}
+                  Case {displayCase.taskId}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>
-                  Policy: {selectedCase.policyNum} • Queue: {selectedCase.queue}
+                  Policy: {displayCase.policyNum} • Queue: {displayCase.queue}
                 </Typography>
               </Box>
               <Chip 
-                label={selectedCase.workType} 
+                label={displayCase.workType} 
                 color="primary" 
                 sx={{ borderRadius: 4, fontWeight: 500 }}
               />
@@ -128,30 +152,30 @@ const WorkbenchPage: React.FC = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="caption" sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Next Action</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
-                  {selectedCase.nextAction}
+                  {displayCase.nextAction}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Received Date</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
                   <CalendarToday sx={{ fontSize: 14, marginRight: 1 }} />
-                  {selectedCase.receivedDate}
+                  {displayCase.receivedDate}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Due Date</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
                   <Schedule sx={{ fontSize: 14, marginRight: 1 }}/>
-                  {selectedCase.dueDate}
+                  {displayCase.dueDate}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Priority</Typography>
                 <Box>
                   <Chip 
-                    label={selectedCase.priority} 
+                    label={displayCase.priority} 
                     size="small"
-                    color={getPriorityColor(selectedCase.priority) as any}
+                    color={getPriorityColor(displayCase.priority) as any}
                     sx={{ borderRadius: 4, fontWeight: 500 }}
                   />
                 </Box>
@@ -160,9 +184,9 @@ const WorkbenchPage: React.FC = () => {
                 <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Status</Typography>
                 <Box>
                   <Chip 
-                    label={selectedCase.assignmentStatus} 
+                    label={displayCase.assignmentStatus} 
                     size="small"
-                    color={getStatusColor(selectedCase.assignmentStatus) as any}
+                    color={getStatusColor(displayCase.assignmentStatus) as any}
                     sx={{ borderRadius: 4, fontWeight: 500 }}
                   />
                 </Box>
@@ -170,21 +194,7 @@ const WorkbenchPage: React.FC = () => {
             </Box>
           </Paper>
 
-        
-        <WorkbenchComponent
-          workbenchSection={workbenchSection}
-          handleWorkbenchSectionClick={handleWorkbenchSectionClick}
-          diabetesIcdCodes={applicantData.medical.diabetesIcdCodes || []}
-          sleepApneaIcdCodes={applicantData.medical.sleepApneaIcdCodes || []}
-          handleSourceClick={handleSourceClick}
-          isReferred={false}
-          referralReason={''}
-          extractedData={applicantData.medical.patientInfo.extractedData || {}}
-          alitheiaEHRAssessments={applicantData.application.workbench.alitheiaEHRAssessments || []}
-          carrierRuleDecisions={applicantData.application.workbench.risks.carrierRuleDecisions || []}
-          alitheiaAssessments={applicantData.application.workbench.risks.alitheiaAssessments || []}
-          summarizerComponentProps={applicantData.medical.ehrSummarizer}
-        />
+        <WorkbenchComponent />
       </Box>
     );
   }
@@ -238,11 +248,10 @@ const WorkbenchPage: React.FC = () => {
             
             <Box sx={{ display: 'flex', gap: '8px' }}>
               <Chip 
-                label={`${cases.length} Total Cases`} 
+                label={`${tableCases.length} Total Cases`} 
                 variant="outlined" 
                 size="small"
                 sx={{ borderRadius: 16 }}
-                
               />
             </Box>
           </Box>
@@ -272,7 +281,7 @@ const WorkbenchPage: React.FC = () => {
                   </TableHead>
                   <TableBody>
                     {filteredCases.map((caseData) => (
-                      <TableRow key={caseData.taskId} sx={{ 
+                      <TableRow key={caseData.id} sx={{ 
                         '&:hover': { backgroundColor: '#f5f9ff' }
                       }}>
                         <TableCell>{caseData.policyNum}</TableCell>
@@ -284,10 +293,10 @@ const WorkbenchPage: React.FC = () => {
                         <TableCell>{caseData.dueDate}</TableCell>
                         <TableCell>
                           <Chip 
-                          label={caseData.priority} 
-                          size="small"
-                          color={getPriorityColor(caseData.priority) as any}
-                          sx={{ borderRadius: 4, fontWeight: 500 }}
+                            label={caseData.priority} 
+                            size="small"
+                            color={getPriorityColor(caseData.priority) as any}
+                            sx={{ borderRadius: 4, fontWeight: 500 }}
                           />
                         </TableCell>
                         <TableCell>
@@ -299,14 +308,14 @@ const WorkbenchPage: React.FC = () => {
                           />
                         </TableCell>
                         <TableCell>
-                            <Button 
+                          <Button 
                             variant="contained" 
                             color="primary" 
                             onClick={() => handleCaseClick(caseData)}
                             sx={{ borderRadius: 2, textTransform: 'none' }}
-                            >
+                          >
                             Select
-                            </Button>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
