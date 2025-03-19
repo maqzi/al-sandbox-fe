@@ -1,0 +1,38 @@
+{
+    "rules": [
+      {
+        "id": "2",
+        "name": "Hypertension",
+        "versions": [
+          {
+            "version": "v1",
+            "nodes": [
+              { "id": "start", "type": "circle", "data": { "label": "Start" }, "position": { "x": 0, "y": 250 } },
+              { "id": "1", "data": { "label": "Initial Blood Pressure Check" }, "position": { "x": 200, "y": 250 } },
+              { "id": "2", "type": "diamond", "data": { "label": "Systolic > 140 or Diastolic > 90?" }, "position": { "x": 400, "y": 250 } },
+              { "id": "3", "data": { "label": "Repeat Blood Pressure Check" }, "position": { "x": 600, "y": 150 } },
+              { "id": "4", "type": "diamond", "data": { "label": "Repeated Systolic > 140 or Diastolic > 90?" }, "position": { "x": 800, "y": 150 } },
+              { "id": "5", "data": { "label": "Hypertension Confirmed" }, "position": { "x": 1000, "y": 50 } },
+              { "id": "6", "data": { "label": "Refer to Physician" }, "position": { "x": 1200, "y": 50 } },
+              { "id": "7", "data": { "label": "Normal Blood Pressure" }, "position": { "x": 600, "y": 350 } },
+              { "id": "end", "type": "circle", "data": { "label": "End" }, "position": { "x": 1400, "y": 250 } }
+            ],
+            "edges": [
+              { "id": "e-start-1", "source": "start", "target": "1", "animated": true },
+              { "id": "e1-2", "source": "1", "target": "2", "animated": true },
+              { "id": "e2-3", "source": "2", "target": "3", "animated": true, "label": "Yes" },
+              { "id": "e2-7", "source": "2", "target": "7", "animated": true, "label": "No" },
+              { "id": "e3-4", "source": "3", "target": "4", "animated": true },
+              { "id": "e4-5", "source": "4", "target": "5", "animated": true, "label": "Yes" },
+              { "id": "e4-7", "source": "4", "target": "7", "animated": true, "label":"No"},
+              { "id": "e5-6", "source": "5", "target": "6", "animated": true},
+              { "id": "e6-end", "source": "6", "target": "end", "animated": true },
+              { "id": "e7-end", "source": "7", "target": "end", "animated": true }
+            ],
+            "tag": "initial",
+            "note": "Initial rule for hypertension assessment"
+          }
+        ]
+      }
+    ]
+  }

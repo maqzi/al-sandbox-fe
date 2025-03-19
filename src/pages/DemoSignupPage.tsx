@@ -364,13 +364,13 @@ const DemoSignupPage = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <CheckIcon sx={{ color: '#00ab55', mr: 0.7, fontSize: 14 }} />
                               <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                                Faster time-to-value with iterative delivery
+                                Faster time-to-value
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <CheckIcon sx={{ color: '#00ab55', mr: 0.7, fontSize: 14 }} />
                               <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                                Transparency throughout development
+                                Transparency across development
                               </Typography>
                             </Box>
                           </Box>

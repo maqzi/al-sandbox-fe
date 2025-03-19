@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
 import rulesData from '@/data/rulesTree.json';
 
 // Define TypeScript interfaces for better type safety
@@ -54,6 +54,8 @@ const initialState: RulesState = {
   activeVersion: null
 };
 
+export const addRule = createAction<Rule>('rules/addRule');
+
 const rulesSlice = createSlice({
   name: 'rules',
   initialState,
@@ -86,6 +88,11 @@ const rulesSlice = createSlice({
         state.rules[index] = updatedRule;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(addRule, (state, action) => {
+      state.rules.push(action.payload);
+    });
   }
 });
 

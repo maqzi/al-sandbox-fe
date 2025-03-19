@@ -1,13 +1,15 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { 
   Box, Typography, List, ListItem, ListItemIcon, ListItemText,
-  Paper, Badge, Chip, Divider
+  Paper, Badge, Chip, Divider, Tooltip
 } from '@mui/material';
 import {
   Person, DirectionsCar, LocalHospital, 
   Assignment, Lock, Description, KeyboardArrowRight, 
-  Assessment
+  Assessment, Security
 } from '@mui/icons-material';
+import { selectSelectedCase } from '@/store/selectors';
 
 interface WorkbenchSideMenuProps {
   activeSection: string;
@@ -24,14 +26,44 @@ interface WorkbenchSideMenuProps {
 const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({ 
   activeSection, 
   onSectionChange,
+  // We'll keep this as a fallback but won't actually use it
   caseInfo = {
-    id: 'CASE-2023-0015',
-    name: 'John Smith',
-    age: 45,
-    date: 'March 12, 2025',
-    conditions: ['Type 2 Diabetes', 'Obstructive Sleep Apnea']
+    id: '<case_id>',
+    name: '<name>',
+    age: '<age>',
+    date: '<date>',
+    conditions: ['<condition1>', '<condition2>']
   } 
 }) => {
+  // Get data directly from Redux state
+  const selectedCase = useSelector(selectSelectedCase);
+  
+  // Use Redux data if available, otherwise fall back to props
+  const displayInfo = selectedCase ? {
+    id: selectedCase.id || selectedCase.case.taskId || 'N/A',
+    name: selectedCase.person?.fullName || `${selectedCase.person?.firstName || ''} ${selectedCase.person?.lastName || ''}`,
+    age: selectedCase.person?.age || 'N/A',
+    date: selectedCase.policy?.applicationDate || selectedCase.case?.receivedDate || 'N/A',
+    conditions: selectedCase.health?.conditions?.map(c => c.name) || []
+  } : caseInfo;
+  
+  // Generate condition abbreviations for chips
+  const getConditionAbbreviation = (condition: string): string => {
+    if (!condition) return '';
+    
+    // return first letters of words
+    return condition
+      .split(' ')
+      .map(word => word[0]?.toUpperCase())
+      .join('')
+      .slice(0, 4);
+  };
+  
+  const conditionChips = displayInfo.conditions.map(condition => ({
+    label: getConditionAbbreviation(condition),
+    fullName: condition
+  })).slice(0, 3); // Limit to 3 chips
+  
   return (
     <Paper 
       elevation={0}
@@ -49,7 +81,7 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
           Case Workbench
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Case ID: {caseInfo.id}
+          Case ID: {displayInfo.id}
         </Typography>
       </Box>
 
@@ -240,7 +272,6 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
         
         <Divider sx={{ my: 1 }} />
         
-        {/* Case Summary */}
         <Box sx={{ p: 2 }}>
           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             CASE SUMMARY
@@ -254,38 +285,47 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
             border: '1px solid rgba(85, 105, 255, 0.1)'
           }}>
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {caseInfo.name}, {caseInfo.age}
+              {displayInfo.name}, {displayInfo.age}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              Application Date: {caseInfo.date}
+              Application Date: {displayInfo.date}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              {caseInfo.conditions.join(', ')}
+              {displayInfo.conditions.join(', ')}
             </Typography>
             
-            <Box sx={{ mt: 1.5, display: 'flex', gap: 0.5 }}>
-              <Chip 
-                label="T2D" 
-                size="small" 
-                sx={{ 
-                  fontSize: '0.65rem', 
-                  height: 20,
-                  bgcolor: 'rgba(255, 152, 0, 0.1)',
-                  color: '#ff9800',
-                  fontWeight: 500,
-                }}
-              />
-              <Chip 
-                label="OSA" 
-                size="small" 
-                sx={{ 
-                  fontSize: '0.65rem', 
-                  height: 20,
-                  bgcolor: 'rgba(255, 152, 0, 0.1)',
-                  color: '#ff9800',
-                  fontWeight: 500,
-                }}
-              />
+            <Box sx={{ mt: 1.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+              {conditionChips.map((chip, index) => (
+                <Tooltip key={index} title={chip.fullName} arrow>
+                  <Chip 
+                    label={chip.label} 
+                    size="small" 
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      height: 20,
+                      bgcolor: 'rgba(255, 152, 0, 0.1)',
+                      color: '#ff9800',
+                      fontWeight: 500,
+                    }}
+                  />
+                </Tooltip>
+              ))}
+              
+              {displayInfo.conditions.length > 3 && (
+                <Tooltip title={`${displayInfo.conditions.length - 3} more conditions`} arrow>
+                  <Chip 
+                    label={`+${displayInfo.conditions.length - 3}`} 
+                    size="small" 
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      height: 20,
+                      bgcolor: 'rgba(0, 0, 0, 0.05)',
+                      color: 'text.secondary',
+                      fontWeight: 500,
+                    }}
+                  />
+                </Tooltip>
+              )}
             </Box>
           </Box>
         </Box>

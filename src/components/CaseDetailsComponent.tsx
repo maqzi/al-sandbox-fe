@@ -8,7 +8,7 @@ import {
 import {
   Person, Cake, Timer, HomeWork, Phone, Email, 
   Payment, Security, MedicalServices, MonetizationOn,
-  LocalHospital, CalendarMonth, CheckCircle
+  LocalHospital, CalendarMonth, CheckCircle, Error
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { selectSelectedCase } from '@/store/selectors';
@@ -295,7 +295,7 @@ const CaseDetailsComponent: React.FC = () => {
                           {condition.verified ? (
                             <CheckCircle sx={{ color: 'success.main', fontSize: 18 }} />
                           ) : (
-                            <ErrorOutline sx={{ color: 'warning.main', fontSize: 18 }} />
+                            <Error sx={{ color: 'warning.main', fontSize: 18 }} />
                           )}
                         </TableCell>
                       </TableRow>

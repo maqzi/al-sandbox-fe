@@ -9,7 +9,7 @@ import {
 import { 
   FavoriteBorder, ShowChart, LocalHospital, TrendingUp, TrendingDown, 
   Warning, CheckCircle, Info, DirectionsRun, AccessTime, Flag, 
-  ErrorOutline, Timeline
+  Error, Timeline
 } from '@mui/icons-material';
 import './css/SummarizerComponent.css';
 import { selectSelectedCase } from '@/store/selectors';
@@ -186,7 +186,7 @@ const SummarizerComponent: React.FC = () => {
                       className={smokerStatus.toLowerCase() === 'never' ? 'avatar-green' : 'avatar-red'}
                       sx={{ width: 36, height: 36, mr: 1.5 }}
                     >
-                      {smokerStatus.toLowerCase() === 'never' ? <CheckCircle fontSize="small" /> : <ErrorOutline fontSize="small" />}
+                      {smokerStatus.toLowerCase() === 'never' ? <CheckCircle fontSize="small" /> : <Error fontSize="small" />}
                     </Avatar>
                     <Box>
                       <Typography variant="body2" color="text.secondary">

@@ -1,14 +1,14 @@
 {
     "cases": [
       {
-        "id": "C12345",
+        "id": "C67890",
         "workbench": {
           "currentSection": "Case Details",
           "activeSource": ""
         },
         "case": {
-          "policyNum": "12345",
-          "taskId": "T001",
+          "policyNum": "67890",
+          "taskId": "T002",
           "queue": "Underwriting",
           "workType": "Review",
           "nextAction": "Approve",
@@ -45,14 +45,14 @@
           },
           "occupation": "Financial Analyst",
           "physical": {
-            "heightInches": 71,
-            "weightPounds": 185,
-            "bmi": 27.5,
+            "heightInches": 70,
+            "weightPounds": 190,
+            "bmi": 27.3,
             "buildHistory": [
               {
                 "date": "2025-02-27",
-                "build": "5.10.180",
-                "bmi": 27.5,
+                "build": "5.10.190",
+                "bmi": 27.3,
                 "class": "Overweight"
               },
               {
@@ -98,7 +98,7 @@
               "diagnosed": "Mar 2021",
               "treatment": "CPAP",
               "reported": true,
-              "verified": true,
+              "verified": false,
               "codes": [
                 {
                   "code": "G47.33",
@@ -171,7 +171,7 @@
             }
           ],
           "ehrSummary": {
-            "impairments": "Diabetes, Hypertension",
+            "impairments": "Diabetes, Sleep Apnea",
             "unprocessedDocuments": "Lab Results, Medical Records"
           }
         },
@@ -217,19 +217,7 @@
                 "flatExtraRating": "",
                 "targetOrder": "EHR",
                 "overrideReason": "EHR - Diabetes Type 2",
-                "overrideComment": "Missing A1c Score in APS"
-              },
-              {
-                "rule": "EHR Screening",
-                "riskClass": "",
-                "mortalityRating": "",
-                "refer": "Yes",
-                "decline": "No",
-                "tobacco": "No",
-                "flatExtraRating": "",
-                "targetOrder": "",
-                "overrideReason": "",
-                "overrideComment": ""
+                "overrideComment": "EHR ordered for missing A1c Score"
               },
               {
                 "rule": "EHR - Diabetes Type 2",
@@ -242,27 +230,51 @@
                 "targetOrder": "",
                 "overrideReason": "",
                 "overrideComment": ""
+              },
+              {
+                "rule": "Obstructive Sleep Apnea",
+                "riskClass": "",
+                "mortalityRating": "",
+                "refer": "Yes - Override",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "EHR",
+                "overrideReason": "EHR - Obstructive Sleep Apnea",
+                "overrideComment": "EHR available - screen for missing AHI Score"
+              },
+              {
+                "rule": "EHR Screening - OSA",
+                "riskClass": "Refer - Missing data",
+                "mortalityRating": "",
+                "refer": "Yes",
+                "decline": "No",
+                "tobacco": "No",
+                "flatExtraRating": "",
+                "targetOrder": "",
+                "overrideReason": "",
+                "overrideComment": ""
               }
             ]
           }
         }
       },
       {
-        "id": "C67890",
+        "id": "C12345",
         "workbench": {
           "currentSection": "Case Details",
           "activeSource": ""
         },
         "case": {
-          "policyNum": "67890",
-          "taskId": "T002",
-          "queue": "Claims",
-          "workType": "Investigation",
-          "nextAction": "Investigate",
+          "policyNum": "12345",
+          "taskId": "T001",
+          "queue": "Underwriting",
+          "workType": "Post-Issue Audit",
+          "nextAction": "Close",
           "receivedDate": "2025-03-02",
           "dueDate": "2025-03-06",
           "priority": "Medium",
-          "assignmentStatus": "Unassigned"
+          "assignmentStatus": "Assigned"
         },
         "policy": {
           "product": "Term Life Insurance",
@@ -271,7 +283,7 @@
           "applicationDate": "2025-02-01",
           "hipaaAuthDate": "2025-02-01",
           "hasPriorPolicy": "No",
-          "status": "Pending",
+          "status": "Issued",
           "premium": 1500
         },
         "person": {
@@ -280,7 +292,7 @@
           "fullName": "John Doe",
           "ssn": "123-45-6789",
           "gender": "Male",
-          "birthDate": "1980-01-01",
+          "birthDate": "1980-02-22",
           "age": 45,
           "birthPlace": {
             "state": "California",
@@ -300,7 +312,7 @@
                 "date": "2025-01-15",
                 "build": "5.10.180",
                 "bmi": 25.8,
-                "class": "Overweight"
+                "class": "Normal"
               },
               {
                 "date": "2024-07-20",
@@ -337,27 +349,6 @@
                   "description": "Type 2 diabetes mellitus with hyperglycemia",
                   "sourceDoc": "Lab Results 2023-02-01",
                   "found": true
-                }
-              ]
-            },
-            {
-              "name": "Obstructive Sleep Apnea",
-              "diagnosed": "Mar 2021",
-              "treatment": "CPAP",
-              "reported": true,
-              "verified": true,
-              "codes": [
-                {
-                  "code": "G47.33",
-                  "description": "Obstructive sleep apnea (adult) (pediatric)",
-                  "sourceDoc": "Sleep Study 2023-03-10",
-                  "found": true
-                },
-                {
-                  "code": "G47.30",
-                  "description": "Sleep apnea, unspecified",
-                  "sourceDoc": "Required for AHI score",
-                  "found": false
                 }
               ]
             }
@@ -411,31 +402,31 @@
             },
             {
               "parameter": "AHI Score",
-              "value": "Not Found",
+              "value": "3",
               "sourceDoc": "Sleep Study 2023-03-10",
-              "isNormal": false,
-              "found": false
+              "isNormal": true,
+              "found": true
             }
           ],
           "ehrSummary": {
-            "impairments": "Diabetes, Sleep Apnea",
-            "unprocessedDocuments": "Sleep Study, Lab Results"
+            "impairments": "Diabetes",
+            "unprocessedDocuments": ""
           }
         },
         "assessment": {
           "ehrAssessments": [
             {
-              "referralReason": "Missing AHI Score data in EHR",
-              "rule": "Sleep Apnea",
+              "referralReason": "",
+              "rule": "",
               "bestRiskClass": "Standard NT",
               "rating": 100,
               "flatExtras": "[]",
               "declineFlag": false,
-              "referFlag": true,
+              "referFlag": false,
               "inputsDataUsed": [
                 { "inputs": "ICD-10", "dataUsed": "G47.33 - Obstructive sleep apnea" },
                 { "inputs": "CPT", "dataUsed": "95810 - Sleep Study" },
-                { "inputs": "AHI Score", "dataUsed": "Not Found" },
+                { "inputs": "AHI Score", "dataUsed": "3" },
                 { "inputs": "Age at time of Application", "dataUsed": "45" },
                 { "inputs": "Age at diagnosis", "dataUsed": "43" }
               ]
@@ -455,28 +446,16 @@
             ],
             "alitheia": [
               {
-                "rule": "Sleep Apnea",
+                "rule": "Diabetes Type 2",
                 "riskClass": "",
                 "mortalityRating": "",
-                "refer": "Yes",
+                "refer": "Yes - Override",
                 "decline": "No",
                 "tobacco": "No",
                 "flatExtraRating": "",
                 "targetOrder": "EHR",
-                "overrideReason": "",
-                "overrideComment": "Missing AHI Score in EHR"
-              },
-              {
-                "rule": "EHR Screening",
-                "riskClass": "",
-                "mortalityRating": "",
-                "refer": "Yes",
-                "decline": "No",
-                "tobacco": "No",
-                "flatExtraRating": "",
-                "targetOrder": "",
-                "overrideReason": "",
-                "overrideComment": ""
+                "overrideReason": "EHR - Diabetes Type 2",
+                "overrideComment": "Missing A1c Score found in EHR"
               },
               {
                 "rule": "EHR - Diabetes Type 2",

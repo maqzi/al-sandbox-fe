@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Box, Typography, Alert } from '@mui/material';
 import WorkbenchSideMenu from './WorkbenchSideMenu';
 import CaseDetailsComponent from './CaseDetailsComponent';
+import AssessmentsComponent from './AssessmentsComponent';
 import './css/WorkbenchComponent.css';
 
 import { 
@@ -74,30 +75,14 @@ const WorkbenchComponent: React.FC = () => {
             {/* EHR Section */}
             {workbenchSection === 'EHRs' && (
               <>
-                <SummarizerComponent  />
+                <SummarizerComponent />
                 {/* Add other EHR section content here */}
               </>
             )}
 
-            {/* Assessment Section */}
+            {/* Assessments Section */}
             {workbenchSection === 'Assessment' && (
-              <>
-                {
-                  <Alert 
-                    severity="warning"
-                    className="info-alert"
-                  >
-                    <Typography variant="body1" fontWeight={500}>
-                      This case requires human review
-                    </Typography>
-                    <Typography variant="body2">
-                      Reason: FYI
-                    </Typography>
-                  </Alert>
-                }
-                
-                {/* Add assessment section content here */}
-              </>
+              <AssessmentsComponent />
             )}
             
             {/* Add other workbench sections as needed */}
