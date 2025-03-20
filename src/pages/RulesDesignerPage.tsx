@@ -137,7 +137,6 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
         const template = ruleRecommendations.rules.find(rule => 
           rule.name.toLowerCase() === impairment.replace('_', ' ')
         );
-        
         if (template) {
           matchingTemplates.push(template);
         }
@@ -859,6 +858,7 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
             input={<OutlinedInput label="Impairments" />}
             renderValue={(selected) => selected.join(', ')}
           >
+            {/* Available Impairments */}
             <MenuItem value="hypertension">
               <Checkbox checked={selectedImpairments.indexOf('hypertension') > -1} />
               <ListItemText 
@@ -866,44 +866,130 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
                 secondary="Blood pressure exceeding 140/90 mm Hg"
               />
             </MenuItem>
-            <MenuItem value="cholesterol">
-              <Checkbox checked={selectedImpairments.indexOf('cholesterol') > -1} />
+            
+            <MenuItem value="brca">
+              <Checkbox checked={selectedImpairments.indexOf('brca') > -1} />
               <ListItemText 
-                primary="Hypercholesterolemia" 
-                secondary="High total cholesterol or LDL levels"
+                primary="BRCA Mutation" 
+                secondary="BRCA1/2 gene mutations or family history of breast/ovarian cancer"
               />
             </MenuItem>
-            <MenuItem value="obesity">
-              <Checkbox checked={selectedImpairments.indexOf('obesity') > -1} />
-              <ListItemText 
-                primary="Obesity" 
-                secondary="BMI exceeding 30 kg/m²"
-              />
+            
+            <Divider sx={{ my: 1 }} />
+            
+            {/* Locked Impairments */}
+            <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
+              <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  More impairments coming soon
+                </Typography>
+                <Chip 
+                  icon={<Lock fontSize="small" />} 
+                  label="Coming Soon" 
+                  size="small" 
+                  variant="outlined"
+                  sx={{ ml: 2 }}
+                />
+              </Box>
             </MenuItem>
-            <MenuItem value="diabetes">
-              <Checkbox checked={selectedImpairments.indexOf('diabetes') > -1} />
+            
+            <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
+              <Checkbox disabled />
               <ListItemText 
-                primary="Diabetes" 
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    Diabetes
+                    <Chip 
+                      icon={<Lock fontSize="small" />} 
+                      label="Coming Soon" 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                }
                 secondary="Type 1 or Type 2 diabetes mellitus"
               />
             </MenuItem>
-            <MenuItem value="sleep_apnea">
-              <Checkbox checked={selectedImpairments.indexOf('sleep_apnea') > -1} />
+            
+            <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
+              <Checkbox disabled />
               <ListItemText 
-                primary="Sleep Apnea" 
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    Hypercholesterolemia
+                    <Chip 
+                      icon={<Lock fontSize="small" />} 
+                      label="Coming Soon" 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                }
+                secondary="High total cholesterol or LDL levels"
+              />
+            </MenuItem>
+            
+            <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
+              <Checkbox disabled />
+              <ListItemText 
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    Obesity
+                    <Chip 
+                      icon={<Lock fontSize="small" />} 
+                      label="Coming Soon" 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                }
+                secondary="BMI exceeding 30 kg/m²"
+              />
+            </MenuItem>
+            
+            <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
+              <Checkbox disabled />
+              <ListItemText 
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    Sleep Apnea
+                    <Chip 
+                      icon={<Lock fontSize="small" />} 
+                      label="Coming Soon" 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                }
                 secondary="Obstructive or central sleep apnea"
               />
             </MenuItem>
-            <MenuItem value="smoking">
-              <Checkbox checked={selectedImpairments.indexOf('smoking') > -1} />
+            
+            <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
+              <Checkbox disabled />
               <ListItemText 
-                primary="Tobacco Use" 
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    Tobacco Use
+                    <Chip 
+                      icon={<Lock fontSize="small" />} 
+                      label="Coming Soon" 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                }
                 secondary="Current or former tobacco user"
               />
             </MenuItem>
           </Select>
           <FormHelperText>
-            Select one or more impairments to create rules for.
+            Select one or more impairments to create rules for. 
           </FormHelperText>
         </FormControl>
         

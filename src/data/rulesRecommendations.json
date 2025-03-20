@@ -33,6 +33,55 @@
             "note": "Initial rule for hypertension assessment"
           }
         ]
-      }
+      },
+      {
+      "id": "1",
+      "name": "BRCA",
+      "versions": [
+        {
+          "version": "v1",
+          "nodes": [
+            { "id": "start", "type": "circle", "data": { "label": "Start" }, "position": { "x": -250, "y": -500 } },
+            { "id": "1", "type": "diamond", "data": { "label": "Do you have a family history of cancer (excluding non-melanoma skin cancer) in a biological parent or sibling prior to age 60?" }, "position": { "x": 0, "y": -500 } },
+            { "id": "2", "type": "diamond", "data": { "label": "Have you tested positive for BRCA 1 and/or BRCA 2 mutations?" }, "position": { "x": 0, "y": -750 } },
+            { "id": "3", "type": "diamond", "data": { "label": "Has a family member tested positive for BRCA 1 and/or BRCA 2 mutations?" }, "position": { "x": 0, "y": -1000 } },
+            { "id": "4", "type": "diamond", "data": { "label": "Are you undergoing appropriate surveillance as recommended?" }, "position": { "x": 1000, "y": -1000 } },
+            { "id": "female_positive", "data": { "label": "Female Applicant - BRCA 1/2 Positive" }, "position": { "x": 250, "y": -500 } },
+            { "id": "female_family", "data": { "label": "Female Applicant - Family Member BRCA Positive" }, "position": { "x": 1000, "y": -500 } },
+            { "id": "male_positive", "data": { "label": "Male Applicant - BRCA 1/2 Positive" }, "position": { "x": 500, "y": -500 } },
+            { "id": "male_family", "data": { "label": "Male Applicant - Family Member BRCA Positive" }, "position": { "x": 750, "y": -500 } },
+            { "id": "female_positive_age", "data": { "label": "Age < 55 years" }, "position": { "x": 300, "y": -250 } },
+            { "id": "female_positive_55", "data": { "label": "Age > 55 years" }, "position": { "x": 200, "y": -300 } },
+            { "id": "male_positive_surveillance", "data": { "label": "Proof of Appropriate Surveillance" }, "position": { "x": 450, "y": -150 } },
+            { "id": "male_positive_no_surveillance", "data": { "label": "Not Undergoing Appropriate Surveillance" }, "position": { "x": 550, "y": -100 } },
+            { "id": "end", "type": "circle", "data": { "label": "End" }, "position": { "x": 1000, "y": 500 } }
+          ],
+          "edges": [
+            { "id": "e-start-1", "source": "start", "target": "1", "animated": true },
+            { "id": "e1-2-yes", "source": "1", "target": "2", "animated": true, "label": "Yes" },
+            { "id": "e1-2-no", "source": "1", "target": "end", "animated": true, "label": "No" },
+            { "id": "e2-3", "source": "2", "target": "3", "animated": true },
+            { "id": "e3-4", "source": "3", "target": "4", "animated": true },
+            { "id": "e4-female_positive", "source": "4", "target": "female_positive", "animated": true },
+            { "id": "e4-female_family", "source": "4", "target": "female_family", "animated": true },
+            { "id": "e4-male_positive", "source": "4", "target": "male_positive", "animated": true },
+            { "id": "e4-male_family", "source": "4", "target": "male_family", "animated": true },
+            { "id": "e-female_positive_age", "source": "female_positive", "target": "female_positive_age", "animated": true },
+            { "id": "e-female_positive_55", "source": "female_positive", "target": "female_positive_55", "animated": true },
+            { "id": "e-female_family-end", "source": "female_family", "target": "end", "animated": true },
+            { "id": "e-male_positive-surveillance", "source": "male_positive", "target": "male_positive_surveillance", "animated": true },
+            { "id": "e-male_positive-no_surveillance", "source": "male_positive", "target": "male_positive_no_surveillance", "animated": true },
+            { "id": "e-female_positive_age-75", "source": "female_positive_age", "target": "end", "animated": true, "label": "Bilateral Mastectomies or Bilateral Salpingo-oopherectomy (Pathology Negative)" },
+            { "id": "e-female_positive_55-50", "source": "female_positive_55", "target": "end", "animated": true, "label": "Bilateral Mastectomies or Bilateral Salpingo-oopherectomy (Pathology Negative)" },
+            { "id": "e-female_positive_55-standard", "source": "female_positive_55", "target": "end", "animated": true, "label": "Both Procedures (Pathology Negative)" },
+            { "id": "e-male_positive_surveillance-25", "source": "male_positive_surveillance", "target": "end", "animated": true, "label": "Rating 25" },
+            { "id": "e-male_positive_no_surveillance-decline", "source": "male_positive_no_surveillance", "target": "end", "animated": true, "label": "Decline" },
+            { "id": "e-male_family-end", "source": "male_family", "target": "end", "animated": true }
+          ],
+          "tag": "initial",
+          "note": "Unified BRCA assessment tree with family history, mutation status, and surveillance for both male and female applicants"
+        }
+      ]
+    }
     ]
   }
