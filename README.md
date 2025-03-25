@@ -1,4 +1,4 @@
-# alitheia Labs x EHRs design prototype
+# alitheia Labs
 
 Welcome to the alitheia Labs design prototype
 
