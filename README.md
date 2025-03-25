@@ -1,9 +1,9 @@
 # alitheia Labs x EHRs design prototype
 
-Welcome to the alitheia Labs x EHRs design prototype
+Welcome to the alitheia Labs design prototype
 
 ## Project info
-This is a design prototype for clients to experience the EXL workflow of using EHRs.
+This is a design prototype for clients to experience the EXL workflow of using EHRs and Rule AI.
 
 ## Requirements
 

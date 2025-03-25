@@ -91,7 +91,7 @@ const SummarizerComponent: React.FC = () => {
               
               <Chip 
                 icon={<Info sx={{ fontSize: 16 }} />}
-                label="EHR Prototype" 
+                label="EHR Summarizer" 
                 variant="outlined"
                 color="primary"
                 className="status-chip"

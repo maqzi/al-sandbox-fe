@@ -67,7 +67,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
               Welcome {userInfo.name}!
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: '90%' }}>
-              Welcome to alitheia Labs. This prototype is designed to showcase alitheia's EHR Assessments.
+              Welcome to alitheia Labs. This prototype is designed to showcase alitheia's EHR Assessments and Rule AI features.
               You will be able to design rules and test them in a sandbox workbench environment on sample cases.
             </Typography>
             <Box display="flex" gap={2} sx={{ mt: 3 }}>
