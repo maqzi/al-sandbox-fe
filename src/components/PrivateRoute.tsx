@@ -16,6 +16,8 @@ const PrivateRoute = ({ children, step }: PrivateRouteProps) => {
 
   useEffect(() => {
     dispatch(setStep(step));
+    // Save the current route to local storage
+    localStorage.setItem("lastVisitedRoute", location.pathname);
   }, [dispatch, step, location.pathname]);
 
   if (!user.name || !user.email) {

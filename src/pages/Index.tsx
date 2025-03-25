@@ -190,16 +190,6 @@ const Index = () => {
                 >
                   alitheia Labs
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: '#637381',
-                    fontWeight: 500,
-                    letterSpacing: '0.5px'
-                  }}
-                >
-                  Prototype: EHR Assessments
-                </Typography>
               </Box>
               <Divider orientation="vertical" flexItem sx={{ mx: 2, display: { xs: 'none', md: 'block' } }} />
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
@@ -334,7 +324,7 @@ const Index = () => {
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          © 2025 alitheia Labs - Prototype: EHR Assessments  - All rights reserved.
+          © 2025 alitheia Labs - All rights reserved.
         </Typography>
       </Box>
     </Box>
