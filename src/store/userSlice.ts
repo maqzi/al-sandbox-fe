@@ -23,16 +23,8 @@ const userSlice = createSlice({
     setStep: (state, action: PayloadAction<number>) => {
       state.step = action.payload;
     },
-    logout: (state) => {
-      // Clear user state
-      state.name = '';
-      state.email = '';
-      state.step = 0;
-      // Clear local storage
-      localStorage.removeItem('reduxState');
-    },
   },
 });
 
-export const { setUser, setStep, logout } = userSlice.actions;
+export const { setUser, setStep } = userSlice.actions;
 export const userReducer = userSlice.reducer;

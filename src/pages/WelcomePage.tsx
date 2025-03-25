@@ -118,10 +118,6 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
           position: 'relative',
           overflow: 'hidden',
           transition: 'all 0.3s ease',
-          '&:hover': {
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-            transform: 'translateY(-4px)',
-          }
         }}
       >
         <Grid container spacing={4} alignItems="center">
@@ -138,7 +134,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
               Welcome to alitheia Labs. This prototype is designed to showcase alitheia's EHR Assessments and Rule AI features.
               You will be able to design rules and test them in a sandbox workbench environment on sample cases.
             </Typography>
-            <Box display="flex" sx={{ mt: 3 }}>
+            <Box display="flex" gap={2} sx={{ mt: 3 }}>
             <Button
                 variant="contained"
                 color="primary"
