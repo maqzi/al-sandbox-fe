@@ -41,3 +41,6 @@ This project is built with .
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## Attributions
+- Claude 3.7 Sonnet Copilot helped with the inline styling :robot:
