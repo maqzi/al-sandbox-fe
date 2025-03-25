@@ -1,46 +1,50 @@
-# Use the official Node.js image as the base image
-FROM node:16-alpine AS build
+# Stage 1: Build the React app
+FROM node:18-alpine AS build
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package.json ./
+RUN npm install --package-lock-only
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy the rest of the application code
+# Copy the rest of the application files
 COPY . .
 
-# Build the application
-RUN npx vite build
+# Build the React app
+RUN npm run build
 
-# Use the official nginx image as the base image for serving the built application
-FROM nginx:alpine
+# Stage 2: Serve the app with Nginx
+FROM nginx:stable-alpine
 
-# Ensure necessary directories exist and have correct permissions
-RUN mkdir -p /var/cache/nginx /var/log/nginx /var/tmp/nginx /var/run && \
-    chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/tmp/nginx /var/run /usr/share/nginx/html
+# Create a non-root user with id=40000
+RUN addgroup -g 40000 appgroup && adduser -u 40000 -G appgroup -s /bin/sh -D appuser
 
-# Copy the built application from the build stage to the nginx html directory
-COPY --from=build /app/dist /usr/share/nginx/html
+# Set permissions for the Nginx directories and create writable directories for temporary files
+RUN mkdir -p /tmp/nginx/client_temp /tmp/nginx/proxy_temp /tmp/nginx/fastcgi_temp /tmp/nginx/uwsgi_temp /tmp/nginx/scgi_temp && \
+    chown -R appuser:appgroup /usr/share/nginx/html /var/cache/nginx /var/log/nginx /tmp/nginx
 
-# Ensure that nginx can access the copied files
-RUN chown -R nginx:nginx /usr/share/nginx/html
-
-# Change permissions for /var/run directory for nginx user
-RUN chmod 755 /var/run && \
-    chown nginx:nginx /var/run
-
-# Set the user for Nginx to run as
-USER nginx
-
-# Copy the nginx configuration file
+# Replace the default Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose the port Nginx will run on
+# Copy built assets from the build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Add an entrypoint script to create necessary directories at runtime
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Switch to the non-root user
+USER appuser
+
+# Expose port 8080
 EXPOSE 8080
 
-# Start nginx
+# Use the entrypoint script
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+# Start Nginx server without overriding the PID directive
 CMD ["nginx", "-g", "daemon off;"]
