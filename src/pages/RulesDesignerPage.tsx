@@ -850,14 +850,12 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
         
         <FormControl fullWidth sx={{ mb: 3 }}>
           <InputLabel id="impairments-label">Impairments</InputLabel>
-          <Select
+            <Select
             labelId="impairments-label"
-            multiple
-            value={selectedImpairments}
-            onChange={(e) => setSelectedImpairments(e.target.value as string[])}
+            value={selectedImpairments[0] || ''}
+            onChange={(e) => setSelectedImpairments([e.target.value as string])}
             input={<OutlinedInput label="Impairments" />}
-            renderValue={(selected) => selected.join(', ')}
-          >
+            >
             {/* Available Impairments */}
             <MenuItem value="hypertension">
               <Checkbox checked={selectedImpairments.indexOf('hypertension') > -1} />

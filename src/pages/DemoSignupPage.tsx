@@ -24,6 +24,7 @@ import {
   LocalHospital as LocalHospitalIcon,
   Assignment as AssignmentIcon
 } from '@mui/icons-material';
+import AlitheiaBranding from "@/components/AlitheiaBranding";
 
 const DemoSignupPage = () => {
   const navigate = useNavigate();
@@ -61,32 +62,9 @@ const DemoSignupPage = () => {
           bgcolor: '#fff',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar 
-            sx={{ 
-              bgcolor: theme.palette.primary.main,
-              color: '#fff',
-              width: 34,
-              height: 34,
-              mr: 1.5
-            }}
-          >
-            <HealthIcon sx={{ fontSize: 20 }} />
-          </Avatar>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 600,
-              background: 'linear-gradient(90deg, #1976d2, #304ffe)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.5px'
-            }}
-          >
-            alitheia Labs
-          </Typography>
-        </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+        <AlitheiaBranding variant="default" isHeader withTagline={true} />
+      </Box>
       </Box>
 
       {/* Main Content */}
@@ -214,7 +192,7 @@ const DemoSignupPage = () => {
                     }
                   }}
                 >
-                  We build with you, as you build for your clients
+                  Innovation starts with listening
                 </Typography>
 
                 <Grid container spacing={3}>
@@ -253,7 +231,7 @@ const DemoSignupPage = () => {
                       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontSize: '0.875rem' }}>
                         With alitheia Labs, we prioritize partnerships with our clients. By working together, 
                         we develop innovative experiments to address real industry challenges, gather feedback and
-                        iterate on those experiments and produce solutions with the right product-market fit.
+                        iterate to enable solutions that offer most value to you!
                       </Typography>
                     </Box>
                   </Grid>
@@ -288,8 +266,7 @@ const DemoSignupPage = () => {
                       </Box>
                       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontSize: '0.875rem' }}>
                         We combine deep domain expertise with cutting-edge technology to develop underwriting solutions 
-                        that deliver measurable outcomes. Our solutions are designed by underwriters for underwriters to offer
-                        the best in class performance.
+                        that deliver measurable outcomes. Our solutions are designed by underwriters for underwriters.
 
                       </Typography>
                     </Box>

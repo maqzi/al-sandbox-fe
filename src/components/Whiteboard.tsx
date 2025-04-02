@@ -19,10 +19,12 @@ import {
   Close, Code, Add, Remove, Timeline,
   Settings, Info, Save, CallSplit, 
   Error as ErrorIcon, SystemUpdateAlt,
-  CheckCircle, PlayArrow
+  CheckCircle, PlayArrow,
+  Edit
 } from '@mui/icons-material';
 import CircleNode from './CircleNode';
 import DiamondNode from './DiamondNode';
+import SupportModal from './SupportModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { 
@@ -41,9 +43,10 @@ const nodeTypes = {
 
 interface WhiteboardProps {
   onClose: () => void;
+  onNeedHelp?: () => void; // Add this prop to trigger the help/contact dialog from the parent
 }
 
-const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
   // Get active rule and version from Redux state
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
@@ -55,6 +58,12 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   const [lockedDialogOpen, setLockedDialogOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [thresholdValue, setThresholdValue] = useState('');
+  
+  // Add new states for node editing
+  const [nodeDialogOpen, setNodeDialogOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [nodeLabelValue, setNodeLabelValue] = useState('');
+  
   const [ruleSummary, setRuleSummary] = useState({
     nodeCount: 0,
     edgeCount: 0,
@@ -90,12 +99,19 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   }>(null);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [editedVersionNote, setEditedVersionNote] = useState('');
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [supportModalSubject, setSupportModalSubject] = useState('');
   const dispatch = useDispatch();
 
   // Add these state variables to your component
   const [ruleAiDialogOpen, setRuleAiDialogOpen] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [ruleSummaryText, setRuleSummaryText] = useState<string | null>(null);
+
+  // Add new state for numeric editing and node deletion
+  const [isNumericEditMode, setIsNumericEditMode] = useState(false);
+  const [originalNodeLabel, setOriginalNodeLabel] = useState('');
+
 
   // Load nodes and edges when component mounts or when activeVersion changes
   useEffect(() => {
@@ -198,7 +214,8 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   );
 
   const handleLockedDialogOpen = () => {
-    setLockedDialogOpen(true);
+    // Open the SupportModal directly within Whiteboard
+    setSupportModalOpen(true);
   };
 
   const handleLockedDialogClose = () => {
@@ -216,6 +233,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
     setThresholdRecommendations([]);
     setLoadingRecommendations(false);
     setRecommendationsShown(false);
+    console.log('Edge dialog closed');
   };
 
   const handleEdgeClick = (event, edge) => {
@@ -511,7 +529,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
       // Optional: display a "No changes to save" toast notification
       return;
     }
-
     // Calculate the next version number based on the current version
     const currentVersion = activeVersion?.version || '1.0';
     const parts = currentVersion.split('.');
@@ -582,6 +599,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   // Add function to handle closing save dialog
   const handleSaveDialogClose = () => {
     setSaveVersionDialogOpen(false);
+    console.log('Save dialog closed');
   };
 
   // Add this function to handle the test button click
@@ -652,6 +670,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   const handleTestDialogClose = () => {
     setTestDialogOpen(false);
     setTestResults(null);
+    console.log('Test dialog closed');
   };
 
   // Add function to handle opening the settings dialog
@@ -664,6 +683,8 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   // Add function to handle closing the settings dialog
   const handleSettingsDialogClose = () => {
     setSettingsDialogOpen(false);
+    setEditedVersionNote(''); // Clear form data
+    console.log('Settings dialog closed');
   };
 
   // Add function to save updated version note
@@ -788,6 +809,225 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
   // Add function to close the dialog
   const handleRuleAiDialogClose = () => {
     setRuleAiDialogOpen(false);
+    console.log('Rule AI dialog closed');
+  };
+
+  // Add this function to get field mapping information based on node type and label
+  const getFieldMappingInfo = (node) => {
+    if (!node) return null;
+    
+    // Default mapping info
+    let mappingInfo = {
+      field: '',
+      description: 'Maps to a custom field in your dataset',
+      dataType: 'string'
+    };
+    
+    const label = node.data?.label?.toLowerCase() || '';
+    const nodeType = node.type || '';
+    
+    // Determine mapping based on node type and label content
+    if (nodeType === 'diamond') {
+      // Decision nodes
+      if (label.includes('diabetes') || label.includes('a1c')) {
+        mappingInfo = {
+          field: 'patient.conditions.diabetes',
+          description: 'Maps to diabetes diagnostic data including A1c values',
+          dataType: 'numeric (percentage)'
+        };
+      } else if (label.includes('bmi')) {
+        mappingInfo = {
+          field: 'patient.vitals.bmi',
+          description: 'Maps to Body Mass Index calculation',
+          dataType: 'numeric'
+        };
+      } else if (label.includes('sleep') || label.includes('apnea')) {
+        mappingInfo = {
+          field: 'patient.conditions.sleepApnea',
+          description: 'Maps to sleep apnea diagnostic data including AHI values',
+          dataType: 'numeric and categorical'
+        };
+      } else if (label.includes('risk')) {
+        mappingInfo = {
+          field: 'assessments.riskScore',
+          description: 'Maps to calculated risk assessment scores',
+          dataType: 'numeric or categorical'
+        };
+      }
+    } else if (nodeType === 'circle') {
+      // Terminal nodes
+      if (label === 'start') {
+        mappingInfo = {
+          field: 'system.entryPoint',
+          description: 'Initial process entry point',
+          dataType: 'system'
+        };
+      } else if (label === 'end') {
+        mappingInfo = {
+          field: 'outcome.decision',
+          description: 'Final decision outcome',
+          dataType: 'categorical'
+        };
+      }
+    } else {
+      // Action nodes
+      if (label.includes('refer') || label.includes('referral')) {
+        mappingInfo = {
+          field: 'actions.referral',
+          description: 'Maps to referral actions in your process',
+          dataType: 'action'
+        };
+      } else if (label.includes('approve') || label.includes('approval')) {
+        mappingInfo = {
+          field: 'actions.approval',
+          description: 'Maps to approval actions in your process',
+          dataType: 'action'
+        };
+      } else if (label.includes('reject') || label.includes('denial')) {
+        mappingInfo = {
+          field: 'actions.denial',
+          description: 'Maps to rejection actions in your process',
+          dataType: 'action'
+        };
+      }
+    }
+    
+    return mappingInfo;
+  };
+
+  // Add a new handler for node clicks
+  const handleNodeClick = (event, node) => {
+    event.stopPropagation();
+    setSelectedNode(node);
+    
+    // Store the original label for potential numeric editing
+    const nodeLabel = node.data?.label || '';
+    setOriginalNodeLabel(nodeLabel);
+    
+    // Reset edit modes
+    setIsNumericEditMode(false);
+    
+    // Check if the label contains numbers we might want to edit separately
+    const hasNumbers = /\d+(\.\d+)?/.test(nodeLabel);
+    
+    setNodeLabelValue(nodeLabel);
+    setNodeDialogOpen(true);
+  };
+
+  // Add a function to extract and update only numbers in a string
+  const extractAndUpdateNumbers = (original, value) => {
+    
+    // Otherwise use the original behavior
+    // Extract numbers from both strings
+    const originalNumbers = original.match(/\d+(\.\d+)?/g) || [];
+    const newNumbers = value.match(/\d+(\.\d+)?/g) || [];
+    
+    // If we don't have any numbers in either string, just return the new value
+    if (originalNumbers.length === 0 || newNumbers.length === 0) {
+      return value;
+    }
+    
+    // Replace numbers in the original string with new numbers
+    let result = original;
+    const minLength = Math.min(originalNumbers.length, newNumbers.length);
+    
+    for (let i = 0; i < minLength; i++) {
+      result = result.replace(originalNumbers[i], newNumbers[i]);
+    }
+    
+    return result;
+  };
+
+  // Update the node label update function to handle threshold-only edits
+  const handleNodeLabelSubmit = () => {
+    if (!selectedNode) return;
+    
+    let finalLabel;
+    
+    // Determine the final label based on edit mode
+    if (isNumericEditMode) {
+      // We're in numeric-only edit mode (but without condition separation)
+      finalLabel = extractAndUpdateNumbers(originalNodeLabel, nodeLabelValue);
+    } else {
+      // Standard edit mode
+      finalLabel = nodeLabelValue;
+    }
+    
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === selectedNode.id 
+          ? { 
+              ...node, 
+              data: { 
+                ...node.data, 
+                label: finalLabel
+              } 
+            } 
+          : node
+      )
+    );
+    
+    handleNodeDialogClose();
+  };
+
+  // Add function to delete a node
+  const handleNodeDelete = () => {
+    if (!selectedNode) return;
+    
+    // Remove the node from the graph
+    setNodes((nds) => nds.filter((node) => node.id !== selectedNode.id));
+    
+    // Also remove any connected edges
+    setEdges((eds) => eds.filter(
+      (edge) => edge.source !== selectedNode.id && edge.target !== selectedNode.id
+    ));
+    
+    // Update statistics
+    setRuleSummary(prev => {
+      const updatedStats = { ...prev, nodeCount: prev.nodeCount - 1 };
+      
+      if (selectedNode.type === 'diamond') {
+        updatedStats.decisionPoints = prev.decisionPoints - 1;
+      }
+      
+      if (
+        selectedNode.data?.label === 'End' || 
+        selectedNode.type === 'circle' && selectedNode.id !== 'start'
+      ) {
+        updatedStats.endpoints = prev.endpoints - 1;
+      }
+      
+      return updatedStats;
+    });
+    
+    handleNodeDialogClose();
+  };
+
+  // Toggle numeric edit mode
+  const toggleNumericEditMode = () => {
+    setIsNumericEditMode(!isNumericEditMode);
+    
+    // If switching to numeric mode, try to extract only numbers for editing
+    if (!isNumericEditMode) {
+      const numbers = originalNodeLabel.match(/\d+(\.\d+)?/g);
+      if (numbers && numbers.length > 0) {
+        setNodeLabelValue(numbers.join(', '));
+      }
+    } else {
+      // If switching back to standard mode, restore the full label
+      setNodeLabelValue(originalNodeLabel);
+    }
+  };
+
+  // Update the node dialog close function to reset all state
+  const handleNodeDialogClose = () => {
+    // Clear dialog state
+    setNodeDialogOpen(false);
+    setSelectedNode(null);
+    setNodeLabelValue('');
+    setIsNumericEditMode(false);
+    setOriginalNodeLabel('');    
+    console.log('Node dialog closed');
   };
 
   return (
@@ -811,6 +1051,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
             />
           </Box>
           
+          <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ flexGrow: 1 }} />
           
           <Box className="whiteboard-actions">
@@ -1012,6 +1253,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
               };
               setEdges((eds) => addEdge(newEdge, eds));
             }}
+            onNodeClick={handleNodeClick} // Add this line to handle node clicks
             onEdgeClick={handleEdgeClick}
             fitView
             nodeTypes={nodeTypes}
@@ -1060,6 +1302,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
       </Box>
       
       {/* Dialogs */}
+      {/* Edge Dialog */}
       <Dialog 
         open={dialogOpen} 
         onClose={handleDialogClose}
@@ -1260,42 +1503,246 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
         </DialogActions>
       </Dialog>
       
+      {/* Node Dialog - Update with data mapping information */}
       <Dialog 
-        open={lockedDialogOpen} 
-        onClose={handleLockedDialogClose}
-        PaperProps={{ className: "whiteboard-dialog" }}
+        open={nodeDialogOpen} 
+        onClose={handleNodeDialogClose}
+        PaperProps={{ 
+          className: "whiteboard-dialog",
+          style: { 
+            borderRadius: '12px',
+            overflow: 'hidden'
+          }
+        }}
+        maxWidth="xs"
+        fullWidth
       >
-        <DialogTitle>
+        <DialogTitle sx={{ 
+          bgcolor: '#f5f7fa',
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px'
+        }}>
           <Box display="flex" alignItems="center">
-            <Info color="primary" sx={{ mr: 1 }} />
-            <Typography variant="h6">Coming Soon!</Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
-            Please sign up for alitheia Labs to participate in our upcoming trials!
-          </Typography>
-          <Box className="feature-preview" mt={2}>
-            <Typography variant="subtitle2" gutterBottom>
-              Features included in alitheia Labs:
+            <Edit sx={{ color: '#5569ff', marginRight: 1.5 }} />
+            <Typography variant="h6" fontWeight={600}>
+              Edit Node
             </Typography>
-            <ul className="feature-list">
-              <li>Advanced rule testing</li>
-              <li>AI-assisted rule creation and explanation</li>
-              <li>Rule validation and optimization</li>
-            </ul>
+          </Box>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleNodeDialogClose}
+            aria-label="close"
+            size="small"
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ padding: '24px' }}>          
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {isNumericEditMode 
+                ? "Edit only the numeric values in this node's label." 
+                : "Edit the label for this node. This text will be displayed inside the node."}
+          </Typography>
+          
+          <TextField
+            autoFocus
+            margin="dense"
+            label={isNumericEditMode ? "Numeric Values" : "Node Label"}
+            type="text"
+            fullWidth
+            value={nodeLabelValue}
+            onChange={(e) => setNodeLabelValue(e.target.value)}
+            variant="outlined"
+            sx={{ mb: 1 }}
+            InputProps={{
+              startAdornment: (
+                <Box component="span" sx={{ 
+                  color: '#5569ff', 
+                  marginRight: 1,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  {selectedNode?.type === 'diamond' ? (
+                    <CallSplit fontSize="small" />
+                  ) : selectedNode?.data?.label === 'Start' || selectedNode?.data?.label === 'End' ? (
+                    selectedNode.data.label === 'Start' ? (
+                      <CheckCircle fontSize="small" />
+                    ) : (
+                      <ErrorIcon fontSize="small" />
+                    )
+                  ) : (
+                    <SystemUpdateAlt fontSize="small" />
+                  )}
+                </Box>
+              ),
+            }}
+            helperText={isNumericEditMode ? "Only numeric values will be updated" : ""}
+          />
+          
+          {/\d/.test(originalNodeLabel) && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Checkbox
+                checked={isNumericEditMode}
+                onChange={toggleNumericEditMode}
+                size="small"
+              />
+              <Typography variant="body2" color="text.secondary">
+                Edit only numeric values
+              </Typography>
+            </Box>
+          )}
+          
+          {/* Data Mapping Information - made to look like a locked feature */}
+          {selectedNode && (
+            <Box 
+              sx={{ 
+                mt: 2,
+                mb: 2,
+                p: 2, 
+                borderRadius: 2,
+                border: '1px solid rgba(25, 118, 210, 0.2)',
+                bgcolor: 'rgba(232, 244, 253, 0.4)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Add overlay to make it appear locked */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  bgcolor: 'rgba(255, 255, 255, 0.7)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2,
+                  backdropFilter: 'blur(1px)',
+                }}
+              >
+                <Button 
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Add />}
+                  sx={{ 
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
+                  }}
+                  onClick={() => {
+                    setSupportModalSubject("data-mapping-feature");
+                    handleLockedDialogOpen();
+                  }}
+                >
+                  Get Access
+                </Button>
+              </Box>
+              
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  fontWeight: 600, 
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'primary.main',
+                  mb: 1
+                }}
+              >
+                <SystemUpdateAlt fontSize="small" sx={{ mr: 1 }} />
+                Data Model Mapping
+              </Typography>
+              
+              {(() => {
+                const mapping = getFieldMappingInfo(selectedNode);
+                return (
+                  <>
+                    <Box sx={{ display: 'flex', mb: 0.5 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600, width: 80, flexShrink: 0 }}>
+                        Field:
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
+                        {mapping.field || 'Not mapped'}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', mb: 0.5 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600, width: 80, flexShrink: 0 }}>
+                        Type:
+                      </Typography>
+                      <Typography variant="caption">
+                        {mapping.dataType}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      {mapping.description}
+                    </Typography>
+                  </>
+                );
+              })()}
+            </Box>
+          )}
+          
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            bgcolor: 'rgba(25, 118, 210, 0.05)',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            border: '1px solid rgba(25, 118, 210, 0.1)',
+          }}>
+            <Info fontSize="small" sx={{ color: 'primary.main', marginRight: 1 }} />
+            <Typography variant="caption" color="text.secondary">
+              Nodes influence how data is mapped from your dataset to the rule logic.
+            </Typography>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleLockedDialogClose} color="primary" variant="outlined">
-            Maybe Later
+        <DialogActions sx={{ 
+          padding: '16px 24px', 
+          borderTop: '1px solid #f0f0f0',
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}>
+          <Button 
+            onClick={handleNodeDelete}
+            color="error"
+            startIcon={<Remove />}
+            sx={{ 
+              borderRadius: '8px',
+              marginRight: 'auto'
+            }}
+          >
+            Delete Node
           </Button>
-          <Button onClick={handleLockedDialogClose} color="primary" variant="contained">
-            Learn More
+          <Button 
+            onClick={handleNodeDialogClose} 
+            color="inherit"
+            sx={{ borderRadius: '8px' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleNodeLabelSubmit} 
+            variant="contained"
+            color="primary"
+            sx={{ 
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
+            }}
+          >
+            Save
           </Button>
         </DialogActions>
       </Dialog>
-
+      
+      {/* Other dialogs */}
       <Dialog
         open={saveVersionDialogOpen}
         onClose={handleSaveDialogClose}
@@ -1449,7 +1896,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
           variant="filled"
           sx={{ width: '100%' }}
         >
-          Version {newVersion} saved successfully! <em>(Changes will be lost on refresh)</em>
+          {newVersion ? 
+            `Version ${newVersion} saved successfully! (Changes will be lost on refresh)` : 
+            'Your request has been submitted. We\'ll be in touch soon!'}
         </Alert>
       </Snackbar>
 
@@ -2209,23 +2658,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
           >
             Close
           </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<Info />}
-            onClick={() => {
-              handleRuleAiDialogClose();
-              // Here you could navigate to a page about Rule AI features
-            }}
-            sx={{ 
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              mr: 1
-            }}
-          >
-            Learn More
-          </Button>
           <Button 
             variant="contained"
             color="primary"
@@ -2236,20 +2668,30 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose }) => {
               fontWeight: 600,
               boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
             }}
-            onClick={handleRuleAiDialogClose}
-          >
+            onClick={() => {
+              setSupportModalSubject("rule-ai-feature");
+              handleLockedDialogOpen();
+            }}
+            >
             Get Access
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Add the SupportModal component */}
+      <SupportModal 
+        open={supportModalOpen} 
+        onClose={() => setSupportModalOpen(false)} 
+        defaultSubject={supportModalSubject}
+      />
     </Box>
   );
 };
 
 // Wrap the Whiteboard component with ReactFlowProvider
-const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose }) => (
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => (
   <ReactFlowProvider>
-    <Whiteboard onClose={onClose} />
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} />
   </ReactFlowProvider>
 );
 

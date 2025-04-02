@@ -15,6 +15,7 @@ import RulesDesignerPage from "@/pages/RulesDesignerPage";
 import WorkbenchPage from "@/pages/WorkbenchPage";
 import WelcomePage from "@/pages/WelcomePage";
 import { setUser, setStep } from "@/store/userSlice";
+import AlitheiaBranding from "@/components/AlitheiaBranding";
 
 const Index = () => {
   const dispatch = useDispatch();
@@ -179,17 +180,8 @@ const Index = () => {
         <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
           <Toolbar>
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', marginRight: 2 }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#5569ff',
-                    lineHeight: 1.2
-                  }}
-                >
-                  alitheia Labs
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                <AlitheiaBranding variant="default" isHeader withTagline={false} />
               </Box>
               <Divider orientation="vertical" flexItem sx={{ mx: 2, display: { xs: 'none', md: 'block' } }} />
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
@@ -290,11 +282,6 @@ const Index = () => {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                <MenuItem onClick={handleUserMenuClose}>
-                  <Person sx={{ mr: 1 }} fontSize="small" />
-                  Profile
-                </MenuItem>
-                <Divider />
                 <MenuItem onClick={handleLogout}>
                   <ExitToApp sx={{ mr: 1 }} fontSize="small" />
                   Logout
