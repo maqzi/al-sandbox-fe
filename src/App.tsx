@@ -28,7 +28,9 @@ const RouteChangeTracker = () => {
     datadog.logPageView(pageName, {
       path: location.pathname,
       navigationType,
-      search: location.search
+      search: location.search,
+      timestamp: new Date().toISOString(),
+      screenResolution: `${window.innerWidth}x${window.innerHeight}`
     });
   }, [location, navigationType]);
 

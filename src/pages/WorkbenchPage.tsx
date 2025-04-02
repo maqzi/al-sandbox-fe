@@ -17,6 +17,7 @@ import {
   selectCurrentWorkbenchSection,
   selectActiveSource
 } from '@/store/selectors';
+import datadog from '@/lib/datadog';
 
 // Define interface for filtered case data (displayed in the table)
 interface CaseTableData {
@@ -61,6 +62,7 @@ const WorkbenchPage: React.FC = () => {
   // Local component handlers
   const handleCaseClick = (caseData: CaseTableData) => {
     setIsLoading(true);
+    datadog.trackInteraction('button', 'select_case', { caseId: caseData.id }); // Track case selection
     // Simulate loading delay, then update Redux store with selected case ID
     setTimeout(() => {
       dispatch(setSelectedCase(caseData.id));
@@ -69,11 +71,14 @@ const WorkbenchPage: React.FC = () => {
   };
 
   const handleBackClick = () => {
+    datadog.trackInteraction('button', 'back_to_cases'); // Track back button click
     dispatch(setSelectedCase(null));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
+    const searchValue = event.target.value;
+    setSearchTerm(searchValue);
+    datadog.trackSearch(searchValue, 'case_search', filteredCases.length); // Track search input
   };
 
   const filteredCases = tableCases.filter(caseData => 

@@ -282,7 +282,7 @@ class DatadogService {
   }
 
   /**
-   * Log API requests to Datadog
+   * Log API requests to Datadog with enhanced metadata
    */
   logApiRequest(endpoint: string, method: string, status: number, duration: number): void {
     this.log({
@@ -294,20 +294,28 @@ class DatadogService {
         method,
         status,
         duration,
-        success: status >= 200 && status < 300
+        success: status >= 200 && status < 300,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        screenResolution: `${window.innerWidth}x${window.innerHeight}`
       }
     });
   }
 
   /**
-   * Log feature usage to Datadog
+   * Log feature usage with additional context
    */
   logFeatureUsage(featureName: string, featureData = {}): void {
     this.log({
       action: 'feature_usage',
       category: 'feature',
       label: featureName,
-      additionalData: featureData
+      additionalData: {
+        ...featureData,
+        timestamp: new Date().toISOString(),
+        url: window.location.pathname,
+        referrer: document.referrer || 'direct'
+      }
     });
   }
 

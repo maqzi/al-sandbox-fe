@@ -61,22 +61,20 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
 
   // Track component mount for analytics
   React.useEffect(() => {
-    // Log that the component was mounted
+    const startTime = Date.now(); // Track component load time
+
     datadog.trackComponentLifecycle('WorkbenchSideMenu', 'mount');
-    
-    // Log initial case data (anonymized if needed)
     datadog.log({
-      action: 'case_view',
-      category: 'workbench',
-      label: displayInfo.id,
+      action: 'component_load',
+      category: 'performance',
+      label: 'WorkbenchSideMenu',
       additionalData: {
+        loadTime: `${Date.now() - startTime}ms`,
         caseId: displayInfo.id,
-        conditions: displayInfo.conditions.length,
-        section: activeSection
+        conditions: displayInfo.conditions.length
       }
     });
-    
-    // Cleanup tracking on unmount
+
     return () => {
       datadog.trackComponentLifecycle('WorkbenchSideMenu', 'unmount');
     };
@@ -89,7 +87,6 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
 
   // Handle section change with enhanced logging
   const handleSectionChange = (section: string) => {
-    // Log section navigation with more details
     datadog.log({
       action: 'navigation',
       category: 'workbench',
@@ -103,8 +100,7 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
         url: window.location.pathname
       }
     });
-    
-    // Call the original handler
+
     onSectionChange(section);
   };
   
