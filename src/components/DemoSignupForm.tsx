@@ -12,6 +12,7 @@ import {
   Person as PersonIcon, 
   Email as EmailIcon 
 } from '@mui/icons-material';
+import datadog from '@/lib/datadog';
 
 interface DemoSignupFormProps {
   onComplete: (data: { name: string; email: string }) => void;
@@ -28,6 +29,13 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
   const validateName = () => {
     if (!name.trim()) {
       setNameError('Name is required');
+      // Log validation error
+      datadog.log({
+        action: 'validation_error',
+        category: 'form',
+        label: 'name_required',
+        additionalData: { field: 'name' }
+      });
       return false;
     }
     setNameError('');
@@ -37,13 +45,29 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
   const validateEmail = () => {
     if (!email.trim()) {
       setEmailError('Email is required');
+      // Log validation error
+      datadog.log({
+        action: 'validation_error',
+        category: 'form',
+        label: 'email_required',
+        additionalData: { field: 'email' }
+      });
       return false;
     }
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError('Please enter a valid email');
+      // Log validation error
+      datadog.log({
+        action: 'validation_error',
+        category: 'form',
+        label: 'email_invalid_format',
+        additionalData: { field: 'email' }
+      });
       return false;
     }
+    
     setEmailError('');
     return true;
   };
@@ -54,12 +78,29 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
     const isNameValid = validateName();
     const isEmailValid = validateEmail();
     
+    // Log form submission attempt
+    datadog.log({
+      action: 'form_submit_attempt',
+      category: 'form',
+      label: 'demo_signup',
+      additionalData: {
+        isNameValid,
+        isEmailValid
+      }
+    });
+    
     if (isNameValid && isEmailValid) {
       setIsSubmitting(true);
       setFormError('');
       
       // Simulate API call
       setTimeout(() => {
+        // Log successful signup
+        datadog.logFormSubmit('demo_signup', {
+          userEmail: email,
+          userName: name
+        });
+        
         onComplete({ name, email });
         setIsSubmitting(false);
       }, 800);
@@ -145,6 +186,13 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
           '&:hover': {
             boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
           }
+        }}
+        onClick={() => {
+          // Log button click
+          datadog.logButtonClick('signup_submit', {
+            hasName: !!name.trim(),
+            hasEmail: !!email.trim()
+          });
         }}
       >
         {isSubmitting ? (

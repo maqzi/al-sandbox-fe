@@ -1,4 +1,5 @@
 import * as React from "react"
+import datadog from "@/lib/datadog"
 
 import type {
   ToastActionElement,
@@ -142,13 +143,58 @@ type Toast = Omit<ToasterToast, "id">
 function toast({ ...props }: Toast) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
+  // Log toast to Datadog
+  const logToast = () => {
+    const variant = props.variant || 'default'
+    const toastType = props.variant === 'destructive' ? 'error' : props.variant || 'info'
+    
+    // Log different types of toasts
+    if (toastType === 'error') {
+      datadog.log({
+        action: 'toast_error',
+        category: 'ui',
+        label: String(props.title || 'Error notification'),
+        additionalData: {
+          description: String(props.description || ''),
+          variant
+        }
+      })
+    } else {
+      datadog.log({
+        action: 'toast_notify',
+        category: 'ui',
+        label: String(props.title || 'Notification'),
+        additionalData: {
+          description: String(props.description || ''),
+          variant,
+          toastType
+        }
+      })
+    }
+  }
+
+  const update = (props: ToasterToast) => {
+    // Log toast updates
+    datadog.log({
+      action: 'toast_update',
+      category: 'ui',
+      label: String(props.title || 'Toast updated'),
+      additionalData: {
+        toastId: id
+      }
+    })
+
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
     })
+  }
+  
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
+  // Log the toast creation
+  logToast()
+  
   dispatch({
     type: "ADD_TOAST",
     toast: {
@@ -168,6 +214,104 @@ function toast({ ...props }: Toast) {
   }
 }
 
+// Create specialized toast functions with Datadog logging
+function info(title: string, description?: string) {
+  datadog.log({
+    action: 'toast_info',
+    category: 'notification',
+    label: String(title),
+    additionalData: {
+      description: String(description || ''),
+      variant: 'default',
+      toastType: 'info',
+      timestamp: new Date().toISOString()
+    }
+  });
+  
+  return toast({
+    title,
+    description,
+    variant: 'default',
+  });
+}
+
+function success(title: string, description?: string) {
+  datadog.log({
+    action: 'toast_success',
+    category: 'notification',
+    label: String(title),
+    additionalData: {
+      description: String(description || ''),
+      variant: 'success',
+      toastType: 'success',
+      timestamp: new Date().toISOString()
+    }
+  });
+  
+  return toast({
+    title,
+    description,
+    variant: 'default',
+    className: 'bg-green-500 border-green-600 text-white',
+  });
+}
+
+function warning(title: string, description?: string) {
+  datadog.log({
+    action: 'toast_warning',
+    category: 'notification',
+    label: String(title),
+    additionalData: {
+      description: String(description || ''),
+      variant: 'warning',
+      toastType: 'warning',
+      timestamp: new Date().toISOString()
+    }
+  });
+  
+  return toast({
+    title,
+    description,
+    variant: 'default',
+    className: 'bg-yellow-500 border-yellow-600 text-white',
+  });
+}
+
+function error(title: string, description?: string, errorObj?: Error) {
+  // Log error to Datadog with enhanced error details
+  if (errorObj) {
+    datadog.logError('toast_error', errorObj, {
+      title,
+      description,
+      errorName: errorObj.name,
+      errorStack: errorObj.stack,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      path: window.location.pathname
+    });
+  } else {
+    datadog.log({
+      action: 'toast_error',
+      category: 'notification',
+      label: String(title),
+      additionalData: {
+        description: String(description || ''),
+        variant: 'destructive',
+        toastType: 'error',
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+        path: window.location.pathname
+      }
+    });
+  }
+  
+  return toast({
+    title,
+    description,
+    variant: 'destructive',
+  });
+}
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -185,6 +329,10 @@ function useToast() {
     ...state,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+    info,
+    success,
+    warning,
+    error
   }
 }
 

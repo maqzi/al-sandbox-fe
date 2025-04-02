@@ -1,7 +1,7 @@
 {
   "name": "alitheia-labs-ui",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@datadog/browser-logs": "^6.6.2",
+    "@datadog/browser-rum": "^6.6.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hookform/resolvers": "^3.10.0",

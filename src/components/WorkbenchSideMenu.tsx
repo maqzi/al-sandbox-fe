@@ -10,6 +10,7 @@ import {
   Assessment, Security
 } from '@mui/icons-material';
 import { selectSelectedCase } from '@/store/selectors';
+import datadog from '@/lib/datadog';
 
 interface WorkbenchSideMenuProps {
   activeSection: string;
@@ -26,7 +27,6 @@ interface WorkbenchSideMenuProps {
 const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({ 
   activeSection, 
   onSectionChange,
-  // We'll keep this as a fallback but won't actually use it
   caseInfo = {
     id: '<case_id>',
     name: '<name>',
@@ -58,11 +58,55 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
       .join('')
       .slice(0, 4);
   };
-  
+
+  // Track component mount for analytics
+  React.useEffect(() => {
+    // Log that the component was mounted
+    datadog.trackComponentLifecycle('WorkbenchSideMenu', 'mount');
+    
+    // Log initial case data (anonymized if needed)
+    datadog.log({
+      action: 'case_view',
+      category: 'workbench',
+      label: displayInfo.id,
+      additionalData: {
+        caseId: displayInfo.id,
+        conditions: displayInfo.conditions.length,
+        section: activeSection
+      }
+    });
+    
+    // Cleanup tracking on unmount
+    return () => {
+      datadog.trackComponentLifecycle('WorkbenchSideMenu', 'unmount');
+    };
+  }, []);
+
   const conditionChips = displayInfo.conditions.map(condition => ({
     label: getConditionAbbreviation(condition),
     fullName: condition
   })).slice(0, 3); // Limit to 3 chips
+
+  // Handle section change with enhanced logging
+  const handleSectionChange = (section: string) => {
+    // Log section navigation with more details
+    datadog.log({
+      action: 'navigation',
+      category: 'workbench',
+      label: `section_${section}`,
+      additionalData: {
+        from: activeSection,
+        to: section,
+        caseId: displayInfo.id,
+        timestamp: new Date().toISOString(),
+        screenResolution: `${window.innerWidth}x${window.innerHeight}`,
+        url: window.location.pathname
+      }
+    });
+    
+    // Call the original handler
+    onSectionChange(section);
+  };
   
   return (
     <Paper 
@@ -90,7 +134,7 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
         <ListItem
           button
           selected={activeSection === 'Case Details'}
-          onClick={() => onSectionChange('Case Details')}
+          onClick={() => handleSectionChange('Case Details')}
           sx={{
             borderLeft: activeSection === 'Case Details' ? '4px solid #5569ff' : '4px solid transparent',
             bgcolor: activeSection === 'Case Details' ? 'rgba(85, 105, 255, 0.08)' : 'transparent',
@@ -209,7 +253,7 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
         <ListItem
           button
           selected={activeSection === 'EHRs'}
-          onClick={() => onSectionChange('EHRs')}
+          onClick={() => handleSectionChange('EHRs')}
           sx={{
             borderLeft: activeSection === 'EHRs' ? '4px solid #5569ff' : '4px solid transparent',
             bgcolor: activeSection === 'EHRs' ? 'rgba(85, 105, 255, 0.08)' : 'transparent',
@@ -247,7 +291,7 @@ const WorkbenchSideMenu: React.FC<WorkbenchSideMenuProps> = ({
         <ListItem
           button
           selected={activeSection === 'Assessment'}
-          onClick={() => onSectionChange('Assessment')}
+          onClick={() => handleSectionChange('Assessment')}
           sx={{
             borderLeft: activeSection === 'Assessment' ? '4px solid #5569ff' : '4px solid transparent',
             bgcolor: activeSection === 'Assessment' ? 'rgba(85, 105, 255, 0.08)' : 'transparent',

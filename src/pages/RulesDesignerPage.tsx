@@ -23,6 +23,9 @@ import { Rule, RuleVersion, setActiveRule, setActiveVersion, updateRuleActiveVer
 // First, import the recommendations data
 import ruleRecommendations from '@/data/rulesRecommendations.json';
 
+// Import Datadog logging library
+import datadog from '@/lib/datadog';
+
 interface RulesDesignerPageProps {
   handleStepChange: (step: number) => void;
 }
@@ -52,6 +55,14 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
     message: string;
     progress: number;
   } | null>(null);
+
+  // Log page view on component mount
+  useEffect(() => {
+    datadog.logPageView('rules_designer', {
+      activeStep,
+      createMode
+    });
+  }, []);
 
   // Set the selected rule at component mount
   useEffect(() => {
@@ -239,6 +250,18 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
               phase: 'complete', 
               message: 'Rule successfully generated!', 
               progress: 100 
+            });
+            
+            // Log rule generation
+            datadog.log({
+              action: 'generate_rule',
+              category: 'rules_designer',
+              label: ruleName,
+              additionalData: {
+                ruleId: newRuleId,
+                impairments: selectedImpairments,
+                manual: selectedManual
+              }
             });
             
             // Final delay before closing
