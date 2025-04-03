@@ -45,18 +45,18 @@ const DatadogInitializer: React.FC<DatadogInitializerProps> = ({ children }) => 
     );
     
     // Track application version if available
-    if (import.meta.env.VITE_APP_VERSION) {
+    if (import.meta.env.APP_VERSION) {
       datadog.log({
         action: 'app_init',
         category: 'lifecycle',
         label: 'application_start',
         additionalData: {
-          version: import.meta.env.VITE_APP_VERSION,
+          version: import.meta.env.APP_VERSION,
           environment: import.meta.env.MODE
         }
       });
     }
-    
+  
     setIsInitialized(true);
     
     // Cleanup on application unmount

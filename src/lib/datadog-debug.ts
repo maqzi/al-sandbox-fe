@@ -8,9 +8,9 @@ export const checkDatadogStatus = () => {
   const isInitialized = datadog.isInitialized();
   
   // Check for environment variables
-  const clientToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
-  const appId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
-  const site = import.meta.env.VITE_DATADOG_SITE;
+  const clientToken = import.meta.env.DATADOG_CLIENT_TOKEN;
+  const appId = import.meta.env.DATADOG_APPLICATION_ID;
+  const site = import.meta.env.DATADOG_SITE;
   
   console.group('Datadog Status');
   console.log('Initialized:', isInitialized);

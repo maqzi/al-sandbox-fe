@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import {
   Close, Code, Add, Remove, Timeline,
-  Settings, Info, Save, CallSplit, 
+  Settings, Info, Save, CallSplit,  Lock,
   Error as ErrorIcon, SystemUpdateAlt,
   CheckCircle, PlayArrow,
   Edit
@@ -602,65 +602,144 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
     console.log('Save dialog closed');
   };
 
+  const determineOutcome = (result) => {
+    let riskFactors = [];
+    let a1c = null;
+    let bmi = null;
+    let ahi = null;
+    let systolic = null;
+    let diastolic = null;
+    let brca = false;
+    let cpapCompliant = true;
+    const ruleName = activeRule.name.toLowerCase();
+
+
+    // Parse the result string
+    const parts = result.split(', ');
+    parts.forEach(part => {
+        if (part.startsWith('A1c:')) {
+            a1c = parseFloat(part.split(': ')[1].replace('%', ''));
+        } else if (part.startsWith('BMI:')) {
+            bmi = parseFloat(part.split(': ')[1]);
+        } else if (part.startsWith('Sleep Apnea: AHI')) {
+            const ahiString = part.split(': ')[1];
+            if (ahiString.includes('>')) {
+                ahi = parseFloat(ahiString.replace('AHI > ', ''));
+            } else if (ahiString.includes('-')) {
+                const range = ahiString.replace('AHI ', '').split('-');
+                ahi = (parseFloat(range[0]) + parseFloat(range[1])) / 2; // Average of range
+            }
+        } else if (part.startsWith('Blood Pressure:')) {
+            const bp = part.split(': ')[1].split('/');
+            systolic = parseFloat(bp[0]);
+            diastolic = parseFloat(bp[1]);
+        } else if (part.startsWith('BRCA:')) {
+            brca = part.split(': ')[1] === 'Positive';
+        } else if (part.startsWith('No CPAP Compliance')) {
+          cpapCompliant = false;
+        }
+
+    });
+
+    // Evaluate risk factors based on parsed values
+    if (a1c !== null && a1c > 7.0 ) { //&& ruleName === 'Diabetes Type 2' Diabetes is part of the default program
+        riskFactors.push('Elevated A1c');
+    }
+    if (bmi !== null && bmi > 30.0) {
+        riskFactors.push('Elevated BMI');
+    }
+    if (ahi !== null && ahi > 30.0 && ruleName === 'obstructive sleep apnea') {
+        riskFactors.push('Severe Sleep Apnea');
+    }
+    if (systolic !== null && diastolic !== null && (systolic >= 140 || diastolic >= 90) && ruleName === 'hypertension risk assessment') {
+        riskFactors.push('Elevated Blood Pressure');
+    }
+    if (brca && ruleName === 'brca risk assessment') {
+        riskFactors.push('BRCA Positive');
+    }
+    if (ahi !== null && ahi > 30 && !cpapCompliant && ruleName === 'obstructive sleep apnea'){
+      riskFactors.push('Severe Sleep Apnea Non Compliant')
+    }
+
+    // Determine outcome based on risk factors
+    if (riskFactors.length > 2) {
+        return 'rejected'; // High risk: Multiple significant factors
+    } else if (riskFactors.length == 2) {
+        return 'referred'; // Medium risk: Two significant factors
+    } else if (riskFactors.includes('BRCA Positive')) {
+        return 'referred'; // BRCA positive is a strong risk even alone
+    } else if (riskFactors.includes('Elevated Blood Pressure')){
+        return 'referred';
+    } else {
+        return 'approved'; // Low risk: Minimal or no significant factors
+    }
+};
+
   // Add this function to handle the test button click
   const handleTestRuleClick = () => {
     setTestDialogOpen(true);
     setTestingInProgress(true);
-    
+
     // Simulate rule testing with sample data
     setTimeout(() => {
       // Generate mock test results
+      const cases = [
+        {
+          id: 'CASE-2023-0001',
+          name: 'John Smith',
+          result: 'A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative',
+          outcome: determineOutcome('A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative'),
+          processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
+          risk: 'medium' as const,
+        },
+        {
+          id: 'CASE-2023-0002',
+          name: 'Emma Johnson',
+          result: 'A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive',
+          outcome: determineOutcome('A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive'),
+          processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
+          risk: 'low' as const,
+        },
+        {
+          id: 'CASE-2023-0003',
+          name: 'Michael Brown',
+          result: 'A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative',
+          outcome: determineOutcome('A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative'),
+          processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
+          risk: 'high' as const,
+        },
+        {
+          id: 'CASE-2023-0004',
+          name: 'Sarah Williams',
+          result: 'A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive',
+          outcome: determineOutcome('A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive'),
+          processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
+          risk: 'medium' as const,
+        },
+        {
+          id: 'CASE-2023-0005',
+          name: 'David Miller',
+          result: 'A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive',
+          outcome: determineOutcome('A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive'),
+          processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
+          risk: 'high' as const,
+        }
+      ];
+
+      const totalApproved = cases.filter(c => c.outcome === 'approved').length;
+      const totalCases = cases.length;
+      const avgProcessingTime = cases.reduce((sum, c) => sum + c.processingTime, 0) / totalCases;
+
       const results = {
         overall: {
-          stp: Math.floor(70 + Math.random() * 25), // 70-95%
-          accuracy: Math.floor(85 + Math.random() * 10), // 85-95%
+          stp: Math.floor((totalApproved / totalCases) * 100), // Calculate STP as percentage
+          accuracy: Math.floor(90 + Math.random() * 9), // 90-99%
           resourceUtilization: Math.floor(60 + Math.random() * 30), // 60-90%
-          averageProcessingTime: Math.floor(30 + Math.random() * 60), // 30-90 seconds
+          averageProcessingTime: Math.ceil(avgProcessingTime), // Average processing time in minutes
         },
-        cases: [
-          {
-            id: 'CASE-2023-0001',
-            name: 'John Smith',
-            result: 'A1c: 7.2%, BMI: 32.5, Sleep Apnea: AHI > 30',
-            outcome: 'referred' as const,
-            processingTime: 45,
-            risk: 'medium' as const,
-          },
-          {
-            id: 'CASE-2023-0002',
-            name: 'Emma Johnson',
-            result: 'A1c: 5.5%, BMI: 24.3, No Sleep Apnea',
-            outcome: 'approved' as const,
-            processingTime: 28,
-            risk: 'low' as const,
-          },
-          {
-            id: 'CASE-2023-0003',
-            name: 'Michael Brown',
-            result: 'A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance',
-            outcome: 'rejected' as const,
-            processingTime: 52,
-            risk: 'high' as const,
-          },
-          {
-            id: 'CASE-2023-0004',
-            name: 'Sarah Williams',
-            result: 'A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant',
-            outcome: 'approved' as const,
-            processingTime: 38,
-            risk: 'medium' as const,
-          },
-          {
-            id: 'CASE-2023-0005',
-            name: 'David Miller',
-            result: 'A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30',
-            outcome: 'rejected' as const,
-            processingTime: 41,
-            risk: 'high' as const,
-          }
-        ]
+        cases
       };
-      
+
       setTestResults(results);
       setTestingInProgress(false);
     }, 2000); // 2 second delay to simulate processing
@@ -2169,7 +2248,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                             variant="body2"
                             sx={{ ml: 0.5, fontWeight: 500, color: 'text.secondary', verticalAlign: 'bottom' }}
                           >
-                            sec
+                            min
                           </Typography>
                         </Typography>
                       </Box>
@@ -2196,7 +2275,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                       <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Case Details</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Result</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Risk</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Time</TableCell>
                     </TableRow>
                   </TableHead>
@@ -2219,23 +2297,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                             }}
                           />
                         </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={caseItem.risk}
-                            size="small"
-                            sx={{ 
-                              fontWeight: 500, 
-                              fontSize: '0.7rem', 
-                              height: 20,
-                              borderRadius: 1,
-                              bgcolor: caseItem.risk === 'low' ? '#deffee' : caseItem.risk === 'medium' ? '#fff4e6' : '#feecec',
-                              color: caseItem.risk === 'low' ? '#00ab55' : caseItem.risk === 'medium' ? '#ff9800' : '#f44336',
-                              border: '1px solid',
-                              borderColor: caseItem.risk === 'low' ? '#b2eacc' : caseItem.risk === 'medium' ? '#ffd4a8' : '#ffc7c7',
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>{caseItem.processingTime} sec</TableCell>
+                        <TableCell>{caseItem.processingTime} min</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -2319,7 +2381,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
         }}>
           {!testingInProgress && testResults && (
             <Button 
-              startIcon={<SystemUpdateAlt />}
+              startIcon={<Lock />}
               sx={{ 
                 borderRadius: '8px',
                 textTransform: 'none',
@@ -2339,22 +2401,22 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           </Button>
           {!testingInProgress && testResults && (
             <Button 
-              variant="contained"
-              color="primary"
-              startIcon={<PlayArrow />}
-              sx={{ 
-                borderRadius: '8px',
-                textTransform: 'none',
-                fontWeight: 600,
-                boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
-              }}
-              onClick={() => {
-                handleTestDialogClose();
-                // Here you could navigate to the workbench or other testing environment
-              }}
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            sx={{ 
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
+            }}
+            onClick={() => {
+              setSupportModalSubject("rule-test-feature");
+              handleLockedDialogOpen();
+            }}
             >
-              Go to Workbench
-            </Button>
+            Get Access
+          </Button>
           )}
         </DialogActions>
       </Dialog>

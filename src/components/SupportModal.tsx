@@ -208,6 +208,7 @@ const SupportModal: React.FC<SupportModalProps> = ({
                   <MenuItem value="data-mapping-feature">Data Mapping Feature</MenuItem>
                   <MenuItem value="rule-ai-feature">Rule AI Feature</MenuItem>
                   <MenuItem value="rule-designer-support">Rule Designer Support</MenuItem>
+                  <MenuItem value="rule-test-feature">Rule Test Feature</MenuItem>
                   <MenuItem value="technical-issue">Technical Issue</MenuItem>
                   <MenuItem value="ehr-assessments-feature">EHR Assessments</MenuItem>
                   <MenuItem value="workbench-support">Workbench Support</MenuItem>

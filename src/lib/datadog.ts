@@ -49,8 +49,8 @@ class DatadogService {
       // Check if env variables are available
       const clientToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
       const appId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
-      const site = import.meta.env.VITE_DATADOG_SITE || 'us5.datadoghq.com';
-      
+      const site = import.meta.env.VITE_DATADOG_SITE || 'us.datadoghq.com';
+      console.log(import.meta.env)
       if (!clientToken) {
         console.warn('Datadog initialization skipped - missing client token');
         this.initializing = false;
@@ -64,7 +64,7 @@ class DatadogService {
         site: site,
         forwardErrorsToLogs: true,
         sessionSampleRate: 100,
-        service: import.meta.env.VITE_DATADOG_SERVICE || 'health-info-navigator',
+        service: import.meta.env.VITE_DATADOG_SERVICE || 'alitheia-labs-ui',
         env: import.meta.env.MODE || 'development'
       });
 
@@ -75,7 +75,7 @@ class DatadogService {
           applicationId: appId,
           clientToken: clientToken,
           site: site,
-          service: import.meta.env.VITE_DATADOG_SERVICE || 'health-info-navigator',
+          service: import.meta.env.VITE_DATADOG_SERVICE || 'alitheia-labs-ui',
           env: import.meta.env.MODE || 'development',
           sessionSampleRate: 100,
           sessionReplaySampleRate: 20,

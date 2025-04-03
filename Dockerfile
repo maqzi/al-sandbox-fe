@@ -20,6 +20,14 @@ RUN npm run build
 # Stage 2: Serve the app with Nginx
 FROM nginx:stable-alpine
 
+# Add environment variables for Datadog
+ENV DATADOG_CLIENT_TOKEN="" \
+    DATADOG_APPLICATION_ID="" \
+    DATADOG_SITE="" \
+    DATADOG_SERVICE="" \
+    DATADOG_ENV="" \
+    APP_VERSION=""
+
 # Create a non-root user with id=40000
 RUN addgroup -g 40000 appgroup && adduser -u 40000 -G appgroup -s /bin/sh -D appuser
 
