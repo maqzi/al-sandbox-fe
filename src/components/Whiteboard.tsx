@@ -1,13 +1,17 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import ReactFlow, {
+import {
+  ReactFlow,
   addEdge,
   Background,
   Controls,
   MiniMap,
   ReactFlowProvider,
   useEdgesState,
-  useNodesState
-} from 'react-flow-renderer';
+  useNodesState,
+  Position,
+  ConnectionLineType
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { 
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Paper, Typography, Box, IconButton, Tooltip, Chip, Divider,
@@ -17,10 +21,9 @@ import {
 } from '@mui/material';
 import {
   Close, Code, Add, Remove, Timeline,
-  Settings, Info, Save, CallSplit,  Lock,
+  Settings, Info, Save, CallSplit, Lock,
   Error as ErrorIcon, SystemUpdateAlt,
-  CheckCircle, PlayArrow,
-  Edit
+  CheckCircle, PlayArrow, Edit
 } from '@mui/icons-material';
 import CircleNode from './CircleNode';
 import DiamondNode from './DiamondNode';
@@ -33,7 +36,6 @@ import {
   setActiveVersion 
 } from '@/store/rulesSlice';
 import './css/Whiteboard.css';
-import { Position } from 'react-flow-renderer';
 
 // Node types for the ReactFlow component
 const nodeTypes = {
@@ -688,7 +690,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           id: 'CASE-2023-0001',
           name: 'John Smith',
           result: 'A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative',
-          outcome: determineOutcome('A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative'),
+          outcome: determineOutcome('A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative') as 'approved' | 'rejected' | 'referred',
           processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
           risk: 'medium' as const,
         },
@@ -696,7 +698,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           id: 'CASE-2023-0002',
           name: 'Emma Johnson',
           result: 'A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive',
-          outcome: determineOutcome('A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive'),
+          outcome: determineOutcome('A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive') as 'approved' | 'rejected' | 'referred',
           processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
           risk: 'low' as const,
         },
@@ -704,7 +706,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           id: 'CASE-2023-0003',
           name: 'Michael Brown',
           result: 'A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative',
-          outcome: determineOutcome('A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative'),
+          outcome: determineOutcome('A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative') as 'approved' | 'rejected' | 'referred',
           processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
           risk: 'high' as const,
         },
@@ -712,7 +714,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           id: 'CASE-2023-0004',
           name: 'Sarah Williams',
           result: 'A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive',
-          outcome: determineOutcome('A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive'),
+          outcome: determineOutcome('A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive') as 'approved' | 'rejected' | 'referred',
           processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
           risk: 'medium' as const,
         },
@@ -720,7 +722,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           id: 'CASE-2023-0005',
           name: 'David Miller',
           result: 'A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive',
-          outcome: determineOutcome('A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive'),
+          outcome: determineOutcome('A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive') as 'approved' | 'rejected' | 'referred',
           processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes,
           risk: 'high' as const,
         }
@@ -1337,11 +1339,11 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
             fitView
             nodeTypes={nodeTypes}
             defaultEdgeOptions={{
-              type: 'smoothstep', // Default to smoothstep type
+              type: 'smoothstep',
               style: { strokeWidth: 3 },
               labelStyle: { 
                 fill: '#1a3353', 
-                fontWeight: 500, 
+                fontWeight: 50, 
                 fontSize: 12,
                 fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
               },
@@ -1354,7 +1356,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                 strokeWidth: 1
               }
             }}
-            connectionLineType="smoothstep" // Consistent with edge type
+            connectionLineType={ConnectionLineType.SmoothStep}
             connectionLineStyle={{ stroke: '#5c6bc0', strokeWidth: 3, strokeDasharray: '5,3' }}
             snapToGrid={true}
             snapGrid={[20, 20]} // Align to a 20px grid
@@ -1362,7 +1364,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           >
             <MiniMap 
               nodeStrokeColor={(n) => n.style?.stroke || '#42a5f5'}
-              nodeColor={(n) => n.style?.background || '#fff'} 
+              nodeColor={(n) => (n.style?.background as string) || '#fff'} 
               nodeBorderRadius={2}
             />
             <Controls />
@@ -1780,9 +1782,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
         </DialogContent>
         <DialogActions sx={{ 
           padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0',
-          display: 'flex',
-          justifyContent: 'space-between'
+          borderTop: '1px solid #f0f0f0'
         }}>
           <Button 
             onClick={handleNodeDelete}
@@ -1924,7 +1924,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
             border: '1px solid rgba(255, 193, 7, 0.2)',
             mt: 3
           }}>
-            <Info fontSize="small" sx={{ color: '#ff9800', marginRight: 1 }} />
+            <Info fontSize="small" sx={{ color: '#ffc107', marginRight: 1 }} />
             <Typography variant="caption" color="text.secondary">
               <strong>Note:</strong> Saved versions are temporary for this demo and will be lost if you refresh the page.
             </Typography>

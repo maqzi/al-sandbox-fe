@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position } from 'react-flow-renderer';
+import { Handle, Position } from '@xyflow/react';
 import { Box, Typography } from '@mui/material';
 import './css/DiamondNode.css';
 
@@ -16,8 +16,34 @@ const DiamondNode: React.FC<DiamondNodeProps> = ({ data, isConnectable }) => {
       <Handle
         type="target"
         position={Position.Top}
+        id="top"
+        style={{ background: '#555' }}
         isConnectable={isConnectable}
         className="diamond-handle diamond-handle-top"
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left"
+        style={{ background: '#555' }}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-left"
+      />
+      <Handle
+        type="target"
+        position={Position.Right}
+        id="right"
+        style={{ background: '#555' }}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-right"
+      />
+      <Handle
+        type="target"
+        position={Position.Bottom}
+        id="bottom"
+        style={{ background: '#555' }}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-bottom"
       />
       <div className="diamond-shape">
         <Typography variant="body2" className="diamond-label">
@@ -26,21 +52,35 @@ const DiamondNode: React.FC<DiamondNodeProps> = ({ data, isConnectable }) => {
       </div>
       <Handle
         type="source"
-        position={Position.Bottom}
+        position={Position.Top}
+        id="top-source"
+        style={{ background: '#555' }}
         isConnectable={isConnectable}
-        className="diamond-handle diamond-handle-bottom"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        isConnectable={isConnectable}
-        className="diamond-handle diamond-handle-right"
+        className="diamond-handle diamond-handle-top-source"
       />
       <Handle
         type="source"
         position={Position.Left}
+        id="left-source"
+        style={{ background: '#555' }}
         isConnectable={isConnectable}
-        className="diamond-handle diamond-handle-left"
+        className="diamond-handle diamond-handle-left-source"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right-source"
+        style={{ background: '#555' }}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-right-source"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom-source"
+        style={{ background: '#555' }}
+        isConnectable={isConnectable}
+        className="diamond-handle diamond-handle-bottom-source"
       />
     </div>
   );
