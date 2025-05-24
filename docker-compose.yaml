@@ -5,9 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: alitheialabs/ehrs:1.2.2
+    image: alitheialabs/ehrs:1.2.6
     ports:
       - "8080:8080"
-    env_file:
-      - .env
     restart: always

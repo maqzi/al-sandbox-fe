@@ -50,7 +50,7 @@ class DatadogService {
       const clientToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
       const appId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
       const site = import.meta.env.VITE_DATADOG_SITE || 'us.datadoghq.com';
-      console.log(import.meta.env)
+
       if (!clientToken) {
         console.warn('Datadog initialization skipped - missing client token');
         this.initializing = false;

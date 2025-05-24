@@ -20,13 +20,7 @@ RUN npm run build
 # Stage 2: Serve the app with Nginx
 FROM nginx:stable-alpine
 
-# Add environment variables for Datadog
-ENV DATADOG_CLIENT_TOKEN="" \
-    DATADOG_APPLICATION_ID="" \
-    DATADOG_SITE="" \
-    DATADOG_SERVICE="" \
-    DATADOG_ENV="" \
-    APP_VERSION=""
+RUN apk update && apk upgrade && apk add --no-cache libexpat libxml2 libxslt
 
 # Create a non-root user with id=40000
 RUN addgroup -g 40000 appgroup && adduser -u 40000 -G appgroup -s /bin/sh -D appuser
@@ -37,6 +31,7 @@ RUN mkdir -p /tmp/nginx/client_temp /tmp/nginx/proxy_temp /tmp/nginx/fastcgi_tem
 
 # Replace the default Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
+COPY ngx_http_datadog_module.so /usr/lib/nginx/modules/
 
 # Copy built assets from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html

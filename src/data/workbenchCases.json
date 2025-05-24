@@ -24,7 +24,7 @@
           "applicationDate": "2025-01-01",
           "hipaaAuthDate": "2025-01-01",
           "hasPriorPolicy": "Yes",
-          "status": "Active",
+          "status": "Pending",
           "premium": 1200
         },
         "person": {
@@ -387,8 +387,8 @@
               "feature": "Hemoglobin A1c",
               "value": 6.8,
               "unit": "% of total Hgb",
-              "range": "6.0-7.9",
-              "flag": "Normal",
+              "range": "< 5.7",
+              "flag": "Type 2",
               "code": "4548-4"
             }
           ],

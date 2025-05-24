@@ -23,8 +23,6 @@ datadog.log({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <DatadogInitializer>
       <App />
-    </DatadogInitializer>
   </React.StrictMode>,
 );

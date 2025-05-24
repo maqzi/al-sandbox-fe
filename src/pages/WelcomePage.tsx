@@ -503,7 +503,32 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
                         }}
                       >
                         <CheckCircle sx={{ color: '#00ab55', mr: 1, fontSize: 20 }} />
-                        <Typography variant="body2">EHR Integration</Typography>
+                        <Typography variant="body2">EHR Assessments</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Paper 
+                        elevation={0} 
+                        sx={{ 
+                          p: 2, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          bgcolor: '#f8f9fc',
+                          borderRadius: 2,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            bgcolor: '#eef1fb',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 4px 12px rgba(85, 105, 255, 0.08)'
+                          },
+                          '&:active': {
+                            transform: 'translateY(0px)'
+                          }
+                        }}
+                      >
+                        <CheckCircle sx={{ color: '#00ab55', mr: 1, fontSize: 20 }} />
+                        <Typography variant="body2">Business Impact Metrics</Typography>
                       </Paper>
                     </Grid>
                   </Grid>
@@ -617,7 +642,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
                 fullWidth 
                 variant="outlined" 
                 color="warning"
-                onClick={handleSupportModalOpen} // Add this onClick handler
+                onClick={() => window.location.href = "mailto:mqazi@munichre.com?subject=alitheia Labs Support"}
                 sx={{ 
                   borderRadius: 2, 
                   textTransform: 'none',
@@ -1421,7 +1446,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
               
               <Grid item xs={12}>
                 <Typography variant="body2" color="text.secondary">
-                  Your message will be sent to our support team at mqazi@munichre.com. We'll get back to you as soon as possible.
+                  You can also email our support team at <b><a href="mailto:mqazi@munichre.com?subject=alitheia Labs Support">mqazi@munichre.com</a></b>. We'll get back to you as soon as possible.
                 </Typography>
               </Grid>
             </Grid>
