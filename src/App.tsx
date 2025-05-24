@@ -1,10 +1,9 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 import { Provider, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { Snackbar } from "@mui/material";
+import { toast } from "sonner";
 import store, { RootState } from "@/store/store";
 import datadog from "@/lib/datadog";
 import Index from "./pages/Index";
@@ -44,13 +43,20 @@ const AppContent = () => {
   useEffect(() => {
     // Set user information in Datadog if available
     if (userInfo?.email) {
-      datadog.setUser(userInfo.email, {
+      datadog.setUser({
         email: userInfo.email,
-        name: userInfo.name,
-        step: step
+        name: userInfo.name
       });
     }
   }, [userInfo, step]);
+
+  const handleStepChange = (newStep: number) => {
+    // This function can be passed to child components that need it
+  };
+
+  const handleLogout = () => {
+    // Handle logout logic
+  };
 
   return (
     <div>
@@ -70,7 +76,7 @@ const AppContent = () => {
           path="/rules-designer"
           element={
             <PrivateRoute step={1}>
-              <RulesDesignerPage />
+              <RulesDesignerPage handleStepChange={handleStepChange} />
             </PrivateRoute>
           }
         />
@@ -86,7 +92,7 @@ const AppContent = () => {
           path="/welcome"
           element={
             <PrivateRoute step={0}>
-              <WelcomePage />
+              <WelcomePage userInfo={userInfo} handleLogout={handleLogout} />
             </PrivateRoute>
           }
         />
@@ -99,13 +105,9 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <Provider store={store}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </TooltipProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </Provider>
   </QueryClientProvider>
 );
