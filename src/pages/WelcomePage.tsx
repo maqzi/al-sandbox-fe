@@ -1,5 +1,5 @@
-import React, { useState, useRef, FormEvent } from 'react'; // Add FormEvent and useRef
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, FormEvent } from 'react'; // Add FormEvent
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, Typography, Button, Card, CardContent, Grid, 
   Paper, Chip, Avatar, Container, Divider, Dialog, 
@@ -12,7 +12,6 @@ import {
   BusinessCenter, LocalHospital, Assignment, Close,
   InfoOutlined, Code, DataObject, Email // Add icons for tabs, Email icon
 } from '@mui/icons-material';
-import { setStep } from '@/store/userSlice';
 
 interface UserInfo {
   name: string;
@@ -21,11 +20,10 @@ interface UserInfo {
 
 interface WelcomePageProps {
   userInfo: UserInfo;
-  handleLogout: () => void;
 }
 
-const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => {
-  const dispatch = useDispatch();
+const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo }) => {
+  const navigate = useNavigate();
   // Add state for modal dialog and tabs
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -41,10 +39,6 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
-
-  const handleStepChange = (step: number) => {
-    dispatch(setStep(step));
-  };
 
   // Add function to handle opening and closing the modal
   const handleOpenInfoModal = () => {
@@ -273,7 +267,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
                     transform: 'translateY(-2px)'
                   }
                 }}
-                onClick={() => handleStepChange(1)}
+                onClick={() => navigate('/rules-designer')}
               >
                 <CardContent sx={{ p: 4 }}>
                   <Box display="flex" alignItems="center" mb={2}>
@@ -346,7 +340,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ userInfo, handleLogout }) => 
                     transform: 'translateY(-2px)'
                   }
                 }}
-                onClick={() => handleStepChange(2)}
+                onClick={() => navigate('/workbench')}
               >
                 <CardContent sx={{ p: 4 }}>
                   <Box display="flex" alignItems="center" mb={2}>

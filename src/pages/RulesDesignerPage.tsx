@@ -26,13 +26,10 @@ import ruleRecommendations from '@/data/rulesRecommendations.json';
 // Import Datadog logging library
 import datadog from '@/lib/datadog';
 
-interface RulesDesignerPageProps {
-  handleStepChange: (step: number) => void;
-}
-
-const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange }) => {
+const RulesDesignerPage: React.FC = () => {
   // Use typed selector to avoid type errors
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const rules = useSelector((state: RootState) => state.rules.rules as Rule[]);
   const activeRule = useSelector((state: RootState) => state.rules.activeRule as Rule | null);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion as RuleVersion | null);
@@ -47,7 +44,6 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
   const [selectedImpairments, setSelectedImpairments] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const navigate = useNavigate();
 
   // Add this state for rule generation feedback
   const [generationStatus, setGenerationStatus] = useState<{
@@ -179,7 +175,6 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
             const newRule: Rule = {
               id: newRuleId,
               name: ruleName,
-              description: `Automatically generated rule for ${selectedImpairments.join(', ')} from ${selectedManual}`,
               activeVersionId: '1.0.0',
               versions: [
                 {
@@ -737,9 +732,8 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
             </Typography>
             <Button 
               variant="outlined" 
-              color="primary" 
+              color="inherit" 
               disabled
-              fullWidth
               sx={{ borderRadius: 2, textTransform: 'none' }}
             >
               Create Manually
@@ -833,8 +827,8 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
             </Typography>
             <Button 
               variant="outlined" 
-              color="default" 
-              startIcon={<Lock />}
+              color="inherit" 
+              disabled
               sx={{ borderRadius: 2, textTransform: 'none' }}
             >
               Select File (Locked)

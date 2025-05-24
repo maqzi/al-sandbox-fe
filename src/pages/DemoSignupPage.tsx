@@ -34,7 +34,7 @@ const DemoSignupPage = () => {
   
   const handleSignupComplete = (data: { name: string; email: string }) => {
     dispatch(setUser(data));
-    navigate('/index');
+    navigate('/welcome');
   };
 
   return (

@@ -6,7 +6,7 @@ import { Snackbar } from "@mui/material";
 import { toast } from "sonner";
 import store, { RootState } from "@/store/store";
 import datadog from "@/lib/datadog";
-import Index from "./pages/Index";
+import AppLayout from "./components/AppLayout";
 import NotFound from "./pages/NotFound";
 import RulesDesignerPage from "./pages/RulesDesignerPage";
 import WorkbenchPage from "./pages/WorkbenchPage";
@@ -50,52 +50,58 @@ const AppContent = () => {
     }
   }, [userInfo, step]);
 
-  const handleStepChange = (newStep: number) => {
-    // This function can be passed to child components that need it
-  };
-
-  const handleLogout = () => {
-    // Handle logout logic
-  };
-
   return (
     <div>
       <RouteChangeTracker />
       <Routes>
         <Route path="/" element={<DemoSignupPage />} />
         <Route path="/signup" element={<DemoSignupPage />} />
-        <Route
-          path="/index"
-          element={
-            <PrivateRoute step={0}>
-              <Index />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/rules-designer"
-          element={
-            <PrivateRoute step={1}>
-              <RulesDesignerPage handleStepChange={handleStepChange} />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/workbench"
-          element={
-            <PrivateRoute step={2}>
-              <WorkbenchPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/welcome"
-          element={
-            <PrivateRoute step={0}>
-              <WelcomePage userInfo={userInfo} handleLogout={handleLogout} />
-            </PrivateRoute>
-          }
-        />
+        
+        {/* Routes that use the AppLayout wrapper */}
+        <Route element={<AppLayout />}>
+          <Route
+            path="/welcome"
+            element={
+              <PrivateRoute step={0}>
+                <WelcomePage userInfo={userInfo} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute step={0}>
+                <WelcomePage userInfo={userInfo} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/rules-designer"
+            element={
+              <PrivateRoute step={1}>
+                <RulesDesignerPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/workbench"
+            element={
+              <PrivateRoute step={2}>
+                <WorkbenchPage />
+              </PrivateRoute>
+            }
+          />
+          {/* Legacy route - redirect to welcome */}
+          <Route
+            path="/index"
+            element={
+              <PrivateRoute step={0}>
+                <WelcomePage userInfo={userInfo} />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
