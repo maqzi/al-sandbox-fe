@@ -1715,10 +1715,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                     fontWeight: 600,
                     boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
                   }}
-                  onClick={() => {
-                    setSupportModalSubject("data-mapping-feature");
-                    handleLockedDialogOpen();
-                  }}
+                  onClick={() => window.location.href = "mailto:mqazi@munichre.com?subject=alitheia Labs Support | Get Access to Data Mapping"}
                 >
                   Get Access
                 </Button>
@@ -2410,10 +2407,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
               fontWeight: 600,
               boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
             }}
-            onClick={() => {
-              setSupportModalSubject("rule-test-feature");
-              handleLockedDialogOpen();
-            }}
+            onClick={() => window.location.href = "mailto:mqazi@munichre.com?subject=alitheia Labs Support | Get Access to Business Impact Metrics"}
             >
             Get Access
           </Button>
@@ -2730,10 +2724,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
               fontWeight: 600,
               boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
             }}
-            onClick={() => {
-              setSupportModalSubject("rule-ai-feature");
-              handleLockedDialogOpen();
-            }}
+            onClick={() => window.location.href = "mailto:mqazi@munichre.com?subject=alitheia Labs Support | Get Access to Rule AI"}
             >
             Get Access
           </Button>

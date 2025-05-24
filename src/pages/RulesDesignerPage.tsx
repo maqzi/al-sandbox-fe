@@ -833,11 +833,11 @@ const RulesDesignerPage: React.FC<RulesDesignerPageProps> = ({ handleStepChange 
             </Typography>
             <Button 
               variant="outlined" 
-              color="primary" 
-              startIcon={<DescriptionOutlined />}
+              color="default" 
+              startIcon={<Lock />}
               sx={{ borderRadius: 2, textTransform: 'none' }}
             >
-              Select File
+              Select File (Locked)
             </Button>
           </Box>
         )}
