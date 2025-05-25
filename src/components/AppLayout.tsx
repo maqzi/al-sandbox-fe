@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { useNavigate, useLocation, useParams, Outlet } from "react-router-dom";
 import { RootState } from "@/store/store";
 import { 
   Box, AppBar, Toolbar, Typography, Button, Menu, MenuItem, 
@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { 
   MenuOutlined, Home, DesignServices, Build, ExitToApp,
-  ChevronRight, ArrowDropDown
+  ChevronRight, ArrowDropDown, Palette, Straighten, 
 } from '@mui/icons-material';
 import { setUser } from "@/store/userSlice";
 import AlitheiaBranding from "@/components/AlitheiaBranding";
@@ -18,7 +18,10 @@ const AppLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const { ruleId } = useParams<{ ruleId: string }>();
   const userInfo = useSelector((state: RootState) => state.user);
+  const activeRule = useSelector((state: RootState) => state.rules.activeRule);
+  const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,17 +64,41 @@ const AppLayout = () => {
         sx={{ 
           padding: '12px 24px',
           backgroundColor: '#f8f9fc',
-          borderRadius: 0
+          borderRadius: 0,
+          overflow: 'hidden',
+          minHeight: '48px',
+          display: 'flex',
+          alignItems: 'center'
         }}
       >
-        <Breadcrumbs separator={<ChevronRight fontSize="small" />} aria-label="breadcrumb">
+        <Breadcrumbs 
+          separator={<ChevronRight fontSize="small" />} 
+          aria-label="breadcrumb"
+          sx={{
+            width: '100%',
+            '& .MuiBreadcrumbs-ol': {
+              flexWrap: 'nowrap',
+              alignItems: 'center',
+              display: 'flex !important',
+              flexDirection: 'row !important'
+            },
+            '& .MuiBreadcrumbs-li': {
+              whiteSpace: 'nowrap',
+              display: 'inline-flex !important'
+            },
+            '& .MuiBreadcrumbs-separator': {
+              margin: '0 8px',
+              display: 'inline-flex !important'
+            }
+          }}
+        >
           <Link 
             color="inherit" 
             href="#" 
             onClick={() => navigate('/welcome')}
             sx={{ 
               textDecoration: 'none',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               '&:hover': { textDecoration: 'underline' }
             }}
@@ -79,16 +106,52 @@ const AppLayout = () => {
             <Home sx={{ mr: 0.5, fontSize: 18 }} />
             Home
           </Link>
+          
           {location.pathname === '/rules-designer' && (
-            <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography color="text.primary" sx={{ display: 'inline-flex', alignItems: 'center' }}>
               <DesignServices sx={{ mr: 0.5, fontSize: 18 }} />
               Rules Designer
             </Typography>
           )}
+          
           {location.pathname === '/workbench' && (
-            <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography color="text.primary" sx={{ display: 'inline-flex', alignItems: 'center' }}>
               <Build sx={{ mr: 0.5, fontSize: 18 }} />
               Workbench
+            </Typography>
+          )}
+          
+          {/* Whiteboard breadcrumbs */}
+          {(location.pathname.includes('/whiteboard')) && (
+            <Link 
+              color="inherit" 
+              href="#" 
+              onClick={() => navigate('/rules-designer')}
+              sx={{ 
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                '&:hover': { textDecoration: 'underline' }
+              }}
+            >
+              <DesignServices sx={{ mr: 0.5, fontSize: 18 }} />
+              Rules Designer
+            </Link>
+          )}
+          
+          {(location.pathname.includes('/whiteboard')) && (
+            <Typography 
+              color="text.primary" 
+              sx={{ 
+                display: 'inline-flex', 
+                alignItems: 'center',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '300px'
+              }}
+            >
+              <Straighten sx={{ mr: 0.5, fontSize: 18 }} />
+              {activeRule ? activeRule.name : 'Rule Whiteboard'}
             </Typography>
           )}
         </Breadcrumbs>

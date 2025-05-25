@@ -23,7 +23,7 @@ import {
   Close, Code, Add, Remove, Timeline,
   Settings, Info, Save, CallSplit, Lock,
   Error as ErrorIcon, SystemUpdateAlt,
-  CheckCircle, PlayArrow, Edit
+  CheckCircle, PlayArrow, Edit, KeyboardArrowLeft, KeyboardArrowRight
 } from '@mui/icons-material';
 import CircleNode from './CircleNode';
 import DiamondNode from './DiamondNode';
@@ -44,11 +44,13 @@ const nodeTypes = {
 };
 
 interface WhiteboardProps {
-  onClose: () => void;
-  onNeedHelp?: () => void; // Add this prop to trigger the help/contact dialog from the parent
+  onClose?: () => void;
+  onNeedHelp?: () => void;
+  onUnsavedChanges?: (hasChanges: boolean) => void;
+  showTopNav?: boolean;
 }
 
-const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true }) => {
   // Get active rule and version from Redux state
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
@@ -65,6 +67,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
   const [nodeDialogOpen, setNodeDialogOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeLabelValue, setNodeLabelValue] = useState('');
+  
+  // Add state for sidebar collapse
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const [ruleSummary, setRuleSummary] = useState({
     nodeCount: 0,
@@ -153,13 +158,18 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
         initialEdges !== currentEdges;
       
       setHasUnsavedChanges(hasChanges);
+      
+      // Call the onUnsavedChanges callback if provided
+      if (onUnsavedChanges) {
+        onUnsavedChanges(hasChanges);
+      }
     };
     
     // Use a timeout to avoid excessive checking during rapid changes
     const changeTimer = setTimeout(checkForChanges, 500);
     
     return () => clearTimeout(changeTimer);
-  }, [nodes, edges, activeVersion]);
+  }, [nodes, edges, activeVersion, onUnsavedChanges]);
 
   // Early return if no active rule or version
   if (!activeRule || !activeVersion) {
@@ -995,6 +1005,21 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
     setNodeDialogOpen(true);
   };
 
+  // Add function to close the node dialog
+  const handleNodeDialogClose = () => {
+    setNodeDialogOpen(false);
+    setSelectedNode(null);
+    setNodeLabelValue('');
+    setIsNumericEditMode(false);
+    setOriginalNodeLabel('');
+    console.log('Node dialog closed');
+  };
+
+  // Add function to toggle numeric edit mode
+  const toggleNumericEditMode = () => {
+    setIsNumericEditMode(!isNumericEditMode);
+  };
+
   // Add a function to extract and update only numbers in a string
   const extractAndUpdateNumbers = (original, value) => {
     
@@ -1084,223 +1109,530 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
     handleNodeDialogClose();
   };
 
-  // Toggle numeric edit mode
-  const toggleNumericEditMode = () => {
-    setIsNumericEditMode(!isNumericEditMode);
-    
-    // If switching to numeric mode, try to extract only numbers for editing
-    if (!isNumericEditMode) {
-      const numbers = originalNodeLabel.match(/\d+(\.\d+)?/g);
-      if (numbers && numbers.length > 0) {
-        setNodeLabelValue(numbers.join(', '));
-      }
-    } else {
-      // If switching back to standard mode, restore the full label
-      setNodeLabelValue(originalNodeLabel);
-    }
+  // Toggle sidebar open/close
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
-  // Update the node dialog close function to reset all state
-  const handleNodeDialogClose = () => {
-    // Clear dialog state
-    setNodeDialogOpen(false);
-    setSelectedNode(null);
-    setNodeLabelValue('');
-    setIsNumericEditMode(false);
-    setOriginalNodeLabel('');    
-    console.log('Node dialog closed');
-  };
+  // Add a function to arrange nodes in a vertical layout
+  const applyVerticalLayout = useCallback(() => {
+    if (!nodes.length) return;
+    
+    // Find start and end nodes
+    const startNode = nodes.find(node => node.id === 'start' || node.data?.label === 'Start');
+    
+    // Group nodes by their conceptual "level" in the flow
+    const levels: { [key: string]: any[] } = {};
+    const processed = new Set<string>();
+    
+    // Start with the start node as level 0
+    if (startNode) {
+      levels['0'] = [startNode];
+      processed.add(startNode.id);
+    }
+    
+    // Function to find all direct sources of a node
+    const findSources = (nodeId: string) => {
+      return edges
+        .filter(edge => edge.target === nodeId)
+        .map(edge => edge.source);
+    };
+    
+    // Reverse breadth-first traversal to assign levels
+    let currentLevel = 0;
+    while (Object.keys(levels).includes(currentLevel.toString())) {
+      const nextLevel = currentLevel + 1;
+      levels[nextLevel.toString()] = [];
+      
+      // For each node in the current level, find its sources
+      for (const node of levels[currentLevel.toString()]) {
+        const sources = findSources(node.id);
+        
+        for (const sourceId of sources) {
+          if (!processed.has(sourceId)) {
+            const sourceNode = nodes.find(n => n.id === sourceId);
+            if (sourceNode) {
+              levels[nextLevel.toString()].push(sourceNode);
+              processed.add(sourceId);
+            }
+          }
+        }
+      }
+      
+      // If no nodes were added to this level, remove it
+      if (levels[nextLevel.toString()].length === 0) {
+        delete levels[nextLevel.toString()];
+      }
+      
+      currentLevel = nextLevel;
+    }
+    
+    // Position nodes vertically by level
+    const xGap = 150; // horizontal gap between levels
+    const yGap = 100; // vertical gap between nodes in the same level
+    const updatedNodes = [...nodes];
+    
+    // Update positions for each node based on its level
+    Object.keys(levels).forEach((level) => {
+      const levelNodes = levels[level];
+      const levelY = parseInt(level) * yGap + 100; // Y position based on level
+      
+      levelNodes.forEach((node, index) => {
+        // Calculate X position to center the nodes in each level
+        const levelWidth = levelNodes.length * xGap;
+        const startX = 100 + (800 - levelWidth) / 2;
+        const nodeX = startX + index * xGap;
+        
+        // Find and update the node in our updatedNodes array
+        const nodeIndex = updatedNodes.findIndex(n => n.id === node.id);
+        if (nodeIndex !== -1) {
+          updatedNodes[nodeIndex] = {
+            ...updatedNodes[nodeIndex],
+            position: { x: nodeX, y: levelY }
+          };
+        }
+      });
+    });
+    
+    // Handle any nodes not placed (not connected to the main flow)
+    const unplacedNodes = updatedNodes.filter(node => !processed.has(node.id));
+    if (unplacedNodes.length > 0) {
+      // Position these at the bottom
+      const maxLevel = Math.max(...Object.keys(levels).map(l => parseInt(l)), 0);
+      const extraY = (maxLevel + 1) * yGap + 100;
+      
+      unplacedNodes.forEach((node, index) => {
+        const nodeIndex = updatedNodes.findIndex(n => n.id === node.id);
+        if (nodeIndex !== -1) {
+          updatedNodes[nodeIndex] = {
+            ...updatedNodes[nodeIndex],
+            position: { x: 100 + index * xGap, y: extraY }
+          };
+        }
+      });
+    }
+    
+    setNodes(updatedNodes);
+  }, [nodes, edges, setNodes]);
 
   return (
     <Box className="whiteboard-container">
       {/* Header */}
-      <AppBar position="static" color="inherit" elevation={0} className="whiteboard-header">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={onClose} className="whiteboard-close-btn">
-            <Close />
-          </IconButton>
-          
-          <Box className="whiteboard-title">
-            <Typography variant="h6" noWrap component="div">
-              {activeRule.name}
-            </Typography>
-            <Chip 
-              label={`Version: ${activeVersion.version}`}
-              size="small"
-              color="primary"
-              className="whiteboard-version-chip"
-            />
-          </Box>
-          
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ flexGrow: 1 }} />
-          
-          <Box className="whiteboard-actions">
-            <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
-              <span>
+      {showTopNav && (
+        <AppBar position="static" color="inherit" elevation={0} className="whiteboard-header">
+          <Toolbar>
+            <IconButton edge="start" color="inherit" onClick={onClose} className="whiteboard-close-btn">
+              <Close />
+            </IconButton>
+            
+            <Box className="whiteboard-title">
+              <Typography variant="h6" noWrap component="div">
+                {activeRule.name}
+              </Typography>
+              <Chip 
+                label={`Version: ${activeVersion.version}`}
+                size="small"
+                color="primary"
+                className="whiteboard-version-chip"
+              />
+            </Box>
+            
+            <Box sx={{ flexGrow: 1 }} />
+            <Box sx={{ flexGrow: 1 }} />
+            
+            <Box className="whiteboard-actions">
+              <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
+                <span>
+                  <IconButton 
+                    color="primary" 
+                    className="whiteboard-action-btn"
+                    onClick={handleSaveClick}
+                    disabled={!hasUnsavedChanges}
+                  >
+                    <Badge 
+                      color="error" 
+                      variant="dot" 
+                      invisible={!hasUnsavedChanges}
+                    >
+                      <Save />
+                    </Badge>
+                  </IconButton>
+                </span>
+              </Tooltip>
+              
+              <Tooltip title="Test Rule">
+                <IconButton 
+                  color="secondary" 
+                  onClick={handleTestRuleClick}
+                  className="whiteboard-action-btn"
+                >
+                  <PlayArrow />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Rule Settings">
+                <IconButton
+                  onClick={handleSettingsDialogOpen}
+                  className="whiteboard-action-btn"
+                >
+                  <Settings />
+                </IconButton>
+              </Tooltip>
+              
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleRuleAiClick}
+                startIcon={<Code />}
+                className="whiteboard-ai-btn"
+              >
+                Analyze
+              </Button>
+              <Tooltip title="Auto-arrange Flow">
                 <IconButton 
                   color="primary" 
+                  onClick={applyHorizontalLayout}
                   className="whiteboard-action-btn"
-                  onClick={handleSaveClick}
-                  disabled={!hasUnsavedChanges}
                 >
-                  <Badge 
-                    color="error" 
-                    variant="dot" 
-                    invisible={!hasUnsavedChanges}
-                  >
-                    <Save />
-                  </Badge>
+                  <Timeline />
                 </IconButton>
-              </span>
-            </Tooltip>
-            
-            <Tooltip title="Test Rule">
-              <IconButton 
-                color="secondary" 
-                onClick={handleTestRuleClick}
-                className="whiteboard-action-btn"
-              >
-                <PlayArrow />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Rule Settings">
-              <IconButton
-                onClick={handleSettingsDialogOpen}
-                className="whiteboard-action-btn"
-              >
-                <Settings />
-              </IconButton>
-            </Tooltip>
-            
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleRuleAiClick}
-              startIcon={<Code />}
-              className="whiteboard-ai-btn"
-            >
-              Rule AI
-            </Button>
-            <Tooltip title="Auto-arrange Flow">
-              <IconButton 
-                color="primary" 
-                onClick={applyHorizontalLayout}
-                className="whiteboard-action-btn"
-              >
-                <Timeline />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Toolbar>
-      </AppBar>
+              </Tooltip>
+            </Box>
+          </Toolbar>
+        </AppBar>
+      )}
       
       <Box className="whiteboard-content">
-        {/* Side panel */}
-        <Paper className="whiteboard-side-panel">
-          <Typography variant="subtitle2" className="side-panel-header">
-            Add Elements
-          </Typography>
-          
-          <Divider />
-          
-          <Box className="side-panel-buttons">
-            <Button 
-              variant="outlined" 
-              color="primary" 
-              onClick={() => addCircle('Start')}
-              startIcon={<CheckCircle />}
-              className="side-panel-btn"
-              fullWidth
-            >
-              Start Node
-            </Button>
-            
-            <Button 
-              variant="outlined" 
-              color="error" 
-              onClick={() => addCircle('End')}
-              startIcon={<ErrorIcon />}
-              className="side-panel-btn"
-              fullWidth
-            >
-              End Node
-            </Button>
-            
-            <Button 
-              variant="outlined" 
-              onClick={addDiamond}
-              startIcon={<CallSplit />}
-              className="side-panel-btn"
-              fullWidth
-            >
-              Decision Node
-            </Button>
-            
-            <Button 
-              variant="outlined" 
-              onClick={addRectangle}
-              startIcon={<SystemUpdateAlt />}
-              className="side-panel-btn"
-              fullWidth
-            >
-              Action Node
-            </Button>
-            
-            <Button 
-              variant="outlined"
-              color="warning" 
-              onClick={removeNode}
-              startIcon={<Remove />}
-              className="side-panel-btn"
-              fullWidth
-              disabled={nodes.length === 0}
-            >
-              Remove Last
-            </Button>
-          </Box>
-          
-          <Box className="side-panel-rule-info">
-            <Typography variant="subtitle2" className="side-panel-header">
-              Rule Information
-            </Typography>
-            
-            <Divider />
-            
-            <Box className="rule-info-content">
-              <Typography variant="body2">
-                <strong>Rule:</strong> {activeRule.name}
+        {/* Retractable Side panel */}
+        <Paper 
+          className="whiteboard-side-panel"
+          sx={{ 
+            width: sidebarOpen ? 280 : 48,
+            transition: 'width 0.3s ease',
+            overflow: 'hidden',
+            position: 'relative',
+            maxHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {/* Sidebar toggle button */}
+          <IconButton
+            onClick={toggleSidebar}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 10,
+              bgcolor: 'background.paper',
+              boxShadow: 1,
+              '&:hover': {
+                bgcolor: 'action.hover'
+              }
+            }}
+          >
+            {sidebarOpen ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+          </IconButton>
+
+          {sidebarOpen && (
+            <Box sx={{ 
+              p: 2, 
+              pt: 6, 
+              overflowY: 'auto',
+              flexGrow: 1,
+              maxHeight: 'calc(100vh - 120px)'
+            }}>
+              <Typography variant="subtitle2" className="side-panel-header">
+                Add Elements
               </Typography>
-              <Typography variant="body2">
-                <strong>Version:</strong> {activeVersion.version}
-                {activeVersion.tag === 'latest' && (
-                  <Chip label="Latest" size="small" color="primary" className="latest-tag" />
-                )}
-              </Typography>
-              {activeVersion.note && (
-                <Typography variant="body2">
-                  <strong>Note:</strong> {activeVersion.note}
+              
+              <Divider sx={{ my: 1 }} />
+              
+              <Box className="side-panel-buttons">
+                <Button 
+                  variant="outlined" 
+                  color="primary" 
+                  onClick={() => addCircle('Start')}
+                  startIcon={<CheckCircle />}
+                  className="side-panel-btn"
+                  fullWidth
+                  sx={{ mb: 1 }}
+                >
+                  Start Node
+                </Button>
+                
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  onClick={() => addCircle('End')}
+                  startIcon={<ErrorIcon />}
+                  className="side-panel-btn"
+                  fullWidth
+                  sx={{ mb: 1 }}
+                >
+                  End Node
+                </Button>
+                
+                <Button 
+                  variant="outlined" 
+                  onClick={addDiamond}
+                  startIcon={<CallSplit />}
+                  className="side-panel-btn"
+                  fullWidth
+                  sx={{ mb: 1 }}
+                >
+                  Decision Node
+                </Button>
+                
+                <Button 
+                  variant="outlined" 
+                  onClick={addRectangle}
+                  startIcon={<SystemUpdateAlt />}
+                  className="side-panel-btn"
+                  fullWidth
+                  sx={{ mb: 1 }}
+                >
+                  Action Node
+                </Button>
+                
+                <Button 
+                  variant="outlined"
+                  color="warning" 
+                  onClick={removeNode}
+                  startIcon={<Remove />}
+                  className="side-panel-btn"
+                  fullWidth
+                  disabled={nodes.length === 0}
+                  sx={{ mb: 2 }}
+                >
+                  Remove Last
+                </Button>
+              </Box>
+              
+              
+              <Box className="side-panel-rule-info">
+                <Typography variant="subtitle2" className="side-panel-header">
+                  Rule Information
                 </Typography>
-              )}
-              
-              <Divider className="rule-info-divider" />
-              
-              <Typography variant="body2">
-                <strong>Nodes:</strong> {ruleSummary.nodeCount}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Connections:</strong> {ruleSummary.edgeCount} 
-                {edges.filter(e => e.label).length > 0 ? ` (${edges.filter(e => e.label).length} with thresholds)` : ''}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Decision Points:</strong> {ruleSummary.decisionPoints}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Endpoints:</strong> {ruleSummary.endpoints}
-              </Typography>
+                  
+                <Box className="rule-info-content">
+                  {/* Rule Name and Version */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', mb: 0.5 }}>
+                      {activeRule.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Chip 
+                        label={`Version ${activeVersion.version}`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{ height: 20, fontSize: '0.7rem' }}
+                      />
+                      {activeVersion.tag && (
+                        <Chip 
+                          label={activeVersion.tag}
+                          size="small"
+                          color="success"
+                          variant="filled"
+                          sx={{ height: 20, fontSize: '0.7rem' }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+
+                  {/* Rule Status */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                      Status
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ 
+                        width: 8, 
+                        height: 8, 
+                        borderRadius: '50%', 
+                        bgcolor: hasUnsavedChanges ? '#ff9800' : '#4caf50' 
+                      }} />
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        {hasUnsavedChanges ? 'Modified' : 'Saved'}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Creation and Modified Dates */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                      Created
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                      {new Date().toLocaleDateString()}
+                    </Typography>
+                  </Box>
+
+                  {/* Rule Complexity */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                      Complexity
+                    </Typography>
+                    {(() => {
+                      const complexity = nodes.length + edges.length;
+                      let level = 'Simple';
+                      let color = '#4caf50';
+                      
+                      if (complexity > 20) {
+                        level = 'Complex';
+                        color = '#ff9800';
+                      } else if (complexity > 10) {
+                        level = 'Moderate';
+                        color = '#2196f3';
+                      }
+                      
+                      return (
+                        <Chip 
+                          label={level}
+                          size="small"
+                          sx={{ 
+                            height: 20, 
+                            fontSize: '0.7rem',
+                            bgcolor: `${color}20`,
+                            color: color,
+                            border: `1px solid ${color}40`
+                          }}
+                        />
+                      );
+                    })()}
+                  </Box>
+
+                  {/* Version Notes */}
+                  {activeVersion.note && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                        Version Notes
+                      </Typography>
+                      <Paper sx={{ 
+                        p: 1, 
+                        bgcolor: 'rgba(85, 105, 255, 0.05)',
+                        border: '1px solid rgba(85, 105, 255, 0.1)',
+                        borderRadius: 1
+                      }}>
+                        <Typography variant="body2" sx={{ 
+                          fontSize: '0.75rem',
+                          fontStyle: 'italic',
+                          color: 'text.secondary'
+                        }}>
+                          {activeVersion.note}
+                        </Typography>
+                      </Paper>
+                    </Box>
+                  )}
+
+                  {/* Rule Metrics (if available) */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                      Performance (Last Test)
+                    </Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 0.3 }}>
+                      <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                        <strong>STP Rate:</strong> {testResults?.overall?.stp || '--'}%
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                        <strong>Accuracy:</strong> {testResults?.overall?.accuracy || '--'}%
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                        <strong>Avg. Time:</strong> {testResults?.overall?.averageProcessingTime || '--'} min
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Action Buttons */}
+                  <Box sx={{ mt: 2, pt: 1, borderTop: '1px solid #f0f0f0' }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={handleSettingsDialogOpen}
+                      startIcon={<Settings />}
+                      fullWidth
+                      sx={{ 
+                        mb: 1,
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        height: 28
+                      }}
+                    >
+                      Rule Settings
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={handleRuleAiClick}
+                      startIcon={<Code />}
+                      fullWidth
+                      sx={{ 
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        height: 28
+                      }}
+                    >
+                      Analyze with AI
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
             </Box>
-          </Box>
+          )}
+
+          {!sidebarOpen && (
+            <Box sx={{ p: 1, pt: 6, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Tooltip title="Start Node" placement="right">
+                <IconButton 
+                  onClick={() => addCircle('Start')}
+                  color="primary"
+                  size="small"
+                >
+                  <CheckCircle />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="End Node" placement="right">
+                <IconButton 
+                  onClick={() => addCircle('End')}
+                  color="error"
+                  size="small"
+                >
+                  <ErrorIcon />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Decision Node" placement="right">
+                <IconButton 
+                  onClick={addDiamond}
+                  size="small"
+                >
+                  <CallSplit />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Action Node" placement="right">
+                <IconButton 
+                  onClick={addRectangle}
+                  size="small"
+                >
+                  <SystemUpdateAlt />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Remove Last" placement="right">
+                <IconButton 
+                  onClick={removeNode}
+                  color="warning"
+                  size="small"
+                  disabled={nodes.length === 0}
+                >
+                  <Remove />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
         </Paper>
         
         {/* Flow Editor */}
@@ -1710,7 +2042,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                 <Button 
                   variant="contained"
                   color="primary"
-                  startIcon={<Add />}
+                  startIcon={<Lock />}
                   sx={{ 
                     borderRadius: '8px',
                     textTransform: 'none',
@@ -1723,109 +2055,67 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                 </Button>
               </Box>
               
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                  fontWeight: 600, 
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: 'primary.main',
-                  mb: 1
-                }}
-              >
-                <SystemUpdateAlt fontSize="small" sx={{ mr: 1 }} />
-                Data Model Mapping
+              {/* Background content (locked) */}
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                Data Field Mapping
               </Typography>
-              
-              {(() => {
-                const mapping = getFieldMappingInfo(selectedNode);
-                return (
-                  <>
-                    <Box sx={{ display: 'flex', mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 600, width: 80, flexShrink: 0 }}>
-                        Field:
-                      </Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
-                        {mapping.field || 'Not mapped'}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 600, width: 80, flexShrink: 0 }}>
-                        Type:
-                      </Typography>
-                      <Typography variant="caption">
-                        {mapping.dataType}
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                      {mapping.description}
-                    </Typography>
-                  </>
-                );
-              })()}
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {getFieldMappingInfo(selectedNode)?.field || 'patient.data.field'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {getFieldMappingInfo(selectedNode)?.description || 'Maps to your data source'}
+              </Typography>
             </Box>
           )}
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            bgcolor: 'rgba(25, 118, 210, 0.05)',
-            padding: '10px 12px',
-            borderRadius: '8px',
-            border: '1px solid rgba(25, 118, 210, 0.1)',
-          }}>
-            <Info fontSize="small" sx={{ color: 'primary.main', marginRight: 1 }} />
-            <Typography variant="caption" color="text.secondary">
-              Nodes influence how data is mapped from your dataset to the rule logic.
-            </Typography>
-          </Box>
         </DialogContent>
+        
         <DialogActions sx={{ 
           padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0'
+          borderTop: '1px solid #f0f0f0',
+          display: 'flex',
+          justifyContent: 'space-between'
         }}>
           <Button 
             onClick={handleNodeDelete}
             color="error"
             startIcon={<Remove />}
-            sx={{ 
-              borderRadius: '8px',
-              marginRight: 'auto'
-            }}
+            sx={{ borderRadius: '8px' }}
           >
             Delete Node
           </Button>
-          <Button 
-            onClick={handleNodeDialogClose} 
-            color="inherit"
-            sx={{ borderRadius: '8px' }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleNodeLabelSubmit} 
-            variant="contained"
-            color="primary"
-            sx={{ 
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
-            }}
-          >
-            Save
-          </Button>
+          <Box>
+            <Button 
+              onClick={handleNodeDialogClose} 
+              color="inherit"
+              sx={{ borderRadius: '8px', mr: 1 }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleNodeLabelSubmit} 
+              variant="contained"
+              color="primary"
+              sx={{ 
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
+              }}
+            >
+              Save Changes
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
-      
-      {/* Other dialogs */}
+
+      {/* Save Version Dialog */}
       <Dialog
         open={saveVersionDialogOpen}
         onClose={handleSaveDialogClose}
         PaperProps={{ 
           style: { 
             borderRadius: '12px',
-            maxWidth: '450px'
+            maxWidth: '500px'
           } 
         }}
         fullWidth
@@ -1841,7 +2131,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           <Box display="flex" alignItems="center">
             <Save sx={{ color: '#5569ff', marginRight: 1.5 }} />
             <Typography variant="h6" fontWeight={600}>
-              Save Rule Version
+              Save New Version
             </Typography>
           </Box>
           <IconButton
@@ -1857,7 +2147,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
         
         <DialogContent sx={{ padding: '24px' }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Save your changes as a new version of this rule. This will allow you to roll back to previous versions if needed.
+            Create a new version of this rule with your current changes.
           </Typography>
           
           <TextField
@@ -1871,10 +2161,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
             value={newVersion}
             onChange={(e) => setNewVersion(e.target.value)}
             sx={{ mb: 2 }}
-            InputProps={{
-              startAdornment: <InputAdornment position="start">v</InputAdornment>,
-            }}
-            helperText="Use semantic versioning (e.g., 1.0, 1.1, 2.0)"
           />
           
           <TextField
@@ -1893,7 +2179,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           
           <Box sx={{ 
             display: 'flex', 
-            alignItems: 'center', 
+            alignItems: 'center',
             mt: 3,
             p: 2, 
             bgcolor: 'rgba(85, 105, 255, 0.05)',
@@ -2076,7 +2362,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
                           value={testResults.overall.stp}
                           size={80}
                           thickness={4}
-                          sx={{ color: '#5569ff' }}
                         />
                         <Box
                           sx={{
@@ -2525,7 +2810,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => {
           <Box display="flex" alignItems="center">
             <Code sx={{ color: '#5569ff', marginRight: 1.5 }} />
             <Typography variant="h6" fontWeight={600}>
-              Rule AI
+              Analyze
             </Typography>
           </Box>
           <IconButton

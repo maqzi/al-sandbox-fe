@@ -17,7 +17,6 @@ import {
   CloudUpload, DescriptionOutlined, SmartToy, CreateNewFolder
 } from '@mui/icons-material';
 import { RootState } from '@/store/store';
-import Whiteboard from '@/components/Whiteboard';
 import { Rule, RuleVersion, setActiveRule, setActiveVersion, updateRuleActiveVersion } from '@/store/rulesSlice';
 
 // First, import the recommendations data
@@ -94,9 +93,10 @@ const RulesDesignerPage: React.FC = () => {
     if (activeVersion) {
       dispatch(setActiveRule(rule));
       dispatch(setActiveVersion(activeVersion));
-      setShowWhiteboard(true);
+      // Navigate to dedicated whiteboard page
+      navigate(`/rules/${rule.id}/whiteboard`);
     }
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   const handleCloseWhiteboard = useCallback(() => {
     setShowWhiteboard(false);
@@ -275,8 +275,8 @@ const RulesDesignerPage: React.FC = () => {
               dispatch(setActiveRule(newRule));
               dispatch(setActiveVersion(newRule.versions[0]));
               
-              // Show the whiteboard after rule generation
-              setShowWhiteboard(true);
+              // Navigate to the dedicated whiteboard page for the new rule
+              navigate(`/rules/${newRuleId}/whiteboard`);
             }, 1000);
             
           }, 800);
@@ -290,14 +290,7 @@ const RulesDesignerPage: React.FC = () => {
     .filter(rule => !rule.versions || rule.versions.length === 0)
     .map(rule => rule.name);
 
-  // If whiteboard is shown, render the Whiteboard component
-  if (showWhiteboard && activeRule && activeVersion) {
-    return (
-      <Whiteboard onClose={handleCloseWhiteboard} />
-    );
-  }
-
-  // Otherwise, render the rules table
+  // Always render the rules table - no inline whiteboard
   return (
     <Box className="p-4" sx={{ backgroundColor: '#f8f9fc', minHeight: '100vh' }}>
       <Card sx={{ 

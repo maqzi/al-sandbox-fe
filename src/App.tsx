@@ -9,6 +9,7 @@ import datadog from "@/lib/datadog";
 import AppLayout from "./components/AppLayout";
 import NotFound from "./pages/NotFound";
 import RulesDesignerPage from "./pages/RulesDesignerPage";
+import WhiteboardPage from "./pages/WhiteboardPage";
 import WorkbenchPage from "./pages/WorkbenchPage";
 import WelcomePage from "./pages/WelcomePage";
 import DemoSignupPage from "./pages/DemoSignupPage";
@@ -88,6 +89,23 @@ const AppContent = () => {
             element={
               <PrivateRoute step={2}>
                 <WorkbenchPage />
+              </PrivateRoute>
+            }
+          />
+          {/* Whiteboard routes - now inside AppLayout for top nav */}
+          <Route
+            path="/rules/:ruleId/whiteboard"
+            element={
+              <PrivateRoute step={1}>
+                <WhiteboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/rules/new/whiteboard"
+            element={
+              <PrivateRoute step={1}>
+                <WhiteboardPage />
               </PrivateRoute>
             }
           />
