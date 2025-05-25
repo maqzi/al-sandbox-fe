@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { 
   Box, 
   Typography, 
@@ -19,11 +19,13 @@ import {
   Save as SaveIcon
 } from '@mui/icons-material';
 import { RootState } from '@/store/store';
+import { setActiveRule, setActiveVersion } from '@/store/rulesSlice';
 import Whiteboard from '@/components/Whiteboard';
 
 const WhiteboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { ruleId } = useParams<{ ruleId: string }>();
+  const { ruleId, versionId } = useParams<{ ruleId: string; versionId?: string }>();
+  const dispatch = useDispatch();
   
   const rules = useSelector((state: RootState) => state.rules.rules);
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
@@ -33,6 +35,32 @@ const WhiteboardPage: React.FC = () => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
+  // Effect to handle rule and version loading from URL parameters
+  useEffect(() => {
+    if (ruleId && !activeRule) {
+      // Find the rule by ID
+      const rule = rules.find(r => r.id === ruleId);
+      if (rule) {
+        // If versionId is provided, find that specific version
+        let version;
+        if (versionId) {
+          version = rule.versions.find(v => v.version === versionId);
+        } else {
+          // Fall back to active version or latest
+          version = rule.versions.find(v => v.version === rule.activeVersionId) || 
+                   rule.versions.find(v => v.tag === 'latest') || 
+                   rule.versions[0];
+        }
+        
+        if (version) {
+          // Set the active rule and version in Redux
+          dispatch(setActiveRule(rule));
+          dispatch(setActiveVersion(version));
+        }
+      }
+    }
+  }, [ruleId, versionId, rules, activeRule, dispatch]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -65,11 +93,15 @@ const WhiteboardPage: React.FC = () => {
   }, [hasUnsavedChanges]);
 
   const handleBackNavigation = (targetPath?: string) => {
+    const defaultPath = versionId 
+      ? `/rules-designer` 
+      : '/rules-designer';
+    
     if (hasUnsavedChanges) {
-      setPendingNavigation(targetPath || '/rules-designer');
+      setPendingNavigation(targetPath || defaultPath);
       setShowUnsavedDialog(true);
     } else {
-      navigate(targetPath || '/rules-designer');
+      navigate(targetPath || defaultPath);
     }
   };
 

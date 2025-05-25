@@ -5,7 +5,7 @@ import { RootState } from "@/store/store";
 import { 
   Box, AppBar, Toolbar, Typography, Button, Menu, MenuItem, 
   Avatar, Divider, IconButton, Tooltip, Container, Paper,
-  Breadcrumbs, Link, Fade
+  Breadcrumbs, Link, Fade, Chip
 } from "@mui/material";
 import { 
   MenuOutlined, Home, DesignServices, Build, ExitToApp,
@@ -151,7 +151,20 @@ const AppLayout = () => {
               }}
             >
               <Straighten sx={{ mr: 0.5, fontSize: 18 }} />
-              {activeRule ? activeRule.name : 'Rule Whiteboard'}
+              {activeRule ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {activeRule.name}
+                  {activeVersion && (
+                    <Chip 
+                      label={`v${activeVersion.version}`}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      sx={{ height: 20, fontSize: '0.7rem' }}
+                    />
+                  )}
+                </Box>
+              ) : 'Rule Whiteboard'}
             </Typography>
           )}
         </Breadcrumbs>

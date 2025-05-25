@@ -93,8 +93,8 @@ const RulesDesignerPage: React.FC = () => {
     if (activeVersion) {
       dispatch(setActiveRule(rule));
       dispatch(setActiveVersion(activeVersion));
-      // Navigate to dedicated whiteboard page
-      navigate(`/rules/${rule.id}/whiteboard`);
+      // Navigate to dedicated whiteboard page with version
+      navigate(`/rules/${rule.id}/version/${activeVersion.version}/whiteboard`);
     }
   }, [dispatch, navigate]);
 
@@ -276,7 +276,7 @@ const RulesDesignerPage: React.FC = () => {
               dispatch(setActiveVersion(newRule.versions[0]));
               
               // Navigate to the dedicated whiteboard page for the new rule
-              navigate(`/rules/${newRuleId}/whiteboard`);
+              navigate(`/rules/${newRuleId}/version/1.0.0/whiteboard`);
             }, 1000);
             
           }, 800);

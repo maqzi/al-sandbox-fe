@@ -92,9 +92,9 @@ const AppContent = () => {
               </PrivateRoute>
             }
           />
-          {/* Whiteboard routes - now inside AppLayout for top nav */}
+          {/* Whiteboard routes - version-specific only */}
           <Route
-            path="/rules/:ruleId/whiteboard"
+            path="/rules/:ruleId/version/:versionId/whiteboard"
             element={
               <PrivateRoute step={1}>
                 <WhiteboardPage />
