@@ -9,14 +9,19 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  IconButton,
+  TextField,
 } from '@mui/material';
 import { 
   ArrowBack, 
   Save as SaveIcon
 } from '@mui/icons-material';
+import {
+  Close, Settings
+} from '@mui/icons-material';
 import { RootState } from '@/store/store';
-import { setActiveRule, setActiveVersion } from '@/store/rulesSlice';
+import { updateRule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
 import Whiteboard from '@/components/RulesDesigner/Whiteboard/Whiteboard';
 
 const WhiteboardPage: React.FC = () => {
@@ -31,6 +36,9 @@ const WhiteboardPage: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [editedVersionNote, setEditedVersionNote] = useState('');
+  
 
   // Effect to handle rule and version loading from URL parameters
   useEffect(() => {
@@ -103,6 +111,57 @@ const WhiteboardPage: React.FC = () => {
     }
   };
 
+  // Add function to handle opening the settings dialog
+  const handleSettingsDialogOpen = () => {
+    // Initialize the note field with the current version note
+    setEditedVersionNote(activeVersion?.note || '');
+    setSettingsDialogOpen(true);
+  };
+
+  // Add function to handle closing the settings dialog
+  const handleSettingsDialogClose = () => {
+    setSettingsDialogOpen(false);
+    setEditedVersionNote(''); // Clear form data
+    console.log('Settings dialog closed');
+  };
+
+  // Add function to save updated version note
+  const handleUpdateVersionNote = () => {
+    if (!activeRule || !activeVersion) return;
+
+    // Create updated version object
+    const updatedVersionObj = {
+      ...activeVersion,
+      note: editedVersionNote
+    };
+
+    // Update the version in the rule's versions array
+    const updatedVersions = activeRule.versions.map(v => 
+      v.version === activeVersion.version ? updatedVersionObj : v
+    );
+
+    // Create the updated rule
+    const updatedRule = {
+      ...activeRule,
+      versions: updatedVersions
+    };
+
+    // Dispatch action to update the rule in Redux
+    dispatch(updateRule(updatedRule));
+    
+    // Also update the active version in the Redux store
+    dispatch(setActiveVersion(updatedVersionObj));
+
+    // Show temporary success message
+    // setSaveSuccess(true);
+    // setTimeout(() => {
+      // setSaveSuccess(false);
+    // }, 3000);
+    
+    // Close dialog
+    setSettingsDialogOpen(false);
+  };
+
   if (!activeRule || !activeVersion) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -140,6 +199,7 @@ const WhiteboardPage: React.FC = () => {
           }}
           onUnsavedChanges={setHasUnsavedChanges}
           showTopNav={true} // Don't show duplicate header in Whiteboard component
+          onSettingsClick={handleSettingsDialogOpen}
         />
       </Box>
 
@@ -185,6 +245,92 @@ const WhiteboardPage: React.FC = () => {
 
           >
             Save & Exit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsDialogOpen}
+        onClose={handleSettingsDialogClose}
+        PaperProps={{ 
+          style: { 
+            borderRadius: '12px',
+            maxWidth: '450px'
+          } 
+        }}
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          bgcolor: '#f5f7fa',
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px'
+        }}>
+          <Box display="flex" alignItems="center">
+            <Settings sx={{ color: '#5569ff', marginRight: 1.5 }} />
+            <Typography variant="h6" fontWeight={600}>
+              Rule Settings
+            </Typography>
+          </Box>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleSettingsDialogClose}
+            aria-label="close"
+            size="small"
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent sx={{ padding: '24px' }}>
+          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Update the settings for this rule version.
+          </Typography>
+          
+          <TextField
+            autoFocus
+            margin="dense"
+            id="note"
+            label="Version Notes"
+            placeholder="Describe what changes you made in this version"
+            type="text"
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            value={editedVersionNote}
+            onChange={(e) => setEditedVersionNote(e.target.value)}
+          />
+        </DialogContent>
+        
+        <DialogActions sx={{ 
+          padding: '16px 24px', 
+          borderTop: '1px solid #f0f0f0'
+        }}>
+          <Button 
+            onClick={handleSettingsDialogClose} 
+            color="inherit"
+            sx={{ borderRadius: '8px' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleUpdateVersionNote} 
+            variant="contained"
+            color="primary"
+            disabled={!editedVersionNote.trim()}
+            sx={{ 
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
+            }}
+          >
+            Save Settings
           </Button>
         </DialogActions>
       </Dialog>

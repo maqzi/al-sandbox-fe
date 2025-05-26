@@ -8,15 +8,14 @@ import {
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  Position,
   ConnectionLineType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { 
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Paper, Typography, Box, IconButton, Tooltip, Chip, Divider,
-  AppBar, Toolbar, Card, CardContent, CircularProgress, Grid,
-  InputAdornment, Checkbox, Snackbar, Alert, Badge, Avatar,
+  AppBar, Toolbar, CircularProgress, Grid,
+  Checkbox, Snackbar, Alert, Badge, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer
 } from '@mui/material';
 import {
@@ -48,9 +47,10 @@ interface WhiteboardProps {
   onNeedHelp?: () => void;
   onUnsavedChanges?: (hasChanges: boolean) => void;
   showTopNav?: boolean;
+  onSettingsClick?: () => void;
 }
 
-const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true }) => {
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true,  onSettingsClick}) => {
   // Get active rule and version from Redux state
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
@@ -59,7 +59,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [lockedDialogOpen, setLockedDialogOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [thresholdValue, setThresholdValue] = useState('');
   
@@ -104,8 +103,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
       risk: 'low' | 'medium' | 'high';
     }>
   }>(null);
-  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  const [editedVersionNote, setEditedVersionNote] = useState('');
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [supportModalSubject, setSupportModalSubject] = useState('');
   const dispatch = useDispatch();
@@ -196,47 +193,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
       </Box>
     );
   }
-
-  const onConnect = useCallback(
-    (params) => {
-      // Use step line edges for more structured connections
-      const newEdge = {
-        ...params,
-        type: 'smoothstep', // Use smoothstep for more horizontal paths
-        animated: true,
-        style: { strokeWidth: 3 },
-        labelStyle: { 
-          fill: '#1a3353', 
-          fontWeight: 500, 
-          fontSize: 12,
-          fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
-        },
-        labelBgPadding: [8, 4],
-        labelBgBorderRadius: 4,
-        labelBgStyle: { 
-          fill: '#ffffff', 
-          fillOpacity: 0.8,
-          stroke: '#e6e8f0',
-          strokeWidth: 1
-        }
-      };
-      setEdges((eds) => addEdge(newEdge, eds));
-    },
-    [setEdges]
-  );
-
-  const handleLockedDialogOpen = () => {
-    // Open the SupportModal directly within Whiteboard
-    setSupportModalOpen(true);
-  };
-
-  const handleLockedDialogClose = () => {
-    setLockedDialogOpen(false);
-  };
-
-  const handleDialogOpen = () => {
-    setDialogOpen(true);
-  };
 
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -764,57 +720,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     console.log('Test dialog closed');
   };
 
-  // Add function to handle opening the settings dialog
-  const handleSettingsDialogOpen = () => {
-    // Initialize the note field with the current version note
-    setEditedVersionNote(activeVersion?.note || '');
-    setSettingsDialogOpen(true);
-  };
-
-  // Add function to handle closing the settings dialog
-  const handleSettingsDialogClose = () => {
-    setSettingsDialogOpen(false);
-    setEditedVersionNote(''); // Clear form data
-    console.log('Settings dialog closed');
-  };
-
-  // Add function to save updated version note
-  const handleUpdateVersionNote = () => {
-    if (!activeRule || !activeVersion) return;
-
-    // Create updated version object
-    const updatedVersionObj = {
-      ...activeVersion,
-      note: editedVersionNote
-    };
-
-    // Update the version in the rule's versions array
-    const updatedVersions = activeRule.versions.map(v => 
-      v.version === activeVersion.version ? updatedVersionObj : v
-    );
-
-    // Create the updated rule
-    const updatedRule = {
-      ...activeRule,
-      versions: updatedVersions
-    };
-
-    // Dispatch action to update the rule in Redux
-    dispatch(updateRule(updatedRule));
-    
-    // Also update the active version in the Redux store
-    dispatch(setActiveVersion(updatedVersionObj));
-
-    // Show temporary success message
-    setSaveSuccess(true);
-    setTimeout(() => {
-      setSaveSuccess(false);
-    }, 3000);
-    
-    // Close dialog
-    setSettingsDialogOpen(false);
-  };
-
   // Replace the existing handleLockedDialogOpen function with this new function
   const handleRuleAiClick = () => {
     setRuleAiDialogOpen(true);
@@ -1272,7 +1177,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
               
               <Tooltip title="Rule Settings">
                 <IconButton
-                  onClick={handleSettingsDialogOpen}
+                  onClick={onSettingsClick || (() => {})}
                   className="whiteboard-action-btn"
                 >
                   <Settings />
@@ -1549,7 +1454,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={handleSettingsDialogOpen}
+                      onClick={onSettingsClick || (() => {})}
                       startIcon={<Settings />}
                       fullWidth
                       sx={{ 
@@ -2700,93 +2605,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
         </DialogActions>
       </Dialog>
 
-      {/* Settings Dialog */}
-      <Dialog
-        open={settingsDialogOpen}
-        onClose={handleSettingsDialogClose}
-        PaperProps={{ 
-          style: { 
-            borderRadius: '12px',
-            maxWidth: '450px'
-          } 
-        }}
-        fullWidth
-      >
-        <DialogTitle sx={{ 
-          bgcolor: '#f5f7fa',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
-          <Box display="flex" alignItems="center">
-            <Settings sx={{ color: '#5569ff', marginRight: 1.5 }} />
-            <Typography variant="h6" fontWeight={600}>
-              Rule Settings
-            </Typography>
-          </Box>
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={handleSettingsDialogClose}
-            aria-label="close"
-            size="small"
-          >
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        
-        <DialogContent sx={{ padding: '24px' }}>
-          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Update the settings for this rule version.
-          </Typography>
-          
-          <TextField
-            autoFocus
-            margin="dense"
-            id="note"
-            label="Version Notes"
-            placeholder="Describe what changes you made in this version"
-            type="text"
-            fullWidth
-            multiline
-            rows={3}
-            variant="outlined"
-            value={editedVersionNote}
-            onChange={(e) => setEditedVersionNote(e.target.value)}
-          />
-        </DialogContent>
-        
-        <DialogActions sx={{ 
-          padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0'
-        }}>
-          <Button 
-            onClick={handleSettingsDialogClose} 
-            color="inherit"
-            sx={{ borderRadius: '8px' }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleUpdateVersionNote} 
-            variant="contained"
-            color="primary"
-            disabled={!editedVersionNote.trim()}
-            sx={{ 
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
-            }}
-          >
-            Save Settings
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Add this dialog to your component JSX */}
+      {/* Rule AI Dialog */}
       <Dialog
         open={ruleAiDialogOpen}
         onClose={handleRuleAiDialogClose}
@@ -3027,9 +2846,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
 };
 
 // Wrap the Whiteboard component with ReactFlowProvider
-const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav}) => (
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav, onSettingsClick}) => (
   <ReactFlowProvider>
-    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} />
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} onSettingsClick={onSettingsClick} />
   </ReactFlowProvider>
 );
 
