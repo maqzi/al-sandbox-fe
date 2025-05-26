@@ -1,4 +1,3 @@
-import React from 'react';
 import DemoSignupForm from '@/components/DemoSignupForm';
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -11,15 +10,10 @@ import {
   Paper, 
   useTheme, 
   useMediaQuery, 
-  Card,
   Avatar,
-  Divider,
-  Chip
 } from '@mui/material';
 import { 
-  HealthAndSafety as HealthIcon,
   CheckCircle as CheckIcon,
-  VerifiedUser as VerifiedIcon,
   BusinessCenter as BusinessCenterIcon,
   LocalHospital as LocalHospitalIcon,
   Assignment as AssignmentIcon
@@ -30,7 +24,6 @@ const DemoSignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const handleSignupComplete = (data: { name: string; email: string }) => {
     dispatch(setUser(data));
