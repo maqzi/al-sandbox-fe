@@ -3027,9 +3027,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
 };
 
 // Wrap the Whiteboard component with ReactFlowProvider
-const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => (
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav}) => (
   <ReactFlowProvider>
-    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} />
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} />
   </ReactFlowProvider>
 );
 

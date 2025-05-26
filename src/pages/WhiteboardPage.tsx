@@ -6,9 +6,6 @@ import {
   Typography, 
   Button,
   Alert,
-  Snackbar,
-  Fab,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -33,7 +30,6 @@ const WhiteboardPage: React.FC = () => {
   
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   // Effect to handle rule and version loading from URL parameters
@@ -62,23 +58,6 @@ const WhiteboardPage: React.FC = () => {
     }
   }, [ruleId, versionId, rules, activeRule, dispatch]);
 
-  // Auto-save functionality
-  useEffect(() => {
-    if (hasUnsavedChanges && autoSaveStatus === 'idle') {
-      const autoSaveTimer = setTimeout(() => {
-        setAutoSaveStatus('saving');
-        // Simulate auto-save
-        setTimeout(() => {
-          setAutoSaveStatus('saved');
-          setHasUnsavedChanges(false);
-          setTimeout(() => setAutoSaveStatus('idle'), 2000);
-        }, 1000);
-      }, 5000); // Auto-save after 5 seconds of inactivity
-
-      return () => clearTimeout(autoSaveTimer);
-    }
-  }, [hasUnsavedChanges, autoSaveStatus]);
-
   // Handle browser back button and navigation
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -96,7 +75,7 @@ const WhiteboardPage: React.FC = () => {
     const defaultPath = versionId 
       ? `/rules-designer` 
       : '/rules-designer';
-    
+
     if (hasUnsavedChanges) {
       setPendingNavigation(targetPath || defaultPath);
       setShowUnsavedDialog(true);
@@ -106,7 +85,6 @@ const WhiteboardPage: React.FC = () => {
   };
 
   const handleSaveAndExit = () => {
-    setAutoSaveStatus('saving');
     // Simulate save
     setTimeout(() => {
       setHasUnsavedChanges(false);
@@ -123,15 +101,6 @@ const WhiteboardPage: React.FC = () => {
     if (pendingNavigation) {
       navigate(pendingNavigation);
     }
-  };
-
-  const handleQuickSave = () => {
-    setAutoSaveStatus('saving');
-    setTimeout(() => {
-      setAutoSaveStatus('saved');
-      setHasUnsavedChanges(false);
-      setTimeout(() => setAutoSaveStatus('idle'), 2000);
-    }, 1000);
   };
 
   if (!activeRule || !activeVersion) {
@@ -170,39 +139,9 @@ const WhiteboardPage: React.FC = () => {
             console.log('Help requested');
           }}
           onUnsavedChanges={setHasUnsavedChanges}
-          showTopNav={false} // Don't show duplicate header in Whiteboard component
+          showTopNav={true} // Don't show duplicate header in Whiteboard component
         />
       </Box>
-
-      {/* Floating Action Button for Quick Save */}
-      {hasUnsavedChanges && (
-        <Fab
-          color="primary"
-          onClick={handleQuickSave}
-          disabled={autoSaveStatus === 'saving'}
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            zIndex: 1000
-          }}
-        >
-          <Tooltip title="Quick Save">
-            <SaveIcon />
-          </Tooltip>
-        </Fab>
-      )}
-
-      {/* Auto-save notification */}
-      <Snackbar
-        open={autoSaveStatus === 'saved'}
-        autoHideDuration={3000}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      >
-        <Alert severity="success" variant="filled">
-          Changes saved automatically
-        </Alert>
-      </Snackbar>
 
       {/* Unsaved Changes Dialog */}
       <Dialog
@@ -221,8 +160,8 @@ const WhiteboardPage: React.FC = () => {
           <Typography variant="body1" gutterBottom>
             You have unsaved changes to this rule. What would you like to do?
           </Typography>
-          <Alert severity="info" sx={{ mt: 2 }}>
-            Your changes will be automatically saved every 5 seconds, but you can save manually to ensure they're preserved.
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            Make sure to save your changes before leaving to avoid losing your work.
           </Alert>
         </DialogContent>
         <DialogActions>
@@ -242,9 +181,10 @@ const WhiteboardPage: React.FC = () => {
             onClick={handleSaveAndExit}
             variant="contained"
             startIcon={<SaveIcon />}
-            disabled={autoSaveStatus === 'saving'}
+            sx={{ textTransform: 'none' }}
+
           >
-            {autoSaveStatus === 'saving' ? 'Saving...' : 'Save & Exit'}
+            Save & Exit
           </Button>
         </DialogActions>
       </Dialog>
