@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, SvgIcon } from '@mui/material';
-import { Shield as ShieldIcon } from '@mui/icons-material';
 
 interface AlitheiaLogoProps {
   variant?: 'default' | 'small' | 'large';
@@ -54,11 +53,15 @@ const AlitheiaBranding: React.FC<AlitheiaLogoProps> = ({
           mb: withTagline ? 0.5 : 0,
         }}
       >
-        <ShieldIcon
-          sx={{
-            fontSize: iconSize,
-            color: color === 'primary' ? 'primary.main' : color,
-            mr: spacing,
+        {/* Icon source: https://img.icons8.com/stencil/32/doctors-laboratory-coat.png colors = { #ffab00, #1976d2} */}
+        <img
+          src="/favicon.ico"
+          alt="alitheia Labs"
+          style={{
+            width: iconSize,
+            height: iconSize,
+            marginRight: spacing * 8, 
+            objectFit: 'contain',
           }}
         />
         <Typography

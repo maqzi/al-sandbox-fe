@@ -1754,7 +1754,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ padding: '24px' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Set a threshold value for this connection. This determines when this path will be taken in the rule's execution flow.
           </Typography>
           
@@ -1882,7 +1882,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
             mt: 2
           }}>
             <Info fontSize="small" sx={{ color: 'primary.main', marginRight: 1 }} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography component="div" variant="caption" color="text.secondary">
               Thresholds help explain the logic of branch decisions. Click "Ask Rule AI" for context-aware suggestions.
             </Typography>
           </Box>
@@ -1955,7 +1955,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ padding: '24px' }}>          
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {isNumericEditMode 
                 ? "Edit only the numeric values in this node's label." 
                 : "Edit the label for this node. This text will be displayed inside the node."}
@@ -2146,7 +2146,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
         </DialogTitle>
         
         <DialogContent sx={{ padding: '24px' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Create a new version of this rule with your current changes.
           </Typography>
           
@@ -2211,7 +2211,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
             mt: 3
           }}>
             <Info fontSize="small" sx={{ color: '#ffc107', marginRight: 1 }} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography component="div" variant="caption" color="text.secondary">
               <strong>Note:</strong> Saved versions are temporary for this demo and will be lost if you refresh the page.
             </Typography>
           </Box>
@@ -2738,7 +2738,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
         </DialogTitle>
         
         <DialogContent sx={{ padding: '24px' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Update the settings for this rule version.
           </Typography>
           

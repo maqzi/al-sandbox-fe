@@ -108,14 +108,14 @@ const AppLayout = () => {
           </Link>
           
           {location.pathname === '/rules-designer' && (
-            <Typography color="text.primary" sx={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Typography component="div" color="text.primary" sx={{ display: 'inline-flex', alignItems: 'center' }}>
               <DesignServices sx={{ mr: 0.5, fontSize: 18 }} />
               Rules Designer
             </Typography>
           )}
           
           {location.pathname === '/workbench' && (
-            <Typography color="text.primary" sx={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Typography component="div" color="text.primary" sx={{ display: 'inline-flex', alignItems: 'center' }}>
               <Build sx={{ mr: 0.5, fontSize: 18 }} />
               Workbench
             </Typography>
@@ -141,6 +141,7 @@ const AppLayout = () => {
           
           {(location.pathname.includes('/whiteboard')) && (
             <Typography 
+              component="div" 
               color="text.primary" 
               sx={{ 
                 display: 'inline-flex', 
@@ -152,7 +153,7 @@ const AppLayout = () => {
             >
               <Straighten sx={{ mr: 0.5, fontSize: 18 }} />
               {activeRule ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {activeRule.name}
                   {activeVersion && (
                     <Chip 
