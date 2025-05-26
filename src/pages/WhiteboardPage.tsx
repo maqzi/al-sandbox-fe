@@ -28,6 +28,7 @@ import {
 import { RootState } from '@/store/store';
 import { updateRule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
 import Whiteboard from '@/components/RulesDesigner/Whiteboard/Whiteboard';
+import TestRuleDialog from '../components/RulesDesigner/Whiteboard/TestRuleDialog';
 
 const WhiteboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,7 +49,23 @@ const WhiteboardPage: React.FC = () => {
   const [saveVersionDialogOpen, setSaveVersionDialogOpen] = useState(false);
   const [newVersion, setNewVersion] = useState('');
   const [versionNote, setVersionNote] = useState('');
-
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [testResults, setTestResults] = useState<null | {
+    overall: {
+      stp: number;
+      accuracy: number;
+      resourceUtilization: number;
+      averageProcessingTime: number;
+    },
+    cases: Array<{
+      id: string;
+      name: string;
+      result: string;
+      outcome: 'approved' | 'rejected' | 'referred';
+      processingTime: number;
+      risk: 'low' | 'medium' | 'high';
+    }>
+  }>(null);
   // Effect to handle rule and version loading from URL parameters
   useEffect(() => {
     if (ruleId && !activeRule) {
@@ -257,6 +274,21 @@ const WhiteboardPage: React.FC = () => {
     console.log('Save dialog closed');
   };
 
+  // Test dialog close handler
+  const handleTestDialogClose = () => {
+    setTestDialogOpen(false);
+  };
+
+  // The test handler
+  const handleTestRuleClick = () => {
+    setTestDialogOpen(true);
+  };
+
+  // Callback to receive test results
+  const handleTestComplete = (results: any) => {
+    setTestResults(results);
+  };
+
   if (!activeRule || !activeVersion) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -293,9 +325,11 @@ const WhiteboardPage: React.FC = () => {
             console.log('Help requested');
           }}
           onUnsavedChanges={setHasUnsavedChanges}
-          showTopNav={true} // Don't show duplicate header in Whiteboard component
+          showTopNav={true}
           onSettingsClick={handleSettingsDialogOpen}
           onSaveClick={handleSaveClick}
+          onTestRuleClick={handleTestRuleClick}
+          testResults={testResults}
         />
       </Box>
 
@@ -591,6 +625,13 @@ const WhiteboardPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Test Rule Dialog */}
+      <TestRuleDialog
+        open={testDialogOpen}
+        onClose={handleTestDialogClose}
+        onTestComplete={handleTestComplete}
+      />
     </Box>
   );
 };
