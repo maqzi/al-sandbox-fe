@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import { RootState } from '@/store/store';
 import { setActiveRule, setActiveVersion } from '@/store/rulesSlice';
-import Whiteboard from '@/components/Whiteboard';
+import Whiteboard from '@/components/RulesDesigner/Whiteboard/Whiteboard';
 
 const WhiteboardPage: React.FC = () => {
   const navigate = useNavigate();

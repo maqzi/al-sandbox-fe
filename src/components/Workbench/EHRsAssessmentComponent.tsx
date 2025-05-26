@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, Tab, Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import SummarizerComponent, { SummarizerComponentProps } from '@/components/SummarizerComponent';
+import SummarizerComponent, { SummarizerComponentProps } from '@/components/Workbench/SummarizerComponent';
 
 interface EHRsAssessment {
   rule: string;

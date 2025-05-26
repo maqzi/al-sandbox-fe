@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import CircleNode from './CircleNode';
 import DiamondNode from './DiamondNode';
-import SupportModal from './SupportModal';
+import SupportModal from '../../SupportModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { 
@@ -3026,3 +3026,11 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
   );
 };
 
+// Wrap the Whiteboard component with ReactFlowProvider
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp }) => (
+  <ReactFlowProvider>
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} />
+  </ReactFlowProvider>
+);
+
+export default WhiteboardWrapper;

@@ -9,7 +9,7 @@ import {
   Search, FilterList, Refresh, CalendarToday, 
   Schedule, ArrowBack 
 } from '@mui/icons-material';
-import WorkbenchComponent from '@/components/WorkbenchComponent';
+import WorkbenchComponent from '@/components/Workbench/WorkbenchComponent';
 import { setSelectedCase, setWorkbenchSection, setActiveSource } from '@/store/workbenchSlice';
 import { 
   selectAllCases, 
