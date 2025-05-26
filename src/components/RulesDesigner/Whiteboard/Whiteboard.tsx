@@ -15,7 +15,7 @@ import {
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Paper, Typography, Box, IconButton, Tooltip, Chip, Divider,
   AppBar, Toolbar, CircularProgress, Grid,
-  Checkbox, Snackbar, Alert, Badge, Avatar,
+  Checkbox, Badge, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer
 } from '@mui/material';
 import {
@@ -29,11 +29,6 @@ import DiamondNode from './DiamondNode';
 import SupportModal from '../../SupportModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
-import { 
-  updateRule, 
-  setActiveRule, 
-  setActiveVersion 
-} from '@/store/rulesSlice';
 import './css/Whiteboard.css';
 
 // Node types for the ReactFlow component
@@ -48,9 +43,10 @@ interface WhiteboardProps {
   onUnsavedChanges?: (hasChanges: boolean) => void;
   showTopNav?: boolean;
   onSettingsClick?: () => void;
+  onSaveClick?: () => void;
 }
 
-const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true,  onSettingsClick}) => {
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true,  onSettingsClick, onSaveClick}) => {
   // Get active rule and version from Redux state
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
@@ -80,11 +76,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
   const [thresholdRecommendations, setThresholdRecommendations] = useState<string[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [recommendationsShown, setRecommendationsShown] = useState(false);
-  const [saveVersionDialogOpen, setSaveVersionDialogOpen] = useState(false);
-  const [newVersion, setNewVersion] = useState('');
-  const [versionNote, setVersionNote] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [testingInProgress, setTestingInProgress] = useState(false);
   const [testResults, setTestResults] = useState<null | {
@@ -488,86 +480,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
 
   const applyRecommendation = (recommendation: string) => {
     setThresholdValue(recommendation);
-  };
-
-  // Function to handle opening save dialog
-  const handleSaveClick = () => {
-    // If no changes, show notification and return
-    if (!hasUnsavedChanges) {
-      // Optional: display a "No changes to save" toast notification
-      return;
-    }
-    // Calculate the next version number based on the current version
-    const currentVersion = activeVersion?.version || '1.0';
-    const parts = currentVersion.split('.');
-    const majorVersion = parseInt(parts[0] || '1');
-    const minorVersion = parseInt(parts[1] || '0');
-    const suggestedVersion = `${majorVersion}.${minorVersion + 1}`;
-    
-    setNewVersion(suggestedVersion);
-    setVersionNote(`Updated rule flow for ${activeRule?.name}`);
-    setSaveVersionDialogOpen(true);
-  };
-
-  // Function to handle the actual save operation
-  const handleSaveVersion = () => {
-    if (!activeRule || !activeVersion) return;
-
-    // Create new version object with current nodes and edges
-    const newVersionObj = {
-      version: newVersion,
-      tag: 'latest', // Mark as latest
-      note: versionNote,
-      nodes: nodes, // Current nodes
-      edges: edges  // Current edges
-    };
-
-    // Update existing versions to remove 'latest' tag from others
-    const updatedVersions = activeRule.versions.map(v => ({
-      ...v,
-      tag: v.tag === 'latest' ? undefined : v.tag
-    }));
-
-    // Create the updated rule with new version
-    const updatedRule = {
-      ...activeRule,
-      versions: [...updatedVersions, newVersionObj],
-      activeVersionId: newVersion
-    };
-
-    // Dispatch action to update the rule in Redux
-    dispatch(updateRule(updatedRule));
-    
-    // Also update the active rule and version in the Redux store
-    dispatch(setActiveRule(updatedRule));
-    dispatch(setActiveVersion(newVersionObj));
-
-    // Close dialog and show success notification
-    setSaveVersionDialogOpen(false);
-    setSaveSuccess(true);
-    setHasUnsavedChanges(false);
-    
-    // Update rule summary with the latest counts
-    setRuleSummary({
-      nodeCount: nodes.length,
-      edgeCount: edges.length,
-      decisionPoints: nodes.filter(node => node.type === 'diamond').length,
-      endpoints: nodes.filter(node => 
-        node.data?.label === 'End' || 
-        (node.type === 'circle' && node.id !== 'start')
-      ).length
-    });
-    
-    // Hide success notification after a few seconds
-    setTimeout(() => {
-      setSaveSuccess(false);
-    }, 3000);
-  };
-
-  // Add function to handle closing save dialog
-  const handleSaveDialogClose = () => {
-    setSaveVersionDialogOpen(false);
-    console.log('Save dialog closed');
   };
 
   const determineOutcome = (result) => {
@@ -1146,24 +1058,24 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
             <Box sx={{ flexGrow: 1 }} />
             
             <Box className="whiteboard-actions">
-              <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
-                <span>
-                  <IconButton 
-                    color="primary" 
-                    className="whiteboard-action-btn"
-                    onClick={handleSaveClick}
-                    disabled={!hasUnsavedChanges}
+            <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
+              <span>
+                <IconButton 
+                  color="primary" 
+                  className="whiteboard-action-btn"
+                  onClick={() => onSaveClick?.()} // Change this line
+                  disabled={!hasUnsavedChanges}
+                >
+                  <Badge 
+                    color="error" 
+                    variant="dot" 
+                    invisible={!hasUnsavedChanges}
                   >
-                    <Badge 
-                      color="error" 
-                      variant="dot" 
-                      invisible={!hasUnsavedChanges}
-                    >
-                      <Save />
-                    </Badge>
-                  </IconButton>
-                </span>
-              </Tooltip>
+                    <Save />
+                  </Badge>
+                </IconButton>
+              </span>
+            </Tooltip>
               
               <Tooltip title="Test Rule">
                 <IconButton 
@@ -2013,162 +1925,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
         </DialogActions>
       </Dialog>
 
-      {/* Save Version Dialog */}
-      <Dialog
-        open={saveVersionDialogOpen}
-        onClose={handleSaveDialogClose}
-        PaperProps={{ 
-          style: { 
-            borderRadius: '12px',
-            maxWidth: '500px'
-          } 
-        }}
-        fullWidth
-      >
-        <DialogTitle sx={{ 
-          bgcolor: '#f5f7fa',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
-          <Box display="flex" alignItems="center">
-            <Save sx={{ color: '#5569ff', marginRight: 1.5 }} />
-            <Typography variant="h6" fontWeight={600}>
-              Save New Version
-            </Typography>
-          </Box>
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={handleSaveDialogClose}
-            aria-label="close"
-            size="small"
-          >
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        
-        <DialogContent sx={{ padding: '24px' }}>
-          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Create a new version of this rule with your current changes.
-          </Typography>
-          
-          <TextField
-            autoFocus
-            margin="dense"
-            id="version"
-            label="Version Number"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newVersion}
-            onChange={(e) => setNewVersion(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          
-          <TextField
-            margin="dense"
-            id="note"
-            label="Version Notes"
-            placeholder="Describe what changes you made in this version"
-            type="text"
-            fullWidth
-            multiline
-            rows={3}
-            variant="outlined"
-            value={versionNote}
-            onChange={(e) => setVersionNote(e.target.value)}
-          />
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            mt: 3,
-            p: 2, 
-            bgcolor: 'rgba(85, 105, 255, 0.05)',
-            borderRadius: 1,
-            border: '1px solid rgba(85, 105, 255, 0.1)'
-          }}>
-            <Checkbox 
-              checked={true} 
-              disabled 
-              sx={{ '& .MuiSvgIcon-root': { fontSize: 22 } }}
-            />
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                Mark as latest version
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                This version will be used when the rule is executed
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            bgcolor: 'rgba(255, 193, 7, 0.1)',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 193, 7, 0.2)',
-            mt: 3
-          }}>
-            <Info fontSize="small" sx={{ color: '#ffc107', marginRight: 1 }} />
-            <Typography component="div" variant="caption" color="text.secondary">
-              <strong>Note:</strong> Saved versions are temporary for this demo and will be lost if you refresh the page.
-            </Typography>
-          </Box>
-        </DialogContent>
-        
-        <DialogActions sx={{ 
-          padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0'
-        }}>
-          <Button 
-            onClick={handleSaveDialogClose} 
-            color="inherit"
-            sx={{ borderRadius: '8px' }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSaveVersion} 
-            variant="contained"
-            color="primary"
-            disabled={!newVersion.trim()}
-            sx={{ 
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
-            }}
-          >
-            Save Version
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Success Snackbar */}
-      <Snackbar
-        open={saveSuccess}
-        autoHideDuration={3000}
-        onClose={() => setSaveSuccess(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={() => setSaveSuccess(false)} 
-          severity="success"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {newVersion ? 
-            `Version ${newVersion} saved successfully! (Changes will be lost on refresh)` : 
-            'Your request has been submitted. We\'ll be in touch soon!'}
-        </Alert>
-      </Snackbar>
-
       {/* Test Rule Dialog */}
       <Dialog
         open={testDialogOpen}
@@ -2846,9 +2602,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
 };
 
 // Wrap the Whiteboard component with ReactFlowProvider
-const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav, onSettingsClick}) => (
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav, onSettingsClick, onSaveClick}) => (
   <ReactFlowProvider>
-    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} onSettingsClick={onSettingsClick} />
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} onSettingsClick={onSettingsClick} onSaveClick={onSaveClick}/>
   </ReactFlowProvider>
 );
 

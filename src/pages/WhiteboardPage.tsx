@@ -12,10 +12,15 @@ import {
   DialogActions,
   IconButton,
   TextField,
+  Snackbar,
+  Checkbox,
+  Alert as MuiAlert
 } from '@mui/material';
 import { 
   ArrowBack, 
-  Save as SaveIcon
+  Save as SaveIcon,
+  Info,
+  CheckCircle
 } from '@mui/icons-material';
 import {
   Close, Settings
@@ -38,7 +43,11 @@ const WhiteboardPage: React.FC = () => {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [editedVersionNote, setEditedVersionNote] = useState('');
-  
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [saveVersionDialogOpen, setSaveVersionDialogOpen] = useState(false);
+  const [newVersion, setNewVersion] = useState('');
+  const [versionNote, setVersionNote] = useState('');
 
   // Effect to handle rule and version loading from URL parameters
   useEffect(() => {
@@ -97,9 +106,14 @@ const WhiteboardPage: React.FC = () => {
     setTimeout(() => {
       setHasUnsavedChanges(false);
       setShowUnsavedDialog(false);
-      if (pendingNavigation) {
-        navigate(pendingNavigation);
-      }
+      showSuccessMessage('Rule saved successfully!');
+      
+      // Navigate after a brief delay to show the success message
+      setTimeout(() => {
+        if (pendingNavigation) {
+          navigate(pendingNavigation);
+        }
+      }, 1500);
     }, 1000);
   };
 
@@ -111,21 +125,21 @@ const WhiteboardPage: React.FC = () => {
     }
   };
 
-  // Add function to handle opening the settings dialog
+  // Function to handle opening the settings dialog
   const handleSettingsDialogOpen = () => {
     // Initialize the note field with the current version note
     setEditedVersionNote(activeVersion?.note || '');
     setSettingsDialogOpen(true);
   };
 
-  // Add function to handle closing the settings dialog
+  // Function to handle closing the settings dialog
   const handleSettingsDialogClose = () => {
     setSettingsDialogOpen(false);
     setEditedVersionNote(''); // Clear form data
     console.log('Settings dialog closed');
   };
 
-  // Add function to save updated version note
+  // Function to save updated version note
   const handleUpdateVersionNote = () => {
     if (!activeRule || !activeVersion) return;
 
@@ -152,14 +166,95 @@ const WhiteboardPage: React.FC = () => {
     // Also update the active version in the Redux store
     dispatch(setActiveVersion(updatedVersionObj));
 
-    // Show temporary success message
-    // setSaveSuccess(true);
-    // setTimeout(() => {
-      // setSaveSuccess(false);
-    // }, 3000);
+    // Show success message
+    setSuccessMessage('Rule settings updated successfully!');
+    setSaveSuccess(true);
     
     // Close dialog
     setSettingsDialogOpen(false);
+  };
+
+  // Function to pass success messages
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setSaveSuccess(true);
+  };
+
+  // Function to handle closing success snackbar
+  const handleCloseSuccessSnackbar = () => {
+    setSaveSuccess(false);
+    setSuccessMessage('');
+  };
+
+  // Function to handle save button click
+  const handleSaveClick = () => {
+    // If no changes, show notification and return
+    if (!hasUnsavedChanges) {
+      return;
+    }
+    
+    // Calculate the next version number based on the current version
+    const currentVersion = activeVersion?.version || '1.0';
+    const parts = currentVersion.split('.');
+    const majorVersion = parseInt(parts[0] || '1');
+    const minorVersion = parseInt(parts[1] || '0');
+    const suggestedVersion = `${majorVersion}.${minorVersion + 1}`;
+    
+    setNewVersion(suggestedVersion);
+    setVersionNote(`Updated rule flow for ${activeRule?.name}`);
+    setSaveVersionDialogOpen(true);
+  };
+
+  // Save version handler
+  const handleSaveVersion = () => {
+    if (!activeRule || !activeVersion) return;
+
+    // Get current nodes and edges from the Whiteboard component
+    // We'll need to pass these as props or get them from Redux
+    const currentNodes = activeVersion.nodes || [];
+    const currentEdges = activeVersion.edges || [];
+
+    // Create new version object with current nodes and edges
+    const newVersionObj = {
+      version: newVersion,
+      tag: 'latest',
+      note: versionNote,
+      nodes: currentNodes,
+      edges: currentEdges
+    };
+
+    // Update existing versions to remove 'latest' tag from others
+    const updatedVersions = activeRule.versions.map(v => ({
+      ...v,
+      tag: v.tag === 'latest' ? undefined : v.tag
+    }));
+
+    // Create the updated rule with new version
+    const updatedRule = {
+      ...activeRule,
+      versions: [...updatedVersions, newVersionObj],
+      activeVersionId: newVersion
+    };
+
+    // Dispatch action to update the rule in Redux
+    dispatch(updateRule(updatedRule));
+    
+    // Also update the active rule and version in the Redux store
+    dispatch(setActiveRule(updatedRule));
+    dispatch(setActiveVersion(newVersionObj));
+
+    // Close dialog and show success
+    setSaveVersionDialogOpen(false);
+    setHasUnsavedChanges(false);
+    
+    // Show success message
+    showSuccessMessage('Rule version saved successfully!');
+  };
+
+  // Save dialog close handler
+  const handleSaveDialogClose = () => {
+    setSaveVersionDialogOpen(false);
+    console.log('Save dialog closed');
   };
 
   if (!activeRule || !activeVersion) {
@@ -200,6 +295,7 @@ const WhiteboardPage: React.FC = () => {
           onUnsavedChanges={setHasUnsavedChanges}
           showTopNav={true} // Don't show duplicate header in Whiteboard component
           onSettingsClick={handleSettingsDialogOpen}
+          onSaveClick={handleSaveClick}
         />
       </Box>
 
@@ -331,6 +427,167 @@ const WhiteboardPage: React.FC = () => {
             }}
           >
             Save Settings
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={saveSuccess}
+        autoHideDuration={4000}
+        onClose={handleCloseSuccessSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <MuiAlert
+          onClose={handleCloseSuccessSnackbar}
+          severity="success"
+          variant="filled"
+          icon={<CheckCircle />}
+          sx={{
+            borderRadius: '8px',
+            fontWeight: 500,
+            '& .MuiAlert-message': {
+              fontSize: '0.95rem'
+            }
+          }}
+        >
+          {successMessage}
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Save Version Dialog */}
+      <Dialog
+        open={saveVersionDialogOpen}
+        onClose={handleSaveDialogClose}
+        PaperProps={{ 
+          style: { 
+            borderRadius: '12px',
+            maxWidth: '500px'
+          } 
+        }}
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          bgcolor: '#f5f7fa',
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px'
+        }}>
+          <Box display="flex" alignItems="center">
+            <SaveIcon sx={{ color: '#5569ff', marginRight: 1.5 }} />
+            <Typography variant="h6" fontWeight={600}>
+              Save New Version
+            </Typography>
+          </Box>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleSaveDialogClose}
+            aria-label="close"
+            size="small"
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent sx={{ padding: '24px' }}>
+          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Create a new version of this rule with your current changes.
+          </Typography>
+          
+          <TextField
+            autoFocus
+            margin="dense"
+            id="version"
+            label="Version Number"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newVersion}
+            onChange={(e) => setNewVersion(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          
+          <TextField
+            margin="dense"
+            id="note"
+            label="Version Notes"
+            placeholder="Describe what changes you made in this version"
+            type="text"
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            value={versionNote}
+            onChange={(e) => setVersionNote(e.target.value)}
+          />
+          
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            mt: 3,
+            p: 2, 
+            bgcolor: 'rgba(85, 105, 255, 0.05)',
+            borderRadius: 1,
+            border: '1px solid rgba(85, 105, 255, 0.1)'
+          }}>
+            <Checkbox 
+              checked={true} 
+              disabled 
+              sx={{ '& .MuiSvgIcon-root': { fontSize: 22 } }}
+            />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                Mark as latest version
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                This version will be used when the rule is executed
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            bgcolor: 'rgba(255, 193, 7, 0.1)',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255, 193, 7, 0.2)',
+            mt: 3
+          }}>
+            <Info fontSize="small" sx={{ color: '#ffc107', marginRight: 1 }} />
+            <Typography component="div" variant="caption" color="text.secondary">
+              <strong>Note:</strong> Saved versions are temporary for this demo and will be lost if you refresh the page.
+            </Typography>
+          </Box>
+        </DialogContent>
+        
+        <DialogActions sx={{ 
+          padding: '16px 24px', 
+          borderTop: '1px solid #f0f0f0'
+        }}>
+          <Button 
+            onClick={handleSaveDialogClose} 
+            color="inherit"
+            sx={{ borderRadius: '8px' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSaveVersion} 
+            variant="contained"
+            color="primary"
+            disabled={!newVersion.trim()}
+            sx={{ 
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
+            }}
+          >
+            Save Version
           </Button>
         </DialogActions>
       </Dialog>
