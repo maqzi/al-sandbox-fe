@@ -14,16 +14,23 @@ import {
   TextField,
   Snackbar,
   Checkbox,
-  Alert as MuiAlert
+  Alert as MuiAlert,
+  AppBar,
+  Toolbar,
+  Chip,
+  Tooltip,
+  Badge
 } from '@mui/material';
 import { 
   ArrowBack, 
   Save as SaveIcon,
   Info,
-  CheckCircle
-} from '@mui/icons-material';
-import {
-  Close, Settings
+  CheckCircle,
+  Close,
+  Settings,
+  PlayArrow,
+  Code,
+  Timeline
 } from '@mui/icons-material';
 import { RootState } from '@/store/store';
 import { updateRule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
@@ -72,6 +79,8 @@ const WhiteboardPage: React.FC = () => {
     nodes: activeVersion?.nodes || [], 
     edges: activeVersion?.edges || [] 
   });
+  const [autoArrangeFunction, setAutoArrangeFunction] = useState<(() => void) | null>(null);
+
   
   // Effect to handle rule and version loading from URL parameters
   useEffect(() => {
@@ -311,6 +320,18 @@ const WhiteboardPage: React.FC = () => {
     setCurrentFlowData({ nodes, edges });
   };
 
+  // Handler for auto-arrange
+  const handleAutoArrangeClick = () => {
+    if (autoArrangeFunction) {
+      autoArrangeFunction();
+    }
+  };
+
+  // Callback to receive the auto-arrange function from Whiteboard
+  const onAutoArrangeSet = (arrangeFunc: () => void) => {
+    setAutoArrangeFunction(() => arrangeFunc);
+  };
+
   if (!activeRule || !activeVersion) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -338,6 +359,90 @@ const WhiteboardPage: React.FC = () => {
       flexDirection: 'column',
       bgcolor: '#f8f9fc'
     }}>
+      {/* Header AppBar */}
+      <AppBar position="static" color="inherit" elevation={0} className="whiteboard-header">
+        <Toolbar>
+          <IconButton edge="start" color="inherit" onClick={() => handleBackNavigation()} className="whiteboard-close-btn">
+            <Close />
+          </IconButton>
+          
+          <Box className="whiteboard-title">
+            <Typography variant="h6" noWrap component="div">
+              {activeRule.name}
+            </Typography>
+            <Chip 
+              label={`Version: ${activeVersion.version}`}
+              size="small"
+              color="primary"
+              className="whiteboard-version-chip"
+            />
+          </Box>
+          
+          <Box sx={{ flexGrow: 1 }} />
+          
+          <Box className="whiteboard-actions">
+            <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
+              <span>
+                <IconButton 
+                  color="primary" 
+                  className="whiteboard-action-btn"
+                  onClick={handleSaveClick}
+                  disabled={!hasUnsavedChanges}
+                >
+                  <Badge 
+                    color="error" 
+                    variant="dot" 
+                    invisible={!hasUnsavedChanges}
+                  >
+                    <SaveIcon />
+                  </Badge>
+                </IconButton>
+              </span>
+            </Tooltip>
+              
+            <Tooltip title="Test Rule">
+              <IconButton 
+                color="secondary" 
+                onClick={handleTestRuleClick} 
+                className="whiteboard-action-btn"
+              >
+                <PlayArrow />
+              </IconButton>
+            </Tooltip>
+            
+            <Tooltip title="Rule Settings">
+              <IconButton
+                onClick={handleSettingsDialogOpen}
+                className="whiteboard-action-btn"
+              >
+                <Settings />
+              </IconButton>
+            </Tooltip>
+            
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAnalyzeRuleClick}
+              startIcon={<Code />}
+              className="whiteboard-ai-btn"
+            >
+              Analyze
+            </Button>
+            
+            <Tooltip title="Auto-arrange Flow">
+              <IconButton 
+                color="primary" 
+                onClick={handleAutoArrangeClick} 
+                className="whiteboard-action-btn"
+                disabled={!autoArrangeFunction}
+              >
+                <Timeline />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
       {/* Whiteboard Content - Full height with rule info in sidebar */}
       <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
         <Whiteboard 
@@ -347,13 +452,11 @@ const WhiteboardPage: React.FC = () => {
             console.log('Help requested');
           }}
           onUnsavedChanges={setHasUnsavedChanges}
-          showTopNav={true}
           onSettingsClick={handleSettingsDialogOpen}
-          onSaveClick={handleSaveClick}
-          onTestRuleClick={handleTestRuleClick}
           onAnalyzeRuleClick={handleAnalyzeRuleClick}
           testResults={testResults}
           onFlowDataChange={onFlowDataChange}
+          onAutoArrange={onAutoArrangeSet} 
         />
       </Box>
 

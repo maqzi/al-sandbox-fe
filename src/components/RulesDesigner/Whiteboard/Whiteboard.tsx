@@ -14,7 +14,7 @@ import '@xyflow/react/dist/style.css';
 import { 
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Paper, Typography, Box, IconButton, Tooltip, Chip, Divider,
-  AppBar, Toolbar, CircularProgress, Grid,
+  CircularProgress, Grid,
   Checkbox, Badge, Avatar
 } from '@mui/material';
 import {
@@ -40,10 +40,7 @@ interface WhiteboardProps {
   onClose?: () => void;
   onNeedHelp?: () => void;
   onUnsavedChanges?: (hasChanges: boolean) => void;
-  showTopNav?: boolean;
   onSettingsClick?: () => void;
-  onSaveClick?: () => void;
-  onTestRuleClick?: () => void;
   onAnalyzeRuleClick?: () => void;
   testResults?: {
     overall?: {
@@ -53,9 +50,10 @@ interface WhiteboardProps {
     };
   } | null;
   onFlowDataChange?: (nodes: any[], edges: any[]) => void; 
+  onAutoArrange?: () => void;
 }
 
-const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true,  onSettingsClick, onSaveClick, onTestRuleClick, testResults, onAnalyzeRuleClick, onFlowDataChange }) => {
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, onSettingsClick, testResults, onAnalyzeRuleClick, onFlowDataChange, onAutoArrange }) => {
   // Get active rule and version from Redux state
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
@@ -303,7 +301,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     ));
   };
 
-  // Add a function to arrange nodes in a horizontal layout
+  // Function to arrange nodes in a horizontal layout
   const applyHorizontalLayout = useCallback(() => {
     if (!nodes.length) return;
     
@@ -404,6 +402,114 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     
     setNodes(updatedNodes);
   }, [nodes, edges, setNodes]);
+
+  // Function to arrange nodes in a vertical layout
+  const applyVerticalLayout = useCallback(() => {
+    if (!nodes.length) return;
+    
+    // Find start and end nodes
+    const startNode = nodes.find(node => node.id === 'start' || node.data?.label === 'Start');
+    
+    // Group nodes by their conceptual "level" in the flow
+    const levels: { [key: string]: any[] } = {};
+    const processed = new Set<string>();
+    
+    // Start with the start node as level 0
+    if (startNode) {
+      levels['0'] = [startNode];
+      processed.add(startNode.id);
+    }
+    
+    // Function to find all direct sources of a node
+    const findSources = (nodeId: string) => {
+      return edges
+        .filter(edge => edge.target === nodeId)
+        .map(edge => edge.source);
+    };
+    
+    // Reverse breadth-first traversal to assign levels
+    let currentLevel = 0;
+    while (Object.keys(levels).includes(currentLevel.toString())) {
+      const nextLevel = currentLevel + 1;
+      levels[nextLevel.toString()] = [];
+      
+      // For each node in the current level, find its sources
+      for (const node of levels[currentLevel.toString()]) {
+        const sources = findSources(node.id);
+        
+        for (const sourceId of sources) {
+          if (!processed.has(sourceId)) {
+            const sourceNode = nodes.find(n => n.id === sourceId);
+            if (sourceNode) {
+              levels[nextLevel.toString()].push(sourceNode);
+              processed.add(sourceId);
+            }
+          }
+        }
+      }
+      
+      // If no nodes were added to this level, remove it
+      if (levels[nextLevel.toString()].length === 0) {
+        delete levels[nextLevel.toString()];
+      }
+      
+      currentLevel = nextLevel;
+    }
+    
+    // Position nodes vertically by level
+    const xGap = 150; // horizontal gap between levels
+    const yGap = 100; // vertical gap between nodes in the same level
+    const updatedNodes = [...nodes];
+    
+    // Update positions for each node based on its level
+    Object.keys(levels).forEach((level) => {
+      const levelNodes = levels[level];
+      const levelY = parseInt(level) * yGap + 100; // Y position based on level
+      
+      levelNodes.forEach((node, index) => {
+        // Calculate X position to center the nodes in each level
+        const levelWidth = levelNodes.length * xGap;
+        const startX = 100 + (800 - levelWidth) / 2;
+        const nodeX = startX + index * xGap;
+        
+        // Find and update the node in our updatedNodes array
+        const nodeIndex = updatedNodes.findIndex(n => n.id === node.id);
+        if (nodeIndex !== -1) {
+          updatedNodes[nodeIndex] = {
+            ...updatedNodes[nodeIndex],
+            position: { x: nodeX, y: levelY }
+          };
+        }
+      });
+    });
+    
+    // Handle any nodes not placed (not connected to the main flow)
+    const unplacedNodes = updatedNodes.filter(node => !processed.has(node.id));
+    if (unplacedNodes.length > 0) {
+      // Position these at the bottom
+      const maxLevel = Math.max(...Object.keys(levels).map(l => parseInt(l)), 0);
+      const extraY = (maxLevel + 1) * yGap + 100;
+      
+      unplacedNodes.forEach((node, index) => {
+        const nodeIndex = updatedNodes.findIndex(n => n.id === node.id);
+        if (nodeIndex !== -1) {
+          updatedNodes[nodeIndex] = {
+            ...updatedNodes[nodeIndex],
+            position: { x: 100 + index * xGap, y: extraY }
+          };
+        }
+      });
+    }
+    
+    setNodes(updatedNodes);
+  }, [nodes, edges, setNodes]);
+
+  // UseEffect to set the onAutoArrange callback
+  useEffect(() => {
+    if (onAutoArrange) {
+      onAutoArrange(applyHorizontalLayout);
+    }
+  }, [applyHorizontalLayout, onAutoArrange]);
 
   const askRuleAI = useCallback(() => {
     setLoadingRecommendations(true);
@@ -684,194 +790,10 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Function to arrange nodes in a vertical layout
-  const applyVerticalLayout = useCallback(() => {
-    if (!nodes.length) return;
-    
-    // Find start and end nodes
-    const startNode = nodes.find(node => node.id === 'start' || node.data?.label === 'Start');
-    
-    // Group nodes by their conceptual "level" in the flow
-    const levels: { [key: string]: any[] } = {};
-    const processed = new Set<string>();
-    
-    // Start with the start node as level 0
-    if (startNode) {
-      levels['0'] = [startNode];
-      processed.add(startNode.id);
-    }
-    
-    // Function to find all direct sources of a node
-    const findSources = (nodeId: string) => {
-      return edges
-        .filter(edge => edge.target === nodeId)
-        .map(edge => edge.source);
-    };
-    
-    // Reverse breadth-first traversal to assign levels
-    let currentLevel = 0;
-    while (Object.keys(levels).includes(currentLevel.toString())) {
-      const nextLevel = currentLevel + 1;
-      levels[nextLevel.toString()] = [];
-      
-      // For each node in the current level, find its sources
-      for (const node of levels[currentLevel.toString()]) {
-        const sources = findSources(node.id);
-        
-        for (const sourceId of sources) {
-          if (!processed.has(sourceId)) {
-            const sourceNode = nodes.find(n => n.id === sourceId);
-            if (sourceNode) {
-              levels[nextLevel.toString()].push(sourceNode);
-              processed.add(sourceId);
-            }
-          }
-        }
-      }
-      
-      // If no nodes were added to this level, remove it
-      if (levels[nextLevel.toString()].length === 0) {
-        delete levels[nextLevel.toString()];
-      }
-      
-      currentLevel = nextLevel;
-    }
-    
-    // Position nodes vertically by level
-    const xGap = 150; // horizontal gap between levels
-    const yGap = 100; // vertical gap between nodes in the same level
-    const updatedNodes = [...nodes];
-    
-    // Update positions for each node based on its level
-    Object.keys(levels).forEach((level) => {
-      const levelNodes = levels[level];
-      const levelY = parseInt(level) * yGap + 100; // Y position based on level
-      
-      levelNodes.forEach((node, index) => {
-        // Calculate X position to center the nodes in each level
-        const levelWidth = levelNodes.length * xGap;
-        const startX = 100 + (800 - levelWidth) / 2;
-        const nodeX = startX + index * xGap;
-        
-        // Find and update the node in our updatedNodes array
-        const nodeIndex = updatedNodes.findIndex(n => n.id === node.id);
-        if (nodeIndex !== -1) {
-          updatedNodes[nodeIndex] = {
-            ...updatedNodes[nodeIndex],
-            position: { x: nodeX, y: levelY }
-          };
-        }
-      });
-    });
-    
-    // Handle any nodes not placed (not connected to the main flow)
-    const unplacedNodes = updatedNodes.filter(node => !processed.has(node.id));
-    if (unplacedNodes.length > 0) {
-      // Position these at the bottom
-      const maxLevel = Math.max(...Object.keys(levels).map(l => parseInt(l)), 0);
-      const extraY = (maxLevel + 1) * yGap + 100;
-      
-      unplacedNodes.forEach((node, index) => {
-        const nodeIndex = updatedNodes.findIndex(n => n.id === node.id);
-        if (nodeIndex !== -1) {
-          updatedNodes[nodeIndex] = {
-            ...updatedNodes[nodeIndex],
-            position: { x: 100 + index * xGap, y: extraY }
-          };
-        }
-      });
-    }
-    
-    setNodes(updatedNodes);
-  }, [nodes, edges, setNodes]);
+
 
   return (
     <Box className="whiteboard-container">
-      {/* Header */}
-      {showTopNav && (
-        <AppBar position="static" color="inherit" elevation={0} className="whiteboard-header">
-          <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={onClose} className="whiteboard-close-btn">
-              <Close />
-            </IconButton>
-            
-            <Box className="whiteboard-title">
-              <Typography variant="h6" noWrap component="div">
-                {activeRule.name}
-              </Typography>
-              <Chip 
-                label={`Version: ${activeVersion.version}`}
-                size="small"
-                color="primary"
-                className="whiteboard-version-chip"
-              />
-            </Box>
-            
-            <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ flexGrow: 1 }} />
-            
-            <Box className="whiteboard-actions">
-            <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
-              <span>
-                <IconButton 
-                  color="primary" 
-                  className="whiteboard-action-btn"
-                  onClick={() => onSaveClick?.()} // Change this line
-                  disabled={!hasUnsavedChanges}
-                >
-                  <Badge 
-                    color="error" 
-                    variant="dot" 
-                    invisible={!hasUnsavedChanges}
-                  >
-                    <Save />
-                  </Badge>
-                </IconButton>
-              </span>
-            </Tooltip>
-              
-              <Tooltip title="Test Rule">
-                <IconButton 
-                  color="secondary" 
-                  onClick={() => onTestRuleClick?.()} 
-                  className="whiteboard-action-btn"
-                >
-                  <PlayArrow />
-                </IconButton>
-              </Tooltip>
-              
-              <Tooltip title="Rule Settings">
-                <IconButton
-                  onClick={onSettingsClick || (() => {})}
-                  className="whiteboard-action-btn"
-                >
-                  <Settings />
-                </IconButton>
-              </Tooltip>
-              
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => onAnalyzeRuleClick?.()}
-                startIcon={<Code />}
-                className="whiteboard-ai-btn"
-              >
-                Analyze
-              </Button>
-              <Tooltip title="Auto-arrange Flow">
-                <IconButton 
-                  color="primary" 
-                  onClick={applyHorizontalLayout}
-                  className="whiteboard-action-btn"
-                >
-                  <Timeline />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Toolbar>
-        </AppBar>
-      )}
-      
       <Box className="whiteboard-content">
         {/* Retractable Side panel */}
         <Paper 
@@ -1689,9 +1611,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
 };
 
 // Wrap the Whiteboard component with ReactFlowProvider
-const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav, onSettingsClick, onSaveClick, onTestRuleClick, testResults, onAnalyzeRuleClick, onFlowDataChange}) => (
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, onSettingsClick, testResults, onAnalyzeRuleClick, onFlowDataChange, onAutoArrange}) => (
   <ReactFlowProvider>
-    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} onSettingsClick={onSettingsClick} onSaveClick={onSaveClick} onTestRuleClick={onTestRuleClick} testResults={testResults} onAnalyzeRuleClick={onAnalyzeRuleClick} onFlowDataChange={onFlowDataChange}/>
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} onSettingsClick={onSettingsClick} testResults={testResults} onAnalyzeRuleClick={onAnalyzeRuleClick} onFlowDataChange={onFlowDataChange} onAutoArrange={onAutoArrange}/>
   </ReactFlowProvider>
 );
 
