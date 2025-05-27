@@ -44,16 +44,18 @@ interface WhiteboardProps {
   onSettingsClick?: () => void;
   onSaveClick?: () => void;
   onTestRuleClick?: () => void;
+  onAnalyzeRuleClick?: () => void;
   testResults?: {
     overall?: {
       stp?: number;
       accuracy?: number;
       averageProcessingTime?: number;
     };
-  } | null; 
+  } | null;
+  onFlowDataChange?: (nodes: any[], edges: any[]) => void; 
 }
 
-const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true,  onSettingsClick, onSaveClick, onTestRuleClick, testResults }) => {
+const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav = true,  onSettingsClick, onSaveClick, onTestRuleClick, testResults, onAnalyzeRuleClick, onFlowDataChange }) => {
   // Get active rule and version from Redux state
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
   const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
@@ -87,13 +89,6 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [supportModalSubject, setSupportModalSubject] = useState('');
   const dispatch = useDispatch();
-
-  // Add these state variables to your component
-  const [ruleAiDialogOpen, setRuleAiDialogOpen] = useState(false);
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-  const [ruleSummaryText, setRuleSummaryText] = useState<string | null>(null);
-
-  // Add new state for numeric editing and node deletion
   const [isNumericEditMode, setIsNumericEditMode] = useState(false);
   const [originalNodeLabel, setOriginalNodeLabel] = useState('');
 
@@ -118,7 +113,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     }
   }, [activeVersion, setNodes, setEdges]);
 
-  // Add this useEffect to detect changes and update hasUnsavedChanges flag
+  // useEffect to detect changes and update hasUnsavedChanges flag
   useEffect(() => {
     // Skip initialization effect
     if (!activeVersion || !activeVersion.nodes || !activeVersion.edges) return;
@@ -148,6 +143,13 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     
     return () => clearTimeout(changeTimer);
   }, [nodes, edges, activeVersion, onUnsavedChanges]);
+
+  // useEffect to send flow data whenever nodes or edges change
+  useEffect(() => {
+    if (onFlowDataChange) {
+      onFlowDataChange(nodes, edges);
+    }
+  }, [nodes, edges, onFlowDataChange]);
 
   // Early return if no active rule or version
   if (!activeRule || !activeVersion) {
@@ -471,94 +473,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     setThresholdValue(recommendation);
   };
 
-  const handleRuleAiClick = () => {
-    setRuleAiDialogOpen(true);
-    setGeneratingSummary(true);
-    
-    // Simulate AI generating a summary based on the rule structure
-    setTimeout(() => {
-      // Create an intelligent summary based on the rule's structure
-      const decisionNodes = nodes.filter(node => node.type === 'diamond');
-      const endNodes = nodes.filter(node => 
-        node.data?.label === 'End' || 
-        (node.type === 'circle' && node.id !== 'start')
-      );
-      
-      // Extract decision points and labeled edges
-      const decisionPoints = decisionNodes.map(node => node.data?.label || 'Decision').join(', ');
-      const thresholds = edges.filter(edge => edge.label).map(edge => edge.label).join(', ');
-      
-      // Construct the rule summary based on structure
-      let summary = `This rule "${activeRule.name}" (version ${activeVersion.version}) `;
-      
-      if (decisionNodes.length > 0) {
-        summary += `evaluates ${decisionNodes.length} key decision points `;
-        if (decisionPoints) {
-          summary += `including ${decisionPoints}. `;
-        } else {
-          summary += `. `;
-        }
-      }
-      
-      if (edges.filter(edge => edge.label).length > 0) {
-        summary += `It includes conditional paths based on thresholds such as ${thresholds}. `;
-      }
-      
-      if (endNodes.length > 1) {
-        summary += `The rule can result in ${endNodes.length} different outcomes depending on the evaluation path. `;
-      } else {
-        summary += `The rule leads to a single outcome after evaluation. `;
-      }
-      
-      // Add context-specific insights based on node labels
-      const diabetesRelated = nodes.some(node => 
-        node.data?.label && 
-        node.data.label.toLowerCase().includes('diabetes')
-      );
-      
-      const sleepApneaRelated = nodes.some(node => 
-        node.data?.label && 
-        (node.data.label.toLowerCase().includes('sleep') || node.data.label.toLowerCase().includes('apnea'))
-      );
-      
-      const bmiRelated = nodes.some(node => 
-        node.data?.label && 
-        node.data.label.toLowerCase().includes('bmi')
-      );
-      
-      if (diabetesRelated || sleepApneaRelated || bmiRelated) {
-        summary += `This rule appears to be evaluating health conditions including `;
-        const conditions = [];
-        if (diabetesRelated) conditions.push('diabetes');
-        if (sleepApneaRelated) conditions.push('sleep apnea');
-        if (bmiRelated) conditions.push('BMI');
-        
-        summary += conditions.join(', ');
-        summary += ` to determine appropriate underwriting actions. `;
-      }
-      
-      summary += `\n\nThis rule design follows ${
-        nodes.length > 10 ? 'a complex' : 'a straightforward'
-      } decision tree structure with ${nodes.length} nodes and ${edges.length} connections. `;
-      
-      summary += `\n\nRecommendation: ${
-        decisionNodes.length > 5 
-          ? 'Consider simplifying some decision paths to improve rule readability and maintenance.' 
-          : 'The current design has good balance between complexity and readability.'
-      }`;
-      
-      setRuleSummaryText(summary);
-      setGeneratingSummary(false);
-    }, 2000);
-  };
-
-  // Add function to close the dialog
-  const handleRuleAiDialogClose = () => {
-    setRuleAiDialogOpen(false);
-    console.log('Rule AI dialog closed');
-  };
-
-  // Add this function to get field mapping information based on node type and label
+  // Function to get field mapping information based on node type and label
   const getFieldMappingInfo = (node) => {
     if (!node) return null;
     
@@ -641,7 +556,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     return mappingInfo;
   };
 
-  // Add a new handler for node clicks
+  // Handler for node clicks
   const handleNodeClick = (event, node) => {
     event.stopPropagation();
     setSelectedNode(node);
@@ -660,7 +575,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     setNodeDialogOpen(true);
   };
 
-  // Add function to close the node dialog
+  // Function to close the node dialog
   const handleNodeDialogClose = () => {
     setNodeDialogOpen(false);
     setSelectedNode(null);
@@ -670,12 +585,12 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     console.log('Node dialog closed');
   };
 
-  // Add function to toggle numeric edit mode
+  // Function to toggle numeric edit mode
   const toggleNumericEditMode = () => {
     setIsNumericEditMode(!isNumericEditMode);
   };
 
-  // Add a function to extract and update only numbers in a string
+  // Function to extract and update only numbers in a string
   const extractAndUpdateNumbers = (original, value) => {
     
     // Otherwise use the original behavior
@@ -731,7 +646,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     handleNodeDialogClose();
   };
 
-  // Add function to delete a node
+  // Function to delete a node
   const handleNodeDelete = () => {
     if (!selectedNode) return;
     
@@ -769,7 +684,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Add a function to arrange nodes in a vertical layout
+  // Function to arrange nodes in a vertical layout
   const applyVerticalLayout = useCallback(() => {
     if (!nodes.length) return;
     
@@ -937,7 +852,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleRuleAiClick}
+                onClick={() => onAnalyzeRuleClick?.()}
                 startIcon={<Code />}
                 className="whiteboard-ai-btn"
               >
@@ -1219,7 +1134,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={handleRuleAiClick}
+                      onClick={() => onAnalyzeRuleClick?.()}
                       startIcon={<Code />}
                       fullWidth
                       sx={{ 
@@ -1763,237 +1678,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
         </DialogActions>
       </Dialog>
 
-      {/* Rule AI Dialog */}
-      <Dialog
-        open={ruleAiDialogOpen}
-        onClose={handleRuleAiDialogClose}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{ 
-          style: { 
-            borderRadius: '12px',
-            overflow: 'hidden'
-          } 
-        }}
-      >
-        <DialogTitle sx={{ 
-          bgcolor: '#f5f7fa',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
-          <Box display="flex" alignItems="center">
-            <Code sx={{ color: '#5569ff', marginRight: 1.5 }} />
-            <Typography variant="h6" fontWeight={600}>
-              Analyze
-            </Typography>
-          </Box>
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={handleRuleAiDialogClose}
-            aria-label="close"
-            size="small"
-          >
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        
-        <DialogContent sx={{ padding: '24px' }}>
-          {/* Generated Rule Summary */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-              AI-Generated Rule Summary
-            </Typography>
-            
-            {generatingSummary ? (
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center',
-                justifyContent: 'center',
-                py: 3
-              }}>
-                <CircularProgress size={40} sx={{ mb: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing rule structure and generating summary...
-                </Typography>
-              </Box>
-            ) : ruleSummaryText ? (
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  borderRadius: 2,
-                  border: '1px solid rgba(85, 105, 255, 0.2)',
-                  bgcolor: 'rgba(85, 105, 255, 0.03)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
-                  <Chip 
-                    label="AI-generated" 
-                    size="small" 
-                    sx={{ 
-                      height: 20, 
-                      fontSize: '0.65rem', 
-                      bgcolor: 'rgba(85, 105, 255, 0.1)', 
-                      color: '#5569ff',
-                      fontWeight: 500
-                    }} 
-                  />
-                </Box>
-                
-                <Typography variant="body1" sx={{ 
-                  whiteSpace: 'pre-line',
-                  lineHeight: 1.7
-                }}>
-                  {ruleSummaryText}
-                </Typography>
-              </Paper>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                Unable to generate summary. Please try again.
-              </Typography>
-            )}
-          </Box>
-
-          {/* Upcoming Features */}
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mt: 4 }}>
-            Upcoming Rule AI Features
-          </Typography>
-          
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  border: '1px solid #e6f0ff',
-                  height: '100%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                  <Avatar sx={{ 
-                    bgcolor: 'rgba(85, 105, 255, 0.1)', 
-                    color: '#5569ff',
-                    width: 40,
-                    height: 40,
-                    mr: 1.5
-                  }}>
-                    <Code fontSize="small" />
-                  </Avatar>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Rule Optimization
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Automatically analyze rule flows to identify redundancies, circular paths, or dead ends.
-                  Get suggestions for simplifying complex decision trees without changing their logic.
-                </Typography>
-              </Paper>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  border: '1px solid #e6f0ff',
-                  height: '100%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                  <Avatar sx={{ 
-                    bgcolor: 'rgba(0, 171, 85, 0.1)', 
-                    color: '#00ab55',
-                    width: 40,
-                    height: 40,
-                    mr: 1.5
-                  }}>
-                    <Timeline fontSize="small" />
-                  </Avatar>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Path Analysis
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Analyze the most common paths through your rule based on real-world data.
-                  Identify edge cases and understand how frequently each decision branch is traversed.
-                </Typography>
-              </Paper>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  border: '1px solid #e6f0ff',
-                  height: '100%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                  <Avatar sx={{ 
-                    bgcolor: 'rgba(255, 193, 7, 0.1)', 
-                    color: '#ffc107',
-                    width: 40,
-                    height: 40,
-                    mr: 1.5
-                  }}>
-                    <Info fontSize="small" />
-                  </Avatar>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Natural Language Generation
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Automatically generate human-readable documentation that explains rule logic in plain language.
-                  Create business glossaries from your rules to maintain consistent terminology.
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        
-        <DialogActions sx={{ 
-          padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0'
-        }}>
-          <Button 
-            onClick={handleRuleAiDialogClose} 
-            color="inherit"
-            sx={{ borderRadius: '8px' }}
-          >
-            Close
-          </Button>
-          <Button 
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            sx={{ 
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
-            }}
-            onClick={() => window.location.href = "mailto:mqazi@munichre.com?subject=alitheia Labs Support | Get Access to Rule AI"}
-            >
-            Get Access
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Add the SupportModal component */}
+      {/* SupportModal Dialog */}
       <SupportModal 
         open={supportModalOpen} 
         onClose={() => setSupportModalOpen(false)} 
@@ -2004,9 +1689,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
 };
 
 // Wrap the Whiteboard component with ReactFlowProvider
-const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav, onSettingsClick, onSaveClick, onTestRuleClick, testResults}) => (
+const WhiteboardWrapper: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedChanges, showTopNav, onSettingsClick, onSaveClick, onTestRuleClick, testResults, onAnalyzeRuleClick, onFlowDataChange}) => (
   <ReactFlowProvider>
-    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} onSettingsClick={onSettingsClick} onSaveClick={onSaveClick} onTestRuleClick={onTestRuleClick} testResults={testResults}/>
+    <Whiteboard onClose={onClose} onNeedHelp={onNeedHelp} onUnsavedChanges={onUnsavedChanges} showTopNav={showTopNav} onSettingsClick={onSettingsClick} onSaveClick={onSaveClick} onTestRuleClick={onTestRuleClick} testResults={testResults} onAnalyzeRuleClick={onAnalyzeRuleClick} onFlowDataChange={onFlowDataChange}/>
   </ReactFlowProvider>
 );
 

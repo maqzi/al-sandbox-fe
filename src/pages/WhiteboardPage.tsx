@@ -28,7 +28,8 @@ import {
 import { RootState } from '@/store/store';
 import { updateRule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
 import Whiteboard from '@/components/RulesDesigner/Whiteboard/Whiteboard';
-import TestRuleDialog from '../components/RulesDesigner/Whiteboard/TestRuleDialog';
+import TestRuleDialog from '../components/RulesDesigner/TestRuleDialog';
+import AnalyzeRuleDialog from '../components/RulesDesigner/AnalyzeRuleDialog';
 
 const WhiteboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -66,6 +67,12 @@ const WhiteboardPage: React.FC = () => {
       risk: 'low' | 'medium' | 'high';
     }>
   }>(null);
+  const [analyzeDialogOpen, setAnalyzeDialogOpen] = useState(false);
+  const [currentFlowData, setCurrentFlowData] = useState({ 
+    nodes: activeVersion?.nodes || [], 
+    edges: activeVersion?.edges || [] 
+  });
+  
   // Effect to handle rule and version loading from URL parameters
   useEffect(() => {
     if (ruleId && !activeRule) {
@@ -289,6 +296,21 @@ const WhiteboardPage: React.FC = () => {
     setTestResults(results);
   };
 
+  // Analyze rule dialog open handler
+  const handleAnalyzeRuleClick = () => {
+    setAnalyzeDialogOpen(true);
+  };
+
+  // Analyze dialog close handler
+  const handleAnalyzeDialogClose = () => {
+    setAnalyzeDialogOpen(false);
+  };
+
+  // Callback function to receive flow data from Whiteboard
+  const onFlowDataChange = (nodes: any[], edges: any[]) => {
+    setCurrentFlowData({ nodes, edges });
+  };
+
   if (!activeRule || !activeVersion) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -329,7 +351,9 @@ const WhiteboardPage: React.FC = () => {
           onSettingsClick={handleSettingsDialogOpen}
           onSaveClick={handleSaveClick}
           onTestRuleClick={handleTestRuleClick}
+          onAnalyzeRuleClick={handleAnalyzeRuleClick}
           testResults={testResults}
+          onFlowDataChange={onFlowDataChange}
         />
       </Box>
 
@@ -631,6 +655,14 @@ const WhiteboardPage: React.FC = () => {
         open={testDialogOpen}
         onClose={handleTestDialogClose}
         onTestComplete={handleTestComplete}
+      />
+
+      {/* Analyze Rule Dialog */}
+      <AnalyzeRuleDialog
+        open={analyzeDialogOpen}
+        onClose={handleAnalyzeDialogClose}
+        nodes={currentFlowData.nodes}
+        edges={currentFlowData.edges}
       />
     </Box>
   );
