@@ -146,8 +146,8 @@ const WhiteboardPage: React.FC = () => {
         if (pendingNavigation) {
           navigate(pendingNavigation);
         }
-      }, 1500);
-    }, 1000);
+      }, 1000);
+    }, 500);
   };
 
   const handleDiscardAndExit = () => {

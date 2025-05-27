@@ -147,7 +147,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ onClose, onNeedHelp, onUnsavedC
     if (onFlowDataChange) {
       onFlowDataChange(nodes, edges);
     }
-  }, [nodes, edges, onFlowDataChange]);
+  }, [nodes, edges]);
 
   // Early return if no active rule or version
   if (!activeRule || !activeVersion) {
