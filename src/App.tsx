@@ -1,19 +1,25 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
-import { Provider, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { Snackbar } from "@mui/material";
-import { toast } from "sonner";
-import store, { RootState } from "@/store/store";
-import datadog from "@/lib/datadog";
-import AppLayout from "./components/AppLayout";
-import NotFound from "./pages/NotFound";
-import RulesDesignerPage from "./pages/RulesDesignerPage";
-import WhiteboardPage from "./pages/WhiteboardPage";
-import WorkbenchPage from "./pages/WorkbenchPage";
-import WelcomePage from "./pages/WelcomePage";
-import DemoSignupPage from "./pages/DemoSignupPage";
-import PrivateRoute from "./components/PrivateRoute";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { Provider, useSelector } from 'react-redux';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  useNavigationType,
+} from 'react-router-dom';
+
+import datadog from '@/lib/datadog';
+import store, { RootState } from '@/store/store';
+
+import AppLayout from './components/AppLayout';
+import PrivateRoute from './components/PrivateRoute';
+import DemoSignupPage from './pages/DemoSignupPage';
+import NotFound from './pages/NotFound';
+import RulesDesignerPage from './pages/RulesDesignerPage';
+import WelcomePage from './pages/WelcomePage';
+import WhiteboardPage from './pages/WhiteboardPage';
+import WorkbenchPage from './pages/WorkbenchPage';
 
 const queryClient = new QueryClient();
 
@@ -30,7 +36,7 @@ const RouteChangeTracker = () => {
       navigationType,
       search: location.search,
       timestamp: new Date().toISOString(),
-      screenResolution: `${window.innerWidth}x${window.innerHeight}`
+      screenResolution: `${window.innerWidth}x${window.innerHeight}`,
     });
   }, [location, navigationType]);
 
@@ -46,7 +52,7 @@ const AppContent = () => {
     if (userInfo?.email) {
       datadog.setUser({
         email: userInfo.email,
-        name: userInfo.name
+        name: userInfo.name,
       });
     }
   }, [userInfo, step]);
@@ -57,7 +63,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<DemoSignupPage />} />
         <Route path="/signup" element={<DemoSignupPage />} />
-        
+
         {/* Routes that use the AppLayout wrapper */}
         <Route element={<AppLayout />}>
           <Route
@@ -119,7 +125,7 @@ const AppContent = () => {
             }
           />
         </Route>
-        
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

@@ -35,17 +35,19 @@ class DatadogService {
   init(): boolean {
     if (this.initialized) return true;
     if (this.initializing) return false;
-    
+
     this.initializing = true;
     console.log('Initializing Datadog...');
-    
+
     try {
       // Check if we're in a browser environment
       if (typeof window === 'undefined') {
-        console.warn('Datadog initialization skipped - not in browser environment');
+        console.warn(
+          'Datadog initialization skipped - not in browser environment'
+        );
         return false;
       }
-      
+
       // Check if env variables are available
       const clientToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
       const appId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
@@ -65,7 +67,7 @@ class DatadogService {
         forwardErrorsToLogs: true,
         sessionSampleRate: 100,
         service: import.meta.env.VITE_DATADOG_SERVICE || 'alitheia-labs-ui',
-        env: import.meta.env.MODE || 'development'
+        env: import.meta.env.MODE || 'development',
       });
 
       // Initialize RUM if app ID is available
@@ -81,19 +83,21 @@ class DatadogService {
           sessionReplaySampleRate: 20,
           trackUserInteractions: true,
           trackResources: true,
-          trackLongTasks: true
+          trackLongTasks: true,
         });
       } else {
-        console.warn('Datadog RUM initialization skipped - missing application ID');
+        console.warn(
+          'Datadog RUM initialization skipped - missing application ID'
+        );
       }
 
       this.initialized = true;
       this.initializing = false;
       console.log('Datadog initialized successfully');
-      
+
       // Process any buffered logs
       this.flushLogBuffer();
-      
+
       return true;
     } catch (error) {
       console.error('Failed to initialize Datadog:', error);
@@ -108,7 +112,7 @@ class DatadogService {
   isInitialized(): boolean {
     return this.initialized;
   }
-  
+
   /**
    * Buffer a log for later processing
    */
@@ -117,22 +121,22 @@ class DatadogService {
     if (this.logBuffer.length >= this.bufferSize) {
       this.logBuffer.shift();
     }
-    
+
     this.logBuffer.push({
       type,
       args,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
-  
+
   /**
    * Process any logs that were queued before initialization
    */
   private flushLogBuffer(): void {
     if (!this.initialized) return;
-    
+
     console.log(`Processing ${this.logBuffer.length} buffered logs`);
-    
+
     this.logBuffer.forEach(item => {
       if (item.type === 'log') {
         this.processLog(...item.args);
@@ -140,7 +144,7 @@ class DatadogService {
         this.processError(...item.args);
       }
     });
-    
+
     // Clear the buffer
     this.logBuffer = [];
   }
@@ -148,9 +152,14 @@ class DatadogService {
   /**
    * Set user information for logging
    */
-  setUser(userInfo: { id?: string; email?: string; name?: string; role?: string }): void {
+  setUser(userInfo: {
+    id?: string;
+    email?: string;
+    name?: string;
+    role?: string;
+  }): void {
     this.userInfo = { ...this.userInfo, ...userInfo };
-    
+
     if (this.initialized) {
       try {
         datadogLogs.setUser(this.userInfo);
@@ -171,26 +180,30 @@ class DatadogService {
         category: options.category,
         label: options.label,
         ...options.additionalData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Failed to log to Datadog:', error);
     }
   }
-  
+
   /**
    * Process error after initialization
    */
-  private processError(message: string, error: Error, additionalData = {}): void {
+  private processError(
+    message: string,
+    error: Error,
+    additionalData = {}
+  ): void {
     try {
       datadogLogs.logger.error(message, {
         error: {
           kind: error.name,
           message: error.message,
-          stack: error.stack
+          stack: error.stack,
         },
         ...additionalData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (logError) {
       console.error('Failed to log error to Datadog:', logError);
@@ -233,8 +246,8 @@ class DatadogService {
         page: pageName,
         ...pageData,
         url: window.location.pathname,
-        referrer: document.referrer || 'direct'
-      }
+        referrer: document.referrer || 'direct',
+      },
     });
   }
 
@@ -246,7 +259,7 @@ class DatadogService {
       action: 'button_click',
       category: 'ui_interaction',
       label: buttonName,
-      additionalData: buttonData
+      additionalData: buttonData,
     });
   }
 
@@ -260,8 +273,8 @@ class DatadogService {
       label: formName,
       additionalData: {
         success,
-        ...formData
-      }
+        ...formData,
+      },
     });
   }
 
@@ -276,15 +289,20 @@ class DatadogService {
       additionalData: {
         fields: Object.keys(errors),
         errorCount: Object.keys(errors).length,
-        errors
-      }
+        errors,
+      },
     });
   }
 
   /**
    * Log API requests to Datadog with enhanced metadata
    */
-  logApiRequest(endpoint: string, method: string, status: number, duration: number): void {
+  logApiRequest(
+    endpoint: string,
+    method: string,
+    status: number,
+    duration: number
+  ): void {
     this.log({
       action: 'api_request',
       category: 'api',
@@ -297,8 +315,8 @@ class DatadogService {
         success: status >= 200 && status < 300,
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
-        screenResolution: `${window.innerWidth}x${window.innerHeight}`
-      }
+        screenResolution: `${window.innerWidth}x${window.innerHeight}`,
+      },
     });
   }
 
@@ -314,15 +332,19 @@ class DatadogService {
         ...featureData,
         timestamp: new Date().toISOString(),
         url: window.location.pathname,
-        referrer: document.referrer || 'direct'
-      }
+        referrer: document.referrer || 'direct',
+      },
     });
   }
 
   /**
    * Track user interaction with any element
    */
-  trackInteraction(elementType: string, elementName: string, additionalData = {}): void {
+  trackInteraction(
+    elementType: string,
+    elementName: string,
+    additionalData = {}
+  ): void {
     this.log({
       action: 'user_interaction',
       category: 'ui_interaction',
@@ -330,30 +352,38 @@ class DatadogService {
       additionalData: {
         elementType,
         elementName,
-        ...additionalData
-      }
+        ...additionalData,
+      },
     });
   }
 
   /**
    * Track component mount/unmount lifecycle
    */
-  trackComponentLifecycle(componentName: string, action: 'mount' | 'unmount', duration?: number): void {
+  trackComponentLifecycle(
+    componentName: string,
+    action: 'mount' | 'unmount',
+    duration?: number
+  ): void {
     this.log({
       action: `component_${action}`,
       category: 'lifecycle',
       label: componentName,
       additionalData: {
         duration,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
   /**
    * Track search actions
    */
-  trackSearch(searchTerm: string, category: string, resultsCount: number): void {
+  trackSearch(
+    searchTerm: string,
+    category: string,
+    resultsCount: number
+  ): void {
     this.log({
       action: 'search',
       category,
@@ -361,15 +391,20 @@ class DatadogService {
       additionalData: {
         searchTerm,
         resultsCount,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
   /**
    * Track file operations
    */
-  trackFileOperation(operation: 'upload' | 'download' | 'view', fileType: string, fileSize?: number, fileName?: string): void {
+  trackFileOperation(
+    operation: 'upload' | 'download' | 'view',
+    fileType: string,
+    fileSize?: number,
+    fileName?: string
+  ): void {
     this.log({
       action: `file_${operation}`,
       category: 'file_operation',
@@ -378,8 +413,8 @@ class DatadogService {
         fileType,
         fileSize,
         fileName,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
@@ -394,32 +429,48 @@ class DatadogService {
       additionalData: {
         value,
         unit,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
   /**
    * Track state changes
    */
-  trackStateChange(stateName: string, previousValue: any, currentValue: any, source?: string): void {
+  trackStateChange(
+    stateName: string,
+    previousValue: any,
+    currentValue: any,
+    source?: string
+  ): void {
     this.log({
       action: 'state_change',
       category: 'state',
       label: stateName,
       additionalData: {
-        previousValue: typeof previousValue === 'object' ? JSON.stringify(previousValue) : previousValue,
-        currentValue: typeof currentValue === 'object' ? JSON.stringify(currentValue) : currentValue,
+        previousValue:
+          typeof previousValue === 'object'
+            ? JSON.stringify(previousValue)
+            : previousValue,
+        currentValue:
+          typeof currentValue === 'object'
+            ? JSON.stringify(currentValue)
+            : currentValue,
         source,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
   /**
    * Track user workflow steps
    */
-  trackWorkflowStep(workflowName: string, stepName: string, stepNumber: number, isComplete: boolean): void {
+  trackWorkflowStep(
+    workflowName: string,
+    stepName: string,
+    stepNumber: number,
+    isComplete: boolean
+  ): void {
     this.log({
       action: 'workflow_step',
       category: 'workflow',
@@ -429,15 +480,19 @@ class DatadogService {
         stepName,
         stepNumber,
         isComplete,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
   /**
    * Track session information
    */
-  trackSession(action: 'start' | 'end' | 'refresh', sessionId: string, duration?: number): void {
+  trackSession(
+    action: 'start' | 'end' | 'refresh',
+    sessionId: string,
+    duration?: number
+  ): void {
     this.log({
       action: `session_${action}`,
       category: 'session',
@@ -446,23 +501,27 @@ class DatadogService {
         sessionId,
         duration,
         userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
   /**
    * Track authentication events
    */
-  trackAuth(action: 'login' | 'logout' | 'login_attempt' | 'password_reset', success: boolean, method?: string): void {
+  trackAuth(
+    action: 'login' | 'logout' | 'login_attempt' | 'password_reset',
+    success: boolean,
+    method?: string
+  ): void {
     this.log({
       action: `auth_${action}`,
       category: 'authentication',
       label: success ? 'success' : 'failure',
       additionalData: {
         method,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 }

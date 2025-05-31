@@ -1,54 +1,62 @@
+import {
+  FavoriteBorder,
+  ShowChart,
+  LocalHospital,
+  TrendingUp,
+  TrendingDown,
+  Warning,
+  CheckCircle,
+  Info,
+  DirectionsRun,
+  AccessTime,
+  Flag,
+  Error,
+  Timeline,
+} from '@mui/icons-material';
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Tabs,
+  Tab,
+  Tooltip,
+  IconButton,
+  Avatar,
+  Grid,
+  Badge,
+  Alert,
+  LinearProgress,
+  Button,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  Box, Typography, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Card, CardContent, Chip, Divider,
-  Tabs, Tab, Tooltip, IconButton, Avatar, Grid, Badge, Alert,
-  LinearProgress, Button
-} from '@mui/material';
-import { 
-  FavoriteBorder, ShowChart, LocalHospital, TrendingUp, TrendingDown, 
-  Warning, CheckCircle, Info, DirectionsRun, AccessTime, Flag, 
-  Error, Timeline
-} from '@mui/icons-material';
+
 import './css/SummarizerComponent.css';
 import { selectSelectedCase } from '@/store/selectors';
 
 const SummarizerComponent: React.FC = () => {
-  // Get data directly from Redux state
-  const selectedCase = useSelector(selectSelectedCase);
-  // Ensure we have case data
-  if (!selectedCase) {
-    return null;
-  }
-
-  const {
-    impairments = '',
-    unprocessedDocuments = '',
-    mostRecentBMI = 0,
-    avgBP = '',
-    smokerStatus = '',
-    buildTableData = [],
-    bloodPressureTableData = [],
-    coreLabResultsTableData = []
-  } = {
-    impairments: selectedCase.health.ehrSummary?.impairments,
-    unprocessedDocuments: selectedCase.health.ehrSummary?.unprocessedDocuments,
-    mostRecentBMI: selectedCase.person.physical?.bmi,
-    avgBP: selectedCase.health.vitals?.bloodPressure?.average,
-    smokerStatus: selectedCase.health.smokerStatus,
-    buildTableData: selectedCase.person.physical?.buildHistory,
-    bloodPressureTableData: selectedCase.health.vitals?.bloodPressure?.history,
-    coreLabResultsTableData: selectedCase.health.labs
-  };
-
+  // Always call hooks first, before any early returns
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Get data directly from Redux state
+  const selectedCase = useSelector(selectSelectedCase);
+
+  // Handle tab change
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setIsLoading(true);
     setActiveTab(newValue);
-    
+
     // Simulate loading delay
     setTimeout(() => {
       setIsLoading(false);
@@ -68,19 +76,56 @@ const SummarizerComponent: React.FC = () => {
     return 'avatar-green';
   };
 
+  // Ensure we have case data - moved after hooks
+  if (!selectedCase) {
+    return null;
+  }
+
+  const {
+    impairments = '',
+    unprocessedDocuments = '',
+    mostRecentBMI = 0,
+    avgBP = '',
+    smokerStatus = '',
+    buildTableData = [],
+    bloodPressureTableData = [],
+    coreLabResultsTableData = [],
+  } = {
+    impairments: selectedCase.health.ehrSummary?.impairments,
+    unprocessedDocuments: selectedCase.health.ehrSummary?.unprocessedDocuments,
+    mostRecentBMI: selectedCase.person.physical?.bmi,
+    avgBP: selectedCase.health.vitals?.bloodPressure?.average,
+    smokerStatus: selectedCase.health.smokerStatus,
+    buildTableData: selectedCase.person.physical?.buildHistory,
+    bloodPressureTableData: selectedCase.health.vitals?.bloodPressure?.history,
+    coreLabResultsTableData: selectedCase.health.labs,
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
       <Card className="summarizer-card" elevation={0}>
         <CardContent sx={{ p: 0 }}>
           {/* Header */}
           <Box className="summarizer-header">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar className="avatar-blue" sx={{ width: 42, height: 42, mr: 1.5 }}>
+                <Avatar
+                  className="avatar-blue"
+                  sx={{ width: 42, height: 42, mr: 1.5 }}
+                >
                   <LocalHospital />
                 </Avatar>
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1a3353' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: '#1a3353' }}
+                  >
                     Applicant EHR Summary
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -88,10 +133,10 @@ const SummarizerComponent: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              
-              <Chip 
+
+              <Chip
                 icon={<Info sx={{ fontSize: 16 }} />}
-                label="EHR Summarizer" 
+                label="EHR Summarizer"
                 variant="outlined"
                 color="primary"
                 className="status-chip"
@@ -106,7 +151,7 @@ const SummarizerComponent: React.FC = () => {
               <Grid item xs={12} sm={6} lg={3}>
                 <Paper elevation={0} className="metric-card warning">
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Badge 
+                    <Badge
                       badgeContent={impairments.split(',').length}
                       color="warning"
                       sx={{ mr: 1.5 }}
@@ -129,7 +174,10 @@ const SummarizerComponent: React.FC = () => {
               <Grid item xs={6} sm={6} lg={3}>
                 <Paper elevation={0} className="metric-card">
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar className={getBMIClass(mostRecentBMI)} sx={{ width: 36, height: 36, mr: 1.5 }}>
+                    <Avatar
+                      className={getBMIClass(mostRecentBMI)}
+                      sx={{ width: 36, height: 36, mr: 1.5 }}
+                    >
                       <DirectionsRun fontSize="small" />
                     </Avatar>
                     <Box>
@@ -137,7 +185,10 @@ const SummarizerComponent: React.FC = () => {
                         Most Recent BMI
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 600 }}
+                        >
                           {mostRecentBMI}
                         </Typography>
                         {mostRecentBMI >= 30 && (
@@ -160,7 +211,10 @@ const SummarizerComponent: React.FC = () => {
               <Grid item xs={6} sm={6} lg={3}>
                 <Paper elevation={0} className="metric-card">
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar className="avatar-red" sx={{ width: 36, height: 36, mr: 1.5 }}>
+                    <Avatar
+                      className="avatar-red"
+                      sx={{ width: 36, height: 36, mr: 1.5 }}
+                    >
                       <FavoriteBorder fontSize="small" />
                     </Avatar>
                     <Box>
@@ -177,16 +231,24 @@ const SummarizerComponent: React.FC = () => {
 
               {/* Smoker Status */}
               <Grid item xs={12} sm={6} lg={3}>
-                <Paper 
-                  elevation={0} 
+                <Paper
+                  elevation={0}
                   className={`metric-card ${smokerStatus.toLowerCase() === 'never' ? 'success' : 'error'}`}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar 
-                      className={smokerStatus.toLowerCase() === 'never' ? 'avatar-green' : 'avatar-red'}
+                    <Avatar
+                      className={
+                        smokerStatus.toLowerCase() === 'never'
+                          ? 'avatar-green'
+                          : 'avatar-red'
+                      }
                       sx={{ width: 36, height: 36, mr: 1.5 }}
                     >
-                      {smokerStatus.toLowerCase() === 'never' ? <CheckCircle fontSize="small" /> : <Error fontSize="small" />}
+                      {smokerStatus.toLowerCase() === 'never' ? (
+                        <CheckCircle fontSize="small" />
+                      ) : (
+                        <Error fontSize="small" />
+                      )}
                     </Avatar>
                     <Box>
                       <Typography variant="body2" color="text.secondary">
@@ -203,30 +265,30 @@ const SummarizerComponent: React.FC = () => {
 
             {/* Navigation Tabs */}
             <Box className="tabs-container">
-              <Tabs 
-                value={activeTab} 
+              <Tabs
+                value={activeTab}
                 onChange={handleTabChange}
                 className="custom-tabs"
                 sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
               >
-                <Tab 
-                  label="Summary" 
-                  icon={<Timeline sx={{ fontSize: 18 }} />} 
-                  iconPosition="start" 
+                <Tab
+                  label="Summary"
+                  icon={<Timeline sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
                 />
-                <Tab 
-                  label="All Lab Results" 
-                  icon={<ShowChart sx={{ fontSize: 18 }} />} 
-                  iconPosition="start" 
+                <Tab
+                  label="All Lab Results"
+                  icon={<ShowChart sx={{ fontSize: 18 }} />}
+                  iconPosition="start"
                 />
               </Tabs>
-              
+
               {isLoading ? (
                 <Box className="skeleton-container">
                   <LinearProgress sx={{ borderRadius: 1 }} />
                   <Box sx={{ mt: 4 }}>
                     <Grid container spacing={2}>
-                      {[1, 2, 3, 4].map((item) => (
+                      {[1, 2, 3, 4].map(item => (
                         <Grid item xs={12} md={6} key={item}>
                           <Paper className="skeleton-card" />
                         </Grid>
@@ -239,17 +301,17 @@ const SummarizerComponent: React.FC = () => {
                   {activeTab === 0 && (
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
-                      <BuildTable data={buildTableData} />
+                        <BuildTable data={buildTableData} />
                       </Grid>
                       <Grid item xs={6}>
-                      <BloodPressureTable data={bloodPressureTableData} />
+                        <BloodPressureTable data={bloodPressureTableData} />
                       </Grid>
                       <Grid item xs={12}>
-                      <CoreLabResultsTable data={coreLabResultsTableData} />
+                        <CoreLabResultsTable data={coreLabResultsTableData} />
                       </Grid>
                     </Grid>
                   )}
-                  
+
                   {activeTab === 1 && (
                     <Box>
                       <AllLabResultsTable data={coreLabResultsTableData} />
@@ -267,14 +329,25 @@ const SummarizerComponent: React.FC = () => {
 
 // Update the BuildTable component
 
-const BuildTable: React.FC<{ data: Array<{ date: string; height: string; weight: string; bmi: number; build: string }> }> = ({ data }) => {
+const BuildTable: React.FC<{
+  data: Array<{
+    date: string;
+    height: string;
+    weight: string;
+    bmi: number;
+    build: string;
+  }>;
+}> = ({ data }) => {
   return (
     <div className="enhanced-table-container compact-table">
       <div className="table-title">
-        <DirectionsRun fontSize="small" className="table-icon table-icon-green" />
+        <DirectionsRun
+          fontSize="small"
+          className="table-icon table-icon-green"
+        />
         <span>Build Measurements</span>
         <div className="table-actions">
-          <Chip 
+          <Chip
             label={`${data.length} Records`}
             size="small"
             variant="outlined"
@@ -282,36 +355,39 @@ const BuildTable: React.FC<{ data: Array<{ date: string; height: string; weight:
           />
         </div>
       </div>
-      
+
       <TableContainer component={Paper} className="table-wrapper">
         <Table size="small" aria-label="build table">
           <TableHead>
             <TableRow>
               <TableCell className="table-header date-cell">Date</TableCell>
-              <TableCell className="table-header value-cell">ft.in.lbs</TableCell>
+              <TableCell className="table-header value-cell">
+                ft.in.lbs
+              </TableCell>
               <TableCell className="table-header value-cell">BMI</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data.map((row, index) => {
-              const bmiHigh = row.class == "Obese"
-              const bmiWarning = row.class == "Overweight";
-              
+              const bmiHigh = row.class === 'Obese';
+              const bmiWarning = row.class === 'Overweight';
+
               return (
                 <TableRow key={index} className="table-row">
                   <TableCell className="date-cell">{row.date}</TableCell>
                   <TableCell className="value-cell">
-                    <Typography variant="body2">
-                      {row.build}
-                    </Typography>
+                    <Typography variant="body2">{row.build}</Typography>
                   </TableCell>
                   <TableCell className="value-cell">
                     <Box className="value-with-indicator">
-                      <Typography 
-                        variant="body2" 
+                      <Typography
+                        variant="body2"
                         className={
-                          bmiHigh ? 'value-alert' : 
-                          bmiWarning ? 'value-warning' : 'value-normal'
+                          bmiHigh
+                            ? 'value-alert'
+                            : bmiWarning
+                              ? 'value-warning'
+                              : 'value-normal'
                         }
                       >
                         {row.bmi}
@@ -324,7 +400,7 @@ const BuildTable: React.FC<{ data: Array<{ date: string; height: string; weight:
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       <div className="table-footer">
         <Typography variant="caption" color="text.secondary">
           <span className="bp-legend-item">
@@ -343,14 +419,24 @@ const BuildTable: React.FC<{ data: Array<{ date: string; height: string; weight:
 };
 
 // Update the BloodPressureTable component
-const BloodPressureTable: React.FC<{ data: Array<{ date: string; systolic: number; diastolic: number; heartRate: number }> }> = ({ data }) => {
+const BloodPressureTable: React.FC<{
+  data: Array<{
+    date: string;
+    systolic: number;
+    diastolic: number;
+    heartRate: number;
+  }>;
+}> = ({ data }) => {
   return (
     <div className="enhanced-table-container compact-table">
       <div className="table-title">
-        <FavoriteBorder fontSize="small" className="table-icon table-icon-red" />
+        <FavoriteBorder
+          fontSize="small"
+          className="table-icon table-icon-red"
+        />
         <span>Blood Pressure</span>
         <div className="table-actions">
-          <Chip 
+          <Chip
             label={`${data.length} Records`}
             size="small"
             variant="outlined"
@@ -358,36 +444,52 @@ const BloodPressureTable: React.FC<{ data: Array<{ date: string; systolic: numbe
           />
         </div>
       </div>
-      
+
       <TableContainer component={Paper} className="table-wrapper">
         <Table size="small" aria-label="blood pressure table">
           <TableHead>
             <TableRow>
               <TableCell className="table-header date-cell">Date</TableCell>
-              <TableCell className="table-header value-cell">Systolic</TableCell>
-              <TableCell className="table-header value-cell">Diastolic</TableCell>
+              <TableCell className="table-header value-cell">
+                Systolic
+              </TableCell>
+              <TableCell className="table-header value-cell">
+                Diastolic
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data.map((row, index) => {
-              const isHigh = (row.flag == "Hypertension");
-              const isElevated = (row.flag == "Elevated");
-              
+              const isHigh = row.flag === 'Hypertension';
+              const isElevated = row.flag === 'Elevated';
+
               return (
                 <TableRow key={index} className="table-row">
                   <TableCell className="date-cell">{row.date}</TableCell>
                   <TableCell className="value-cell">
-                    <Typography 
-                      variant="body2" 
-                      className={isHigh ? 'value-alert' : isElevated ? 'value-warning' : 'value-normal'}
+                    <Typography
+                      variant="body2"
+                      className={
+                        isHigh
+                          ? 'value-alert'
+                          : isElevated
+                            ? 'value-warning'
+                            : 'value-normal'
+                      }
                     >
                       {row.systolic}
                     </Typography>
                   </TableCell>
                   <TableCell className="value-cell">
-                    <Typography 
-                      variant="body2" 
-                      className={isHigh ? 'value-alert' : isElevated ? 'value-warning' : 'value-normal'}
+                    <Typography
+                      variant="body2"
+                      className={
+                        isHigh
+                          ? 'value-alert'
+                          : isElevated
+                            ? 'value-warning'
+                            : 'value-normal'
+                      }
                     >
                       {row.diastolic}
                     </Typography>
@@ -398,7 +500,7 @@ const BloodPressureTable: React.FC<{ data: Array<{ date: string; systolic: numbe
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       <div className="table-footer">
         <Typography variant="caption" color="text.secondary">
           <span className="bp-legend-item">
@@ -416,25 +518,38 @@ const BloodPressureTable: React.FC<{ data: Array<{ date: string; systolic: numbe
   );
 };
 
-const CoreLabResultsTable: React.FC<{ data: Array<{ date: string; feature: string; value: number | string; unit: string; range: string; flag: string; code: string }> }> = ({ data }) => {
+const CoreLabResultsTable: React.FC<{
+  data: Array<{
+    date: string;
+    feature: string;
+    value: number | string;
+    unit: string;
+    range: string;
+    flag: string;
+    code: string;
+  }>;
+}> = ({ data }) => {
   // Group data by feature
-  const groupedData = data.reduce((acc, item) => {
-    if (!acc[item.feature]) {
-      acc[item.feature] = [];
-    }
-    acc[item.feature].push(item);
-    return acc;
-  }, {} as Record<string, typeof data>);
+  const groupedData = data.reduce(
+    (acc, item) => {
+      if (!acc[item.feature]) {
+        acc[item.feature] = [];
+      }
+      acc[item.feature].push(item);
+      return acc;
+    },
+    {} as Record<string, typeof data>
+  );
 
   const features = Object.keys(groupedData);
-  
+
   return (
     <div className="enhanced-table-container core-lab-container">
       <div className="table-title">
         <ShowChart fontSize="small" className="table-icon table-icon-green" />
         <span>Core Lab Results</span>
         <div className="table-actions">
-          <Chip 
+          <Chip
             label={`${data.length} Records`}
             size="small"
             variant="outlined"
@@ -442,33 +557,41 @@ const CoreLabResultsTable: React.FC<{ data: Array<{ date: string; feature: strin
           />
         </div>
       </div>
-      
+
       <div className="lab-results-grid">
         {features.map(feature => {
           const featureData = groupedData[feature];
           const latestResult = featureData[0]; // Assuming sorted by date
           const isAbnormal = latestResult.flag.toLowerCase() !== 'normal';
-          
+
           return (
-            <Paper key={feature} className={`lab-result-card ${isAbnormal ? 'lab-result-card-alert' : ''}`}>
+            <Paper
+              key={feature}
+              className={`lab-result-card ${isAbnormal ? 'lab-result-card-alert' : ''}`}
+            >
               <div className="lab-result-header">
                 <Typography variant="subtitle2">{feature}</Typography>
-                <Chip 
-                  label={latestResult.flag} 
-                  size="small" 
+                <Chip
+                  label={latestResult.flag}
+                  size="small"
                   className={
-                    latestResult.flag.toLowerCase() === 'high' ? 'status-chip status-chip-high' : 
-                    latestResult.flag.toLowerCase() === 'low' ? 'status-chip status-chip-medium' : 
-                    'status-chip status-chip-normal'
+                    latestResult.flag.toLowerCase() === 'high'
+                      ? 'status-chip status-chip-high'
+                      : latestResult.flag.toLowerCase() === 'low'
+                        ? 'status-chip status-chip-medium'
+                        : 'status-chip status-chip-normal'
                   }
                 />
               </div>
               <div className="lab-result-value">
-                <Typography 
-                  variant="h5" 
+                <Typography
+                  variant="h5"
                   className={
-                    latestResult.flag.toLowerCase() === 'high' ? 'value-alert' : 
-                    latestResult.flag.toLowerCase() === 'low' ? 'value-warning' : ''
+                    latestResult.flag.toLowerCase() === 'high'
+                      ? 'value-alert'
+                      : latestResult.flag.toLowerCase() === 'low'
+                        ? 'value-warning'
+                        : ''
                   }
                 >
                   {latestResult.value}
@@ -476,7 +599,7 @@ const CoreLabResultsTable: React.FC<{ data: Array<{ date: string; feature: strin
                 <Typography variant="caption" color="text.secondary">
                   {latestResult.unit}
                 </Typography>
-                
+
                 {latestResult.flag.toLowerCase() === 'high' && (
                   <TrendingUp className="trend-icon trend-icon-up" />
                 )}
@@ -495,21 +618,27 @@ const CoreLabResultsTable: React.FC<{ data: Array<{ date: string; feature: strin
               {featureData.length > 1 && (
                 <div className="lab-result-history">
                   <Divider sx={{ my: 1 }} />
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mb: 1 }}
+                  >
                     History
                   </Typography>
                   <div className="history-chart">
                     {featureData.map((item, idx) => (
-                      <Tooltip 
+                      <Tooltip
                         key={idx}
                         title={`${item.date}: ${item.value} ${item.unit}`}
                         arrow
                       >
-                        <div 
+                        <div
                           className={`history-point ${
-                            item.flag.toLowerCase() === 'high' ? 'history-point-high' : 
-                            item.flag.toLowerCase() === 'low' ? 'history-point-low' : 
-                            'history-point-normal'
+                            item.flag.toLowerCase() === 'high'
+                              ? 'history-point-high'
+                              : item.flag.toLowerCase() === 'low'
+                                ? 'history-point-low'
+                                : 'history-point-normal'
                           }`}
                         ></div>
                       </Tooltip>
@@ -525,14 +654,24 @@ const CoreLabResultsTable: React.FC<{ data: Array<{ date: string; feature: strin
   );
 };
 
-const AllLabResultsTable: React.FC<{ data: Array<{ date: string; feature: string; value: number | string; unit: string; range: string; flag: string; code: string }> }> = ({ data }) => {
+const AllLabResultsTable: React.FC<{
+  data: Array<{
+    date: string;
+    feature: string;
+    value: number | string;
+    unit: string;
+    range: string;
+    flag: string;
+    code: string;
+  }>;
+}> = ({ data }) => {
   return (
     <div className="enhanced-table-container table-container">
       <div className="table-title">
         <ShowChart fontSize="small" className="table-icon table-icon-green" />
         <span>All Lab Results</span>
         <div className="table-actions">
-          <Chip 
+          <Chip
             label={`${data.length} Records`}
             size="small"
             variant="outlined"
@@ -540,7 +679,7 @@ const AllLabResultsTable: React.FC<{ data: Array<{ date: string; feature: string
           />
         </div>
       </div>
-      
+
       <TableContainer component={Paper} className="table-wrapper">
         <Table size="small" aria-label="all lab results table">
           <TableHead>
@@ -557,13 +696,16 @@ const AllLabResultsTable: React.FC<{ data: Array<{ date: string; feature: string
           <TableBody>
             {data.map((row, index) => {
               const isAbnormal = row.flag.toLowerCase() !== 'normal';
-              
+
               return (
-                <TableRow 
-                  key={index} 
+                <TableRow
+                  key={index}
                   className={`table-row ${
-                    row.flag.toLowerCase() === 'high' ? 'row-alert' : 
-                    row.flag.toLowerCase() === 'low' ? 'row-warning' : ''
+                    row.flag.toLowerCase() === 'high'
+                      ? 'row-alert'
+                      : row.flag.toLowerCase() === 'low'
+                        ? 'row-warning'
+                        : ''
                   }`}
                 >
                   <TableCell className="date-cell">{row.date}</TableCell>
@@ -574,35 +716,46 @@ const AllLabResultsTable: React.FC<{ data: Array<{ date: string; feature: string
                   </TableCell>
                   <TableCell>
                     <Box className="value-with-indicator">
-                      <Typography 
-                        variant="body2" 
+                      <Typography
+                        variant="body2"
                         className={
-                          row.flag.toLowerCase() === 'high' ? 'value-alert' : 
-                          row.flag.toLowerCase() === 'low' ? 'value-warning' : ''
+                          row.flag.toLowerCase() === 'high'
+                            ? 'value-alert'
+                            : row.flag.toLowerCase() === 'low'
+                              ? 'value-warning'
+                              : ''
                         }
                         sx={{ fontWeight: isAbnormal ? 600 : 400 }}
                       >
                         {row.value}
                       </Typography>
-                      
+
                       {row.flag.toLowerCase() === 'high' && (
-                        <TrendingUp sx={{ fontSize: 16, ml: 0.5 }} className="trend-icon-up" />
+                        <TrendingUp
+                          sx={{ fontSize: 16, ml: 0.5 }}
+                          className="trend-icon-up"
+                        />
                       )}
                       {row.flag.toLowerCase() === 'low' && (
-                        <TrendingDown sx={{ fontSize: 16, ml: 0.5 }} className="trend-icon-down" />
+                        <TrendingDown
+                          sx={{ fontSize: 16, ml: 0.5 }}
+                          className="trend-icon-down"
+                        />
                       )}
                     </Box>
                   </TableCell>
                   <TableCell>{row.unit}</TableCell>
                   <TableCell>{row.range}</TableCell>
                   <TableCell>
-                    <Chip 
-                      label={row.flag} 
-                      size="small" 
+                    <Chip
+                      label={row.flag}
+                      size="small"
                       className={
-                        row.flag.toLowerCase() === 'high' ? 'status-chip status-chip-high' : 
-                        row.flag.toLowerCase() === 'low' ? 'status-chip status-chip-medium' : 
-                        'status-chip status-chip-normal'
+                        row.flag.toLowerCase() === 'high'
+                          ? 'status-chip status-chip-high'
+                          : row.flag.toLowerCase() === 'low'
+                            ? 'status-chip status-chip-medium'
+                            : 'status-chip status-chip-normal'
                       }
                     />
                   </TableCell>
@@ -622,7 +775,7 @@ const AllLabResultsTable: React.FC<{ data: Array<{ date: string; feature: string
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       <div className="table-footer">
         <Typography variant="caption" color="text.secondary">
           <span className="bp-legend-item">

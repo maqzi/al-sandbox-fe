@@ -1,9 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { 
-  Box, 
-  Typography, 
+import {
+  ArrowBack,
+  Save as SaveIcon,
+  Info,
+  CheckCircle,
+  Close,
+  Settings,
+  PlayArrow,
+  Code,
+  Timeline,
+} from '@mui/icons-material';
+import {
+  Box,
+  Typography,
   Button,
   Alert,
   Dialog,
@@ -19,37 +27,42 @@ import {
   Toolbar,
   Chip,
   Tooltip,
-  Badge
+  Badge,
 } from '@mui/material';
-import { 
-  ArrowBack, 
-  Save as SaveIcon,
-  Info,
-  CheckCircle,
-  Close,
-  Settings,
-  PlayArrow,
-  Code,
-  Timeline
-} from '@mui/icons-material';
-import { RootState } from '@/store/store';
-import { updateRule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import Whiteboard from '@/components/RulesDesigner/Whiteboard/Whiteboard';
-import TestRuleDialog from '../components/RulesDesigner/TestRuleDialog';
+import {
+  updateRule,
+  setActiveRule,
+  setActiveVersion,
+} from '@/store/rulesSlice';
+import { RootState } from '@/store/store';
+
 import AnalyzeRuleDialog from '../components/RulesDesigner/AnalyzeRuleDialog';
+import TestRuleDialog from '../components/RulesDesigner/TestRuleDialog';
 
 const WhiteboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { ruleId, versionId } = useParams<{ ruleId: string; versionId?: string }>();
+  const { ruleId, versionId } = useParams<{
+    ruleId: string;
+    versionId?: string;
+  }>();
   const dispatch = useDispatch();
-  
+
   const rules = useSelector((state: RootState) => state.rules.rules);
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
-  const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
-  
+  const activeVersion = useSelector(
+    (state: RootState) => state.rules.activeVersion
+  );
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
+    null
+  );
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [editedVersionNote, setEditedVersionNote] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -64,7 +77,7 @@ const WhiteboardPage: React.FC = () => {
       accuracy: number;
       resourceUtilization: number;
       averageProcessingTime: number;
-    },
+    };
     cases: Array<{
       id: string;
       name: string;
@@ -72,16 +85,17 @@ const WhiteboardPage: React.FC = () => {
       outcome: 'approved' | 'rejected' | 'referred';
       processingTime: number;
       risk: 'low' | 'medium' | 'high';
-    }>
+    }>;
   }>(null);
   const [analyzeDialogOpen, setAnalyzeDialogOpen] = useState(false);
-  const [currentFlowData, setCurrentFlowData] = useState({ 
-    nodes: activeVersion?.nodes || [], 
-    edges: activeVersion?.edges || [] 
+  const [currentFlowData, setCurrentFlowData] = useState({
+    nodes: activeVersion?.nodes || [],
+    edges: activeVersion?.edges || [],
   });
-  const [autoArrangeFunction, setAutoArrangeFunction] = useState<(() => void) | null>(null);
+  const [autoArrangeFunction, setAutoArrangeFunction] = useState<
+    (() => void) | null
+  >(null);
 
-  
   // Effect to handle rule and version loading from URL parameters
   useEffect(() => {
     if (ruleId && !activeRule) {
@@ -94,11 +108,12 @@ const WhiteboardPage: React.FC = () => {
           version = rule.versions.find(v => v.version === versionId);
         } else {
           // Fall back to active version or latest
-          version = rule.versions.find(v => v.version === rule.activeVersionId) || 
-                   rule.versions.find(v => v.tag === 'latest') || 
-                   rule.versions[0];
+          version =
+            rule.versions.find(v => v.version === rule.activeVersionId) ||
+            rule.versions.find(v => v.tag === 'latest') ||
+            rule.versions[0];
         }
-        
+
         if (version) {
           // Set the active rule and version in Redux
           dispatch(setActiveRule(rule));
@@ -122,9 +137,7 @@ const WhiteboardPage: React.FC = () => {
   }, [hasUnsavedChanges]);
 
   const handleBackNavigation = (targetPath?: string) => {
-    const defaultPath = versionId 
-      ? `/rules-designer` 
-      : '/rules-designer';
+    const defaultPath = versionId ? `/rules-designer` : '/rules-designer';
 
     if (hasUnsavedChanges) {
       setPendingNavigation(targetPath || defaultPath);
@@ -140,7 +153,7 @@ const WhiteboardPage: React.FC = () => {
       setHasUnsavedChanges(false);
       setShowUnsavedDialog(false);
       showSuccessMessage('Rule saved successfully!');
-      
+
       // Navigate after a brief delay to show the success message
       setTimeout(() => {
         if (pendingNavigation) {
@@ -169,7 +182,6 @@ const WhiteboardPage: React.FC = () => {
   const handleSettingsDialogClose = () => {
     setSettingsDialogOpen(false);
     setEditedVersionNote(''); // Clear form data
-    console.log('Settings dialog closed');
   };
 
   // Function to save updated version note
@@ -179,30 +191,30 @@ const WhiteboardPage: React.FC = () => {
     // Create updated version object
     const updatedVersionObj = {
       ...activeVersion,
-      note: editedVersionNote
+      note: editedVersionNote,
     };
 
     // Update the version in the rule's versions array
-    const updatedVersions = activeRule.versions.map(v => 
+    const updatedVersions = activeRule.versions.map(v =>
       v.version === activeVersion.version ? updatedVersionObj : v
     );
 
     // Create the updated rule
     const updatedRule = {
       ...activeRule,
-      versions: updatedVersions
+      versions: updatedVersions,
     };
 
     // Dispatch action to update the rule in Redux
     dispatch(updateRule(updatedRule));
-    
+
     // Also update the active version in the Redux store
     dispatch(setActiveVersion(updatedVersionObj));
 
     // Show success message
     setSuccessMessage('Rule settings updated successfully!');
     setSaveSuccess(true);
-    
+
     // Close dialog
     setSettingsDialogOpen(false);
   };
@@ -225,14 +237,14 @@ const WhiteboardPage: React.FC = () => {
     if (!hasUnsavedChanges) {
       return;
     }
-    
+
     // Calculate the next version number based on the current version
     const currentVersion = activeVersion?.version || '1.0';
     const parts = currentVersion.split('.');
     const majorVersion = parseInt(parts[0] || '1');
     const minorVersion = parseInt(parts[1] || '0');
     const suggestedVersion = `${majorVersion}.${minorVersion + 1}`;
-    
+
     setNewVersion(suggestedVersion);
     setVersionNote(`Updated rule flow for ${activeRule?.name}`);
     setSaveVersionDialogOpen(true);
@@ -253,25 +265,25 @@ const WhiteboardPage: React.FC = () => {
       tag: 'latest',
       note: versionNote,
       nodes: currentNodes,
-      edges: currentEdges
+      edges: currentEdges,
     };
 
     // Update existing versions to remove 'latest' tag from others
     const updatedVersions = activeRule.versions.map(v => ({
       ...v,
-      tag: v.tag === 'latest' ? undefined : v.tag
+      tag: v.tag === 'latest' ? undefined : v.tag,
     }));
 
     // Create the updated rule with new version
     const updatedRule = {
       ...activeRule,
       versions: [...updatedVersions, newVersionObj],
-      activeVersionId: newVersion
+      activeVersionId: newVersion,
     };
 
     // Dispatch action to update the rule in Redux
     dispatch(updateRule(updatedRule));
-    
+
     // Also update the active rule and version in the Redux store
     dispatch(setActiveRule(updatedRule));
     dispatch(setActiveVersion(newVersionObj));
@@ -279,7 +291,7 @@ const WhiteboardPage: React.FC = () => {
     // Close dialog and show success
     setSaveVersionDialogOpen(false);
     setHasUnsavedChanges(false);
-    
+
     // Show success message
     showSuccessMessage('Rule version saved successfully!');
   };
@@ -287,7 +299,6 @@ const WhiteboardPage: React.FC = () => {
   // Save dialog close handler
   const handleSaveDialogClose = () => {
     setSaveVersionDialogOpen(false);
-    console.log('Save dialog closed');
   };
 
   // Test dialog close handler
@@ -341,8 +352,8 @@ const WhiteboardPage: React.FC = () => {
         <Typography variant="body2" color="text.secondary" paragraph>
           The requested rule could not be found or is not available.
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={() => navigate('/rules-designer')}
           startIcon={<ArrowBack />}
         >
@@ -353,45 +364,59 @@ const WhiteboardPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ 
-      height: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column',
-      bgcolor: '#f8f9fc'
-    }}>
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: '#f8f9fc',
+      }}
+    >
       {/* Header AppBar */}
-      <AppBar position="static" color="inherit" elevation={0} className="whiteboard-header">
+      <AppBar
+        position="static"
+        color="inherit"
+        elevation={0}
+        className="whiteboard-header"
+      >
         <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={() => handleBackNavigation()} className="whiteboard-close-btn">
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => handleBackNavigation()}
+            className="whiteboard-close-btn"
+          >
             <Close />
           </IconButton>
-          
+
           <Box className="whiteboard-title">
             <Typography variant="h6" noWrap component="div">
               {activeRule.name}
             </Typography>
-            <Chip 
+            <Chip
               label={`Version: ${activeVersion.version}`}
               size="small"
               color="primary"
               className="whiteboard-version-chip"
             />
           </Box>
-          
+
           <Box sx={{ flexGrow: 1 }} />
-          
+
           <Box className="whiteboard-actions">
-            <Tooltip title={hasUnsavedChanges ? "Save Changes" : "No Changes to Save"}>
+            <Tooltip
+              title={hasUnsavedChanges ? 'Save Changes' : 'No Changes to Save'}
+            >
               <span>
-                <IconButton 
-                  color="primary" 
+                <IconButton
+                  color="primary"
                   className="whiteboard-action-btn"
                   onClick={handleSaveClick}
                   disabled={!hasUnsavedChanges}
                 >
-                  <Badge 
-                    color="error" 
-                    variant="dot" 
+                  <Badge
+                    color="error"
+                    variant="dot"
                     invisible={!hasUnsavedChanges}
                   >
                     <SaveIcon />
@@ -399,17 +424,17 @@ const WhiteboardPage: React.FC = () => {
                 </IconButton>
               </span>
             </Tooltip>
-              
+
             <Tooltip title="Test Rule">
-              <IconButton 
-                color="secondary" 
-                onClick={handleTestRuleClick} 
+              <IconButton
+                color="secondary"
+                onClick={handleTestRuleClick}
                 className="whiteboard-action-btn"
               >
                 <PlayArrow />
               </IconButton>
             </Tooltip>
-            
+
             <Tooltip title="Rule Settings">
               <IconButton
                 onClick={handleSettingsDialogOpen}
@@ -418,7 +443,7 @@ const WhiteboardPage: React.FC = () => {
                 <Settings />
               </IconButton>
             </Tooltip>
-            
+
             <Button
               variant="contained"
               color="primary"
@@ -428,11 +453,11 @@ const WhiteboardPage: React.FC = () => {
             >
               Analyze
             </Button>
-            
+
             <Tooltip title="Auto-arrange Flow">
-              <IconButton 
-                color="primary" 
-                onClick={handleAutoArrangeClick} 
+              <IconButton
+                color="primary"
+                onClick={handleAutoArrangeClick}
                 className="whiteboard-action-btn"
                 disabled={!autoArrangeFunction}
               >
@@ -445,18 +470,17 @@ const WhiteboardPage: React.FC = () => {
 
       {/* Whiteboard Content - Full height with rule info in sidebar */}
       <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-        <Whiteboard 
+        <Whiteboard
           onClose={() => handleBackNavigation()}
           onNeedHelp={() => {
             // Handle help functionality
-            console.log('Help requested');
           }}
           onUnsavedChanges={setHasUnsavedChanges}
           onSettingsClick={handleSettingsDialogOpen}
           onAnalyzeRuleClick={handleAnalyzeRuleClick}
           testResults={testResults}
           onFlowDataChange={onFlowDataChange}
-          onAutoArrange={onAutoArrangeSet} 
+          onAutoArrange={onAutoArrangeSet}
         />
       </Box>
 
@@ -478,28 +502,25 @@ const WhiteboardPage: React.FC = () => {
             You have unsaved changes to this rule. What would you like to do?
           </Typography>
           <Alert severity="warning" sx={{ mt: 2 }}>
-            Make sure to save your changes before leaving to avoid losing your work.
+            Make sure to save your changes before leaving to avoid losing your
+            work.
           </Alert>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={handleDiscardAndExit}
-            color="inherit"
-          >
+          <Button onClick={handleDiscardAndExit} color="inherit">
             Discard Changes
           </Button>
-          <Button 
+          <Button
             onClick={() => setShowUnsavedDialog(false)}
             variant="outlined"
           >
             Continue Editing
           </Button>
-          <Button 
+          <Button
             onClick={handleSaveAndExit}
             variant="contained"
             startIcon={<SaveIcon />}
             sx={{ textTransform: 'none' }}
-
           >
             Save & Exit
           </Button>
@@ -510,22 +531,24 @@ const WhiteboardPage: React.FC = () => {
       <Dialog
         open={settingsDialogOpen}
         onClose={handleSettingsDialogClose}
-        PaperProps={{ 
-          style: { 
+        PaperProps={{
+          style: {
             borderRadius: '12px',
-            maxWidth: '450px'
-          } 
+            maxWidth: '450px',
+          },
         }}
         fullWidth
       >
-        <DialogTitle sx={{ 
-          bgcolor: '#f5f7fa',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
+        <DialogTitle
+          sx={{
+            bgcolor: '#f5f7fa',
+            borderBottom: '1px solid #e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 24px',
+          }}
+        >
           <Box display="flex" alignItems="center">
             <Settings sx={{ color: '#5569ff', marginRight: 1.5 }} />
             <Typography variant="h6" fontWeight={600}>
@@ -542,12 +565,17 @@ const WhiteboardPage: React.FC = () => {
             <Close />
           </IconButton>
         </DialogTitle>
-        
+
         <DialogContent sx={{ padding: '24px' }}>
-          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography
+            component="div"
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 3 }}
+          >
             Update the settings for this rule version.
           </Typography>
-          
+
           <TextField
             autoFocus
             margin="dense"
@@ -560,27 +588,29 @@ const WhiteboardPage: React.FC = () => {
             rows={3}
             variant="outlined"
             value={editedVersionNote}
-            onChange={(e) => setEditedVersionNote(e.target.value)}
+            onChange={e => setEditedVersionNote(e.target.value)}
           />
         </DialogContent>
-        
-        <DialogActions sx={{ 
-          padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0'
-        }}>
-          <Button 
-            onClick={handleSettingsDialogClose} 
+
+        <DialogActions
+          sx={{
+            padding: '16px 24px',
+            borderTop: '1px solid #f0f0f0',
+          }}
+        >
+          <Button
+            onClick={handleSettingsDialogClose}
             color="inherit"
             sx={{ borderRadius: '8px' }}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleUpdateVersionNote} 
+          <Button
+            onClick={handleUpdateVersionNote}
             variant="contained"
             color="primary"
             disabled={!editedVersionNote.trim()}
-            sx={{ 
+            sx={{
               borderRadius: '8px',
               textTransform: 'none',
               fontWeight: 600,
@@ -608,8 +638,8 @@ const WhiteboardPage: React.FC = () => {
             borderRadius: '8px',
             fontWeight: 500,
             '& .MuiAlert-message': {
-              fontSize: '0.95rem'
-            }
+              fontSize: '0.95rem',
+            },
           }}
         >
           {successMessage}
@@ -620,22 +650,24 @@ const WhiteboardPage: React.FC = () => {
       <Dialog
         open={saveVersionDialogOpen}
         onClose={handleSaveDialogClose}
-        PaperProps={{ 
-          style: { 
+        PaperProps={{
+          style: {
             borderRadius: '12px',
-            maxWidth: '500px'
-          } 
+            maxWidth: '500px',
+          },
         }}
         fullWidth
       >
-        <DialogTitle sx={{ 
-          bgcolor: '#f5f7fa',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
+        <DialogTitle
+          sx={{
+            bgcolor: '#f5f7fa',
+            borderBottom: '1px solid #e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 24px',
+          }}
+        >
           <Box display="flex" alignItems="center">
             <SaveIcon sx={{ color: '#5569ff', marginRight: 1.5 }} />
             <Typography variant="h6" fontWeight={600}>
@@ -652,12 +684,17 @@ const WhiteboardPage: React.FC = () => {
             <Close />
           </IconButton>
         </DialogTitle>
-        
+
         <DialogContent sx={{ padding: '24px' }}>
-          <Typography component="div" variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography
+            component="div"
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 3 }}
+          >
             Create a new version of this rule with your current changes.
           </Typography>
-          
+
           <TextField
             autoFocus
             margin="dense"
@@ -667,10 +704,10 @@ const WhiteboardPage: React.FC = () => {
             fullWidth
             variant="outlined"
             value={newVersion}
-            onChange={(e) => setNewVersion(e.target.value)}
+            onChange={e => setNewVersion(e.target.value)}
             sx={{ mb: 2 }}
           />
-          
+
           <TextField
             margin="dense"
             id="note"
@@ -682,21 +719,23 @@ const WhiteboardPage: React.FC = () => {
             rows={3}
             variant="outlined"
             value={versionNote}
-            onChange={(e) => setVersionNote(e.target.value)}
+            onChange={e => setVersionNote(e.target.value)}
           />
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            mt: 3,
-            p: 2, 
-            bgcolor: 'rgba(85, 105, 255, 0.05)',
-            borderRadius: 1,
-            border: '1px solid rgba(85, 105, 255, 0.1)'
-          }}>
-            <Checkbox 
-              checked={true} 
-              disabled 
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mt: 3,
+              p: 2,
+              bgcolor: 'rgba(85, 105, 255, 0.05)',
+              borderRadius: 1,
+              border: '1px solid rgba(85, 105, 255, 0.1)',
+            }}
+          >
+            <Checkbox
+              checked={true}
+              disabled
               sx={{ '& .MuiSvgIcon-root': { fontSize: 22 } }}
             />
             <Box>
@@ -708,40 +747,49 @@ const WhiteboardPage: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            bgcolor: 'rgba(255, 193, 7, 0.1)',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 193, 7, 0.2)',
-            mt: 3
-          }}>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              bgcolor: 'rgba(255, 193, 7, 0.1)',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 193, 7, 0.2)',
+              mt: 3,
+            }}
+          >
             <Info fontSize="small" sx={{ color: '#ffc107', marginRight: 1 }} />
-            <Typography component="div" variant="caption" color="text.secondary">
-              <strong>Note:</strong> Saved versions are temporary for this demo and will be lost if you refresh the page.
+            <Typography
+              component="div"
+              variant="caption"
+              color="text.secondary"
+            >
+              <strong>Note:</strong> Saved versions are temporary for this demo
+              and will be lost if you refresh the page.
             </Typography>
           </Box>
         </DialogContent>
-        
-        <DialogActions sx={{ 
-          padding: '16px 24px', 
-          borderTop: '1px solid #f0f0f0'
-        }}>
-          <Button 
-            onClick={handleSaveDialogClose} 
+
+        <DialogActions
+          sx={{
+            padding: '16px 24px',
+            borderTop: '1px solid #f0f0f0',
+          }}
+        >
+          <Button
+            onClick={handleSaveDialogClose}
             color="inherit"
             sx={{ borderRadius: '8px' }}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleSaveVersion} 
+          <Button
+            onClick={handleSaveVersion}
             variant="contained"
             color="primary"
             disabled={!newVersion.trim()}
-            sx={{ 
+            sx={{
               borderRadius: '8px',
               textTransform: 'none',
               fontWeight: 600,

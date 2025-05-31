@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { Close, PlayArrow, CheckCircle, Lock, Add } from '@mui/icons-material';
 import {
   Dialog,
   DialogTitle,
@@ -19,15 +17,12 @@ import {
   TableCell,
   TableContainer,
   Chip,
-  Button
+  Button,
 } from '@mui/material';
-import {
-  Close,
-  PlayArrow,
-  CheckCircle,
-  Lock,
-  Add
-} from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+
+import { RootState } from '@/store/store';
 
 interface TestResults {
   overall: {
@@ -55,17 +50,19 @@ interface TestRuleDialogProps {
 const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
   open,
   onClose,
-  onTestComplete
+  onTestComplete,
 }) => {
   const activeRule = useSelector((state: RootState) => state.rules.activeRule);
-  const activeVersion = useSelector((state: RootState) => state.rules.activeVersion);
-  
+  const activeVersion = useSelector(
+    (state: RootState) => state.rules.activeVersion
+  );
+
   const [testingInProgress, setTestingInProgress] = useState(false);
   const [testResults, setTestResults] = useState<TestResults | null>(null);
 
   // Move determineOutcome function here
   const determineOutcome = (result: string) => {
-    let riskFactors = [];
+    const riskFactors = [];
     let a1c = null;
     let bmi = null;
     let ahi = null;
@@ -102,7 +99,8 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
     });
 
     // Evaluate risk factors based on parsed values
-    if (a1c !== null && a1c > 7.0) { // Diabetes is part of the default program
+    if (a1c !== null && a1c > 7.0) {
+      // Diabetes is part of the default program
       riskFactors.push('Elevated A1c');
     }
     if (bmi !== null && bmi > 30.0) {
@@ -111,20 +109,30 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
     if (ahi !== null && ahi > 30.0 && ruleName === 'obstructive sleep apnea') {
       riskFactors.push('Severe Sleep Apnea');
     }
-    if (systolic !== null && diastolic !== null && (systolic >= 140 || diastolic >= 90) && ruleName === 'hypertension risk assessment') {
+    if (
+      systolic !== null &&
+      diastolic !== null &&
+      (systolic >= 140 || diastolic >= 90) &&
+      ruleName === 'hypertension risk assessment'
+    ) {
       riskFactors.push('Elevated Blood Pressure');
     }
     if (brca && ruleName === 'brca risk assessment') {
       riskFactors.push('BRCA Positive');
     }
-    if (ahi !== null && ahi > 30 && !cpapCompliant && ruleName === 'obstructive sleep apnea') {
+    if (
+      ahi !== null &&
+      ahi > 30 &&
+      !cpapCompliant &&
+      ruleName === 'obstructive sleep apnea'
+    ) {
       riskFactors.push('Severe Sleep Apnea Non Compliant');
     }
 
     // Determine outcome based on risk factors
     if (riskFactors.length > 2) {
       return 'rejected'; // High risk: Multiple significant factors
-    } else if (riskFactors.length == 2) {
+    } else if (riskFactors.length === 2) {
       return 'referred'; // Medium risk: Two significant factors
     } else if (riskFactors.includes('BRCA Positive')) {
       return 'referred'; // BRCA positive is a strong risk even alone
@@ -140,33 +148,38 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
     {
       id: 'CASE-2023-0001',
       name: 'John Smith',
-      result: 'A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative',
+      result:
+        'A1c: 6.1%, BMI: 22.5, Sleep Apnea: AHI > 30, Blood Pressure: 140/90, BRCA: Negative',
       risk: 'medium' as const,
     },
     {
       id: 'CASE-2023-0002',
       name: 'Emma Johnson',
-      result: 'A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive',
+      result:
+        'A1c: 5.5%, BMI: 24.3, No Sleep Apnea, Blood Pressure: 120/80, BRCA: Positive',
       risk: 'low' as const,
     },
     {
       id: 'CASE-2023-0003',
       name: 'Michael Brown',
-      result: 'A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative',
+      result:
+        'A1c: 8.1%, BMI: 35.2, Sleep Apnea: AHI > 30, No CPAP Compliance, Blood Pressure: 120/75, BRCA: Negative',
       risk: 'high' as const,
     },
     {
       id: 'CASE-2023-0004',
       name: 'Sarah Williams',
-      result: 'A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive',
+      result:
+        'A1c: 6.2%, BMI: 27.8, Sleep Apnea: AHI 5-15, CPAP Compliant, Blood Pressure: 130/85, BRCA: Positive',
       risk: 'medium' as const,
     },
     {
       id: 'CASE-2023-0005',
       name: 'David Miller',
-      result: 'A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive',
+      result:
+        'A1c: 9.3%, BMI: 36.7, Sleep Apnea: AHI > 30, Blood Pressure: 160/100, BRCA: Positive',
       risk: 'high' as const,
-    }
+    },
   ];
 
   // Move test logic here
@@ -179,13 +192,17 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
       const testCases = getTestCases();
       const cases = testCases.map(testCase => ({
         ...testCase,
-        outcome: determineOutcome(testCase.result) as 'approved' | 'rejected' | 'referred',
+        outcome: determineOutcome(testCase.result) as
+          | 'approved'
+          | 'rejected'
+          | 'referred',
         processingTime: Math.floor((300 + Math.random() * 180) / 60), // 5-8 minutes
       }));
 
       const totalApproved = cases.filter(c => c.outcome === 'approved').length;
       const totalCases = cases.length;
-      const avgProcessingTime = cases.reduce((sum, c) => sum + c.processingTime, 0) / totalCases;
+      const avgProcessingTime =
+        cases.reduce((sum, c) => sum + c.processingTime, 0) / totalCases;
 
       const results = {
         overall: {
@@ -194,12 +211,12 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
           resourceUtilization: Math.floor(60 + Math.random() * 30),
           averageProcessingTime: Math.ceil(avgProcessingTime),
         },
-        cases
+        cases,
       };
 
       setTestResults(results);
       setTestingInProgress(false);
-      
+
       // Call the callback to pass results back to parent
       if (onTestComplete) {
         onTestComplete(results);
@@ -228,21 +245,23 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ 
-        style: { 
+      PaperProps={{
+        style: {
           borderRadius: '12px',
-          overflow: 'hidden'
-        } 
+          overflow: 'hidden',
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        bgcolor: '#f5f7fa',
-        borderBottom: '1px solid #e0e0e0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '16px 24px'
-      }}>
+      <DialogTitle
+        sx={{
+          bgcolor: '#f5f7fa',
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px',
+        }}
+      >
         <Box display="flex" alignItems="center">
           <PlayArrow sx={{ color: '#5569ff', marginRight: 1.5 }} />
           <Typography variant="h6" fontWeight={600}>
@@ -259,42 +278,62 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
           <Close />
         </IconButton>
       </DialogTitle>
-      
+
       <DialogContent sx={{ padding: '24px' }}>
         {testingInProgress ? (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            py: 4
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 4,
+            }}
+          >
             <CircularProgress size={60} sx={{ mb: 3 }} />
             <Typography variant="h6" gutterBottom>
               Testing Rule on Sample Cases
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
-              Running {activeRule?.name} (Version {activeVersion?.version}) against 5 sample cases...
+              Running {activeRule?.name} (Version {activeVersion?.version})
+              against 5 sample cases...
             </Typography>
           </Box>
         ) : testResults ? (
           <React.Fragment>
             {/* Rule Information */}
             <Box sx={{ mb: 4 }}>
-              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                sx={{ fontWeight: 600 }}
+              >
                 Test Summary
               </Typography>
-              <Paper sx={{ p: 2, bgcolor: 'rgba(85, 105, 255, 0.03)', border: '1px solid rgba(85, 105, 255, 0.1)', borderRadius: 2 }}>
+              <Paper
+                sx={{
+                  p: 2,
+                  bgcolor: 'rgba(85, 105, 255, 0.03)',
+                  border: '1px solid rgba(85, 105, 255, 0.1)',
+                  borderRadius: 2,
+                }}
+              >
                 <Typography variant="body2">
-                  This report shows the projected performance metrics if this version of the rule ({activeVersion?.version}) 
-                  was deployed to production, while keeping all other rules constant. The metrics below are derived from testing 
-                  against a sample of real cases.
+                  This report shows the projected performance metrics if this
+                  version of the rule ({activeVersion?.version}) was deployed to
+                  production, while keeping all other rules constant. The
+                  metrics below are derived from testing against a sample of
+                  real cases.
                 </Typography>
               </Paper>
             </Box>
 
             {/* Overall metrics */}
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="subtitle1"
+              gutterBottom
+              sx={{ fontWeight: 600 }}
+            >
               Business Impact Metrics
             </Typography>
             <Box sx={{ mb: 4 }}>
@@ -314,7 +353,13 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                       justifyContent: 'center',
                     }}
                   >
-                    <Box sx={{ position: 'relative', display: 'inline-flex', mb: 1 }}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        display: 'inline-flex',
+                        mb: 1,
+                      }}
+                    >
                       <CircularProgress
                         variant="determinate"
                         value={testResults.overall.stp}
@@ -343,10 +388,18 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="subtitle2" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography
+                      variant="subtitle2"
+                      align="center"
+                      sx={{ fontWeight: 600 }}
+                    >
                       Straight-Through Processing
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" align="center">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      align="center"
+                    >
                       Cases processed without manual review
                     </Typography>
                   </Paper>
@@ -367,7 +420,13 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                       justifyContent: 'center',
                     }}
                   >
-                    <Box sx={{ position: 'relative', display: 'inline-flex', mb: 1 }}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        display: 'inline-flex',
+                        mb: 1,
+                      }}
+                    >
                       <CircularProgress
                         variant="determinate"
                         value={testResults.overall.accuracy}
@@ -397,10 +456,18 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="subtitle2" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography
+                      variant="subtitle2"
+                      align="center"
+                      sx={{ fontWeight: 600 }}
+                    >
                       Accuracy
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" align="center">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      align="center"
+                    >
                       Correct risk assessments vs. expert review
                     </Typography>
                   </Paper>
@@ -421,7 +488,13 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                       justifyContent: 'center',
                     }}
                   >
-                    <Box sx={{ position: 'relative', display: 'inline-flex', mb: 1 }}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        display: 'inline-flex',
+                        mb: 1,
+                      }}
+                    >
                       <CircularProgress
                         variant="determinate"
                         value={testResults.overall.resourceUtilization}
@@ -451,10 +524,18 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="subtitle2" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography
+                      variant="subtitle2"
+                      align="center"
+                      sx={{ fontWeight: 600 }}
+                    >
                       Resource Optimization
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" align="center">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      align="center"
+                    >
                       Underwriter capacity freed up
                     </Typography>
                   </Paper>
@@ -486,16 +567,29 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                         <Typography
                           component="span"
                           variant="body2"
-                          sx={{ ml: 0.5, fontWeight: 500, color: 'text.secondary', verticalAlign: 'bottom' }}
+                          sx={{
+                            ml: 0.5,
+                            fontWeight: 500,
+                            color: 'text.secondary',
+                            verticalAlign: 'bottom',
+                          }}
                         >
                           min
                         </Typography>
                       </Typography>
                     </Box>
-                    <Typography variant="subtitle2" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography
+                      variant="subtitle2"
+                      align="center"
+                      sx={{ fontWeight: 600 }}
+                    >
                       Avg. Processing Time
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" align="center">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      align="center"
+                    >
                       Per case processing speed
                     </Typography>
                   </Paper>
@@ -504,10 +598,17 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
             </Box>
 
             {/* Case Results Table */}
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="subtitle1"
+              gutterBottom
+              sx={{ fontWeight: 600 }}
+            >
               Sample Case Results
             </Typography>
-            <TableContainer component={Paper} sx={{ borderRadius: 2, overflow: 'hidden', mb: 3 }}>
+            <TableContainer
+              component={Paper}
+              sx={{ borderRadius: 2, overflow: 'hidden', mb: 3 }}
+            >
               <Table size="small">
                 <TableHead sx={{ bgcolor: '#f5f7fa' }}>
                   <TableRow>
@@ -519,21 +620,36 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {testResults.cases.map((caseItem) => (
-                    <TableRow key={caseItem.id} sx={{ '&:hover': { bgcolor: '#f8faff' } }}>
+                  {testResults.cases.map(caseItem => (
+                    <TableRow
+                      key={caseItem.id}
+                      sx={{ '&:hover': { bgcolor: '#f8faff' } }}
+                    >
                       <TableCell>{caseItem.id}</TableCell>
                       <TableCell>{caseItem.name}</TableCell>
                       <TableCell>{caseItem.result}</TableCell>
                       <TableCell>
                         <Chip
-                          label={caseItem.outcome === 'approved' ? 'Approved' : caseItem.outcome === 'rejected' ? 'Rejected' : 'Referred'}
+                          label={
+                            caseItem.outcome === 'approved'
+                              ? 'Approved'
+                              : caseItem.outcome === 'rejected'
+                                ? 'Rejected'
+                                : 'Referred'
+                          }
                           size="small"
-                          color={caseItem.outcome === 'approved' ? 'success' : caseItem.outcome === 'rejected' ? 'error' : 'warning'}
-                          sx={{ 
-                            fontWeight: 500, 
-                            fontSize: '0.7rem', 
+                          color={
+                            caseItem.outcome === 'approved'
+                              ? 'success'
+                              : caseItem.outcome === 'rejected'
+                                ? 'error'
+                                : 'warning'
+                          }
+                          sx={{
+                            fontWeight: 500,
+                            fontSize: '0.7rem',
                             height: 20,
-                            borderRadius: 1
+                            borderRadius: 1,
                           }}
                         />
                       </TableCell>
@@ -546,7 +662,11 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
 
             {/* Recommendations */}
             <Box sx={{ mt: 3, mb: 2 }}>
-              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                sx={{ fontWeight: 600 }}
+              >
                 Recommendations
               </Typography>
               <Paper
@@ -561,38 +681,54 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                   <CheckCircle sx={{ color: '#00ab55', mr: 1.5, mt: 0.2 }} />
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#00ab55' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: '#00ab55' }}
+                    >
                       Rule Efficiency
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      This rule version shows {testResults.overall.stp > 75 ? 'excellent' : 'good'} STP rates. Consider 
-                      {testResults.overall.stp < 80 ? ' increasing automation for medium risk cases to improve STP rates further.' : ' maintaining this level of automation in the production version.'}
+                      This rule version shows{' '}
+                      {testResults.overall.stp > 75 ? 'excellent' : 'good'} STP
+                      rates. Consider
+                      {testResults.overall.stp < 80
+                        ? ' increasing automation for medium risk cases to improve STP rates further.'
+                        : ' maintaining this level of automation in the production version.'}
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                   <CheckCircle sx={{ color: '#00ab55', mr: 1.5, mt: 0.2 }} />
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#00ab55' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: '#00ab55' }}
+                    >
                       Decision Consistency
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      The rule shows high consistency in outcomes for similar risk profiles. This will help maintain fair and 
-                      equitable underwriting decisions across all applications.
+                      The rule shows high consistency in outcomes for similar
+                      risk profiles. This will help maintain fair and equitable
+                      underwriting decisions across all applications.
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                   <CheckCircle sx={{ color: '#00ab55', mr: 1.5, mt: 0.2 }} />
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#00ab55' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: '#00ab55' }}
+                    >
                       Resource Impact
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      This rule configuration would free up approximately {testResults.overall.resourceUtilization}% of underwriter 
-                      capacity, allowing focus on complex cases and strategic activities.
+                      This rule configuration would free up approximately{' '}
+                      {testResults.overall.resourceUtilization}% of underwriter
+                      capacity, allowing focus on complex cases and strategic
+                      activities.
                     </Typography>
                   </Box>
                 </Box>
@@ -600,56 +736,59 @@ const TestRuleDialog: React.FC<TestRuleDialogProps> = ({
             </Box>
           </React.Fragment>
         ) : (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            py: 4
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 4,
+            }}
+          >
             <Typography variant="body1" color="text.secondary">
               No test results available.
             </Typography>
           </Box>
         )}
       </DialogContent>
-      
-      <DialogActions sx={{ 
-        padding: '16px 24px', 
-        borderTop: '1px solid #f0f0f0'
-      }}>
+
+      <DialogActions
+        sx={{
+          padding: '16px 24px',
+          borderTop: '1px solid #f0f0f0',
+        }}
+      >
         {!testingInProgress && testResults && (
-          <Button 
+          <Button
             startIcon={<Lock />}
-            sx={{ 
+            sx={{
               borderRadius: '8px',
               textTransform: 'none',
               fontWeight: 500,
-              mr: 'auto'
+              mr: 'auto',
             }}
           >
             Export Results
           </Button>
         )}
-        <Button 
-          onClick={onClose} 
-          color="inherit"
-          sx={{ borderRadius: '8px' }}
-        >
+        <Button onClick={onClose} color="inherit" sx={{ borderRadius: '8px' }}>
           Close
         </Button>
         {!testingInProgress && testResults && (
-          <Button 
+          <Button
             variant="contained"
             color="primary"
             startIcon={<Add />}
-            sx={{ 
+            sx={{
               borderRadius: '8px',
               textTransform: 'none',
               fontWeight: 600,
               boxShadow: '0 4px 12px rgba(85, 105, 255, 0.15)',
             }}
-            onClick={() => window.location.href = "mailto:mqazi@munichre.com?subject=alitheia Labs Support | Get Access to Business Impact Metrics"}
+            onClick={() =>
+              (window.location.href =
+                'mailto:mqazi@munichre.com?subject=alitheia Labs Support | Get Access to Business Impact Metrics')
+            }
           >
             Get Access
           </Button>

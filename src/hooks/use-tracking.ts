@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+
 import datadog from '@/lib/datadog';
 
 interface UseTrackingOptions {
@@ -19,7 +20,7 @@ export function useTracking({
   trackUnmount = true,
   trackProps = false,
   trackRenders = false,
-  additionalData = {}
+  additionalData = {},
 }: UseTrackingOptions) {
   const renderCount = useRef(0);
   const mountTime = useRef(Date.now());
@@ -32,9 +33,9 @@ export function useTracking({
       if (!datadog.isInitialized()) {
         datadog.init();
       }
-      
+
       datadog.trackComponentLifecycle(componentName, 'mount');
-      
+
       datadog.log({
         action: 'component_mount',
         category: 'lifecycle',
@@ -42,8 +43,8 @@ export function useTracking({
         additionalData: {
           ...additionalData,
           url: window.location.pathname,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
@@ -52,7 +53,7 @@ export function useTracking({
       if (trackUnmount) {
         const duration = Date.now() - mountTime.current;
         datadog.trackComponentLifecycle(componentName, 'unmount', duration);
-        
+
         datadog.log({
           action: 'component_unmount',
           category: 'lifecycle',
@@ -62,8 +63,8 @@ export function useTracking({
             duration,
             renderCount: renderCount.current,
             url: window.location.pathname,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
     };
@@ -73,8 +74,9 @@ export function useTracking({
   useEffect(() => {
     if (trackRenders) {
       renderCount.current += 1;
-      
-      if (renderCount.current > 1) { // Skip initial render
+
+      if (renderCount.current > 1) {
+        // Skip initial render
         datadog.log({
           action: 'component_render',
           category: 'lifecycle',
@@ -82,8 +84,8 @@ export function useTracking({
           additionalData: {
             renderCount: renderCount.current,
             ...additionalData,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
     }
@@ -100,7 +102,7 @@ export function useTracking({
       if (prevProps.current[key] !== value) {
         changedProps[key] = {
           previous: prevProps.current[key],
-          current: value
+          current: value,
         };
         hasChanges = true;
       }
@@ -114,8 +116,8 @@ export function useTracking({
         additionalData: {
           changedProps,
           ...additionalData,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
@@ -124,19 +126,19 @@ export function useTracking({
 
   // Tracking event helpers
   const trackClick = (elementName: string, data = {}) => {
-    datadog.trackInteraction('click', elementName, { 
-      componentName, 
+    datadog.trackInteraction('click', elementName, {
+      componentName,
       ...data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   };
 
   const trackInput = (inputName: string, inputType: string, data = {}) => {
-    datadog.trackInteraction('input', inputName, { 
-      componentName, 
-      inputType, 
+    datadog.trackInteraction('input', inputName, {
+      componentName,
+      inputType,
       ...data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -148,8 +150,8 @@ export function useTracking({
       additionalData: {
         componentName,
         ...data,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   };
 
@@ -159,7 +161,7 @@ export function useTracking({
       componentName,
       ...data,
       timestamp: new Date().toISOString(),
-      url: window.location.pathname
+      url: window.location.pathname,
     });
   };
 
@@ -169,6 +171,6 @@ export function useTracking({
     trackInput,
     trackSubmit,
     trackError,
-    renderCount: renderCount.current
+    renderCount: renderCount.current,
   };
 }

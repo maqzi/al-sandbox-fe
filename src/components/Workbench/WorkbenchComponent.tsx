@@ -1,27 +1,26 @@
+import { Box } from '@mui/material';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Box, Typography, Alert } from '@mui/material';
-import WorkbenchSideMenu from './WorkbenchSideMenu';
-import CaseDetailsComponent from './CaseDetailsComponent';
-import AssessmentsComponent from './AssessmentsComponent';
-import './css/WorkbenchComponent.css';
 
-import { 
-  selectSelectedCase, 
+import {
+  selectSelectedCase,
   selectCurrentWorkbenchSection,
-  selectActiveSource
 } from '@/store/selectors';
 import { setWorkbenchSection, setActiveSource } from '@/store/workbenchSlice';
+
+import AssessmentsComponent from './AssessmentsComponent';
+import CaseDetailsComponent from './CaseDetailsComponent';
 import SummarizerComponent from './SummarizerComponent';
+import WorkbenchSideMenu from './WorkbenchSideMenu';
+import './css/WorkbenchComponent.css';
 
 const WorkbenchComponent: React.FC = () => {
   const dispatch = useDispatch();
-  
+
   // Get all data from Redux
   const selectedCase = useSelector(selectSelectedCase);
   const workbenchSection = useSelector(selectCurrentWorkbenchSection);
-  const activeSource = useSelector(selectActiveSource);
-  
+
   // Ensure we have case data
   if (!selectedCase) {
     return null;
@@ -33,26 +32,32 @@ const WorkbenchComponent: React.FC = () => {
     name: selectedCase.person.fullName,
     age: selectedCase.person.age,
     date: selectedCase.policy.applicationDate,
-    conditions: selectedCase.health.conditions.map(c => c.name)
+    conditions: selectedCase.health.conditions.map(c => c.name),
   };
 
   // Action handlers
   const handleWorkbenchSectionClick = (section: string) => {
-    dispatch(setWorkbenchSection({
-      caseId: selectedCase.id,
-      section
-    }));
+    dispatch(
+      setWorkbenchSection({
+        caseId: selectedCase.id,
+        section,
+      })
+    );
   };
 
   const handleSourceClick = (source: string) => {
-    dispatch(setActiveSource({
-      caseId: selectedCase.id,
-      source
-    }));
+    dispatch(
+      setActiveSource({
+        caseId: selectedCase.id,
+        source,
+      })
+    );
   };
 
-  const isReferred = selectedCase.assessment.ehrAssessments?.[0]?.referFlag || false;
-  const referralReason = selectedCase.assessment.ehrAssessments?.[0]?.referralReason || '';
+  const isReferred =
+    selectedCase.assessment.ehrAssessments?.[0]?.referFlag || false;
+  const referralReason =
+    selectedCase.assessment.ehrAssessments?.[0]?.referralReason || '';
 
   return (
     <div className="workbench-component">
@@ -68,9 +73,7 @@ const WorkbenchComponent: React.FC = () => {
         <Box className="workbench-main-content">
           <div className="workbench-panel">
             {/* Case Details Section */}
-            {workbenchSection === 'Case Details' && (
-              <CaseDetailsComponent />
-            )}
+            {workbenchSection === 'Case Details' && <CaseDetailsComponent />}
 
             {/* EHR Section */}
             {workbenchSection === 'EHRs' && (
@@ -81,10 +84,8 @@ const WorkbenchComponent: React.FC = () => {
             )}
 
             {/* Assessments Section */}
-            {workbenchSection === 'Assessment' && (
-              <AssessmentsComponent />
-            )}
-            
+            {workbenchSection === 'Assessment' && <AssessmentsComponent />}
+
             {/* Add other workbench sections as needed */}
           </div>
         </Box>

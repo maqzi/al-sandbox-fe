@@ -1,23 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { 
-  Table, TableBody, TableCell, TableHead, TableRow, Button, Typography,
-  Box, Card, CardContent, Chip, Paper, TableContainer,
-  Divider, TextField, InputAdornment, Alert, LinearProgress
-} from '@mui/material';
-import { 
-  Search, FilterList, Refresh, CalendarToday, 
-  Schedule, ArrowBack 
+import {
+  Search,
+  Refresh,
+  CalendarToday,
+  Schedule,
+  ArrowBack,
 } from '@mui/icons-material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Button,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Paper,
+  TableContainer,
+  Divider,
+  TextField,
+  InputAdornment,
+  Alert,
+  LinearProgress,
+} from '@mui/material';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+
 import WorkbenchComponent from '@/components/Workbench/WorkbenchComponent';
-import { setSelectedCase, setWorkbenchSection, setActiveSource } from '@/store/workbenchSlice';
-import { 
-  selectAllCases, 
-  selectSelectedCase, 
-  selectCurrentWorkbenchSection,
-  selectActiveSource
-} from '@/store/selectors';
 import datadog from '@/lib/datadog';
+import { selectAllCases, selectSelectedCase } from '@/store/selectors';
+import { setSelectedCase } from '@/store/workbenchSlice';
 
 // Define interface for filtered case data (displayed in the table)
 interface CaseTableData {
@@ -35,13 +49,11 @@ interface CaseTableData {
 
 const WorkbenchPage: React.FC = () => {
   const dispatch = useDispatch();
-  
+
   // Get data from our new workbench redux state
   const allCases = useSelector(selectAllCases);
   const selectedCaseData = useSelector(selectSelectedCase);
-  const workbenchSection = useSelector(selectCurrentWorkbenchSection);
-  const activeSource = useSelector(selectActiveSource);
-  
+
   // Transform cases for table display format
   const tableCases = allCases.map(caseItem => ({
     id: caseItem.id,
@@ -53,7 +65,7 @@ const WorkbenchPage: React.FC = () => {
     receivedDate: caseItem.case.receivedDate,
     dueDate: caseItem.case.dueDate,
     priority: caseItem.case.priority,
-    assignmentStatus: caseItem.case.assignmentStatus
+    assignmentStatus: caseItem.case.assignmentStatus,
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,28 +93,37 @@ const WorkbenchPage: React.FC = () => {
     datadog.trackSearch(searchValue, 'case_search', filteredCases.length); // Track search input
   };
 
-  const filteredCases = tableCases.filter(caseData => 
-    caseData.taskId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    caseData.policyNum.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    caseData.workType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    caseData.queue.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCases = tableCases.filter(
+    caseData =>
+      caseData.taskId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseData.policyNum.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseData.workType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseData.queue.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getPriorityColor = (priority: string) => {
-    switch(priority.toLowerCase()) {
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'success';
-      default: return 'default';
+    switch (priority.toLowerCase()) {
+      case 'high':
+        return 'error';
+      case 'medium':
+        return 'warning';
+      case 'low':
+        return 'success';
+      default:
+        return 'default';
     }
   };
 
   const getStatusColor = (status: string) => {
-    switch(status.toLowerCase()) {
-      case 'assigned': return 'success';
-      case 'pending': return 'warning';
-      case 'unassigned': return 'error';
-      default: return 'default';
+    switch (status.toLowerCase()) {
+      case 'assigned':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'unassigned':
+        return 'error';
+      default:
+        return 'default';
     }
   };
 
@@ -120,84 +141,129 @@ const WorkbenchPage: React.FC = () => {
       receivedDate: selectedCaseData.case.receivedDate,
       dueDate: selectedCaseData.case.dueDate,
       priority: selectedCaseData.case.priority,
-      assignmentStatus: selectedCaseData.case.assignmentStatus
+      assignmentStatus: selectedCaseData.case.assignmentStatus,
     };
 
     return (
-      <Box sx={{ padding: '24px', backgroundColor: '#f8f9fc', minHeight: '100vh' }}>
-          <Button 
-            startIcon={<ArrowBack />}
-            onClick={handleBackClick}
+      <Box
+        sx={{ padding: '24px', backgroundColor: '#f8f9fc', minHeight: '100vh' }}
+      >
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={handleBackClick}
+          sx={{
+            marginBottom: '16px',
+            textTransform: 'none',
+            fontWeight: 600,
+          }}
+        >
+          Back to Cases
+        </Button>
+        <Paper
+          sx={{ padding: '24px', borderRadius: '8px', marginBottom: '24px' }}
+        >
+          <Box
             sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               marginBottom: '16px',
-              textTransform: 'none',
-              fontWeight: 600
             }}
           >
-            Back to Cases
-          </Button>
-          <Paper sx={{ padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                Case {displayCase.taskId}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>
+                Policy: {displayCase.policyNum} • Queue: {displayCase.queue}
+              </Typography>
+            </Box>
+            <Chip
+              label={displayCase.workType}
+              color="primary"
+              sx={{ borderRadius: 4, fontWeight: 500 }}
+            />
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(0, 0, 0, 0.6)' }}
+              >
+                Next Action
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}
+              >
+                {displayCase.nextAction}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(0, 0, 0, 0.6)' }}
+              >
+                Received Date
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}
+              >
+                <CalendarToday sx={{ fontSize: 14, marginRight: 1 }} />
+                {displayCase.receivedDate}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(0, 0, 0, 0.6)' }}
+              >
+                Due Date
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}
+              >
+                <Schedule sx={{ fontSize: 14, marginRight: 1 }} />
+                {displayCase.dueDate}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(0, 0, 0, 0.6)' }}
+              >
+                Priority
+              </Typography>
               <Box>
-                <Typography variant="h5" sx= {{fontWeight: 600}}>
-                  Case {displayCase.taskId}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>
-                  Policy: {displayCase.policyNum} • Queue: {displayCase.queue}
-                </Typography>
-              </Box>
-              <Chip 
-                label={displayCase.workType} 
-                color="primary" 
-                sx={{ borderRadius: 4, fontWeight: 500 }}
-              />
-            </Box>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="caption" sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Next Action</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
-                  {displayCase.nextAction}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Received Date</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
-                  <CalendarToday sx={{ fontSize: 14, marginRight: 1 }} />
-                  {displayCase.receivedDate}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Due Date</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
-                  <Schedule sx={{ fontSize: 14, marginRight: 1 }}/>
-                  {displayCase.dueDate}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Priority</Typography>
-                <Box>
-                  <Chip 
-                    label={displayCase.priority} 
-                    size="small"
-                    color={getPriorityColor(displayCase.priority) as any}
-                    sx={{ borderRadius: 4, fontWeight: 500 }}
-                  />
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="caption"  sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>Status</Typography>
-                <Box>
-                  <Chip 
-                    label={displayCase.assignmentStatus} 
-                    size="small"
-                    color={getStatusColor(displayCase.assignmentStatus) as any}
-                    sx={{ borderRadius: 4, fontWeight: 500 }}
-                  />
-                </Box>
+                <Chip
+                  label={displayCase.priority}
+                  size="small"
+                  color={getPriorityColor(displayCase.priority) as any}
+                  sx={{ borderRadius: 4, fontWeight: 500 }}
+                />
               </Box>
             </Box>
-          </Paper>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(0, 0, 0, 0.6)' }}
+              >
+                Status
+              </Typography>
+              <Box>
+                <Chip
+                  label={displayCase.assignmentStatus}
+                  size="small"
+                  color={getStatusColor(displayCase.assignmentStatus) as any}
+                  sx={{ borderRadius: 4, fontWeight: 500 }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
 
         <WorkbenchComponent />
       </Box>
@@ -205,35 +271,54 @@ const WorkbenchPage: React.FC = () => {
   }
 
   return (
-    <Box className="p-4" sx={{ backgroundColor: '#f8f9fc', minHeight: '100vh' }}>
-      <Card sx={{ 
-              marginBottom: 4,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-              borderRadius: 2
-            }}>
+    <Box
+      className="p-4"
+      sx={{ backgroundColor: '#f8f9fc', minHeight: '100vh' }}
+    >
+      <Card
+        sx={{
+          marginBottom: 4,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          borderRadius: 2,
+        }}
+      >
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 2,
+            }}
+          >
             <Typography variant="h5" component="h1" sx={{ fontWeight: 600 }}>
               Workbench
             </Typography>
-            
+
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button 
-                startIcon={<Refresh />} 
+              <Button
+                startIcon={<Refresh />}
                 variant="outlined"
                 sx={{
                   borderRadius: '8px',
                   textTransform: 'none',
                   fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(85, 105, 255, 0.2)'
+                  boxShadow: '0 4px 12px rgba(85, 105, 255, 0.2)',
                 }}
               >
                 Refresh
               </Button>
             </Box>
           </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '16px' }} >
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '24px',
+              gap: '16px',
+            }}
+          >
             <TextField
               placeholder="Search by ID, policy, or work type..."
               variant="outlined"
@@ -241,7 +326,7 @@ const WorkbenchPage: React.FC = () => {
               fullWidth
               value={searchTerm}
               onChange={handleSearchChange}
-              sx={{ maxWidth: 500}}
+              sx={{ maxWidth: 500 }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -250,17 +335,17 @@ const WorkbenchPage: React.FC = () => {
                 ),
               }}
             />
-            
+
             <Box sx={{ display: 'flex', gap: '8px' }}>
-              <Chip 
-                label={`${tableCases.length} Total Cases`} 
-                variant="outlined" 
+              <Chip
+                label={`${tableCases.length} Total Cases`}
+                variant="outlined"
                 size="small"
                 sx={{ borderRadius: 16 }}
               />
             </Box>
           </Box>
-          
+
           {filteredCases.length === 0 ? (
             <Alert severity="info">
               No cases match your search criteria. Try adjusting your filters.
@@ -268,7 +353,14 @@ const WorkbenchPage: React.FC = () => {
           ) : (
             <>
               {isLoading && <LinearProgress />}
-              <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #eaedf3' }}>
+              <TableContainer
+                component={Paper}
+                sx={{
+                  borderRadius: 2,
+                  boxShadow: 'none',
+                  border: '1px solid #eaedf3',
+                }}
+              >
                 <Table sx={{ minWidth: 650 }}>
                   <TableHead sx={{ backgroundColor: '#f5f7fa' }}>
                     <TableRow>
@@ -276,8 +368,12 @@ const WorkbenchPage: React.FC = () => {
                       <TableCell sx={{ fontWeight: 600 }}>Task ID</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Queue</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Work Type</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Next Action</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Received Date</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Next Action
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Received Date
+                      </TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Due Date</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Priority</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
@@ -285,10 +381,13 @@ const WorkbenchPage: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {filteredCases.map((caseData) => (
-                      <TableRow key={caseData.id} sx={{ 
-                        '&:hover': { backgroundColor: '#f5f9ff' }
-                      }}>
+                    {filteredCases.map(caseData => (
+                      <TableRow
+                        key={caseData.id}
+                        sx={{
+                          '&:hover': { backgroundColor: '#f5f9ff' },
+                        }}
+                      >
                         <TableCell>{caseData.policyNum}</TableCell>
                         <TableCell>{caseData.taskId}</TableCell>
                         <TableCell>{caseData.queue}</TableCell>
@@ -297,25 +396,27 @@ const WorkbenchPage: React.FC = () => {
                         <TableCell>{caseData.receivedDate}</TableCell>
                         <TableCell>{caseData.dueDate}</TableCell>
                         <TableCell>
-                          <Chip 
-                            label={caseData.priority} 
+                          <Chip
+                            label={caseData.priority}
                             size="small"
                             color={getPriorityColor(caseData.priority) as any}
                             sx={{ borderRadius: 4, fontWeight: 500 }}
                           />
                         </TableCell>
                         <TableCell>
-                          <Chip 
-                            label={caseData.assignmentStatus} 
+                          <Chip
+                            label={caseData.assignmentStatus}
                             size="small"
-                            color={getStatusColor(caseData.assignmentStatus) as any}
+                            color={
+                              getStatusColor(caseData.assignmentStatus) as any
+                            }
                             sx={{ borderRadius: 4, fontWeight: 500 }}
                           />
                         </TableCell>
                         <TableCell>
-                          <Button 
-                            variant="contained" 
-                            color="primary" 
+                          <Button
+                            variant="contained"
+                            color="primary"
                             onClick={() => handleCaseClick(caseData)}
                             sx={{ borderRadius: 2, textTransform: 'none' }}
                           >

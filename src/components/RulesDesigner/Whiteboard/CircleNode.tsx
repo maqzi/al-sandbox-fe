@@ -1,9 +1,17 @@
-import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
+import React, { memo } from 'react';
 
 const CircleNode = ({ data }) => {
   return (
-    <div style={{ borderRadius: '50%', background: '#fff', border: '1px solid #222', padding: 10, textAlign: 'center' }}>
+    <div
+      style={{
+        borderRadius: '50%',
+        background: '#fff',
+        border: '1px solid #222',
+        padding: 10,
+        textAlign: 'center',
+      }}
+    >
       <Handle
         type="target"
         position={Position.Top}

@@ -1,5 +1,5 @@
+import { Box, Typography } from '@mui/material';
 import React from 'react';
-import { Box, Typography, SvgIcon } from '@mui/material';
 
 interface AlitheiaLogoProps {
   variant?: 'default' | 'small' | 'large';
@@ -8,11 +8,11 @@ interface AlitheiaLogoProps {
   isHeader?: boolean;
 }
 
-const AlitheiaBranding: React.FC<AlitheiaLogoProps> = ({ 
+const AlitheiaBranding: React.FC<AlitheiaLogoProps> = ({
   variant = 'default',
   color = 'primary',
   withTagline = false,
-  isHeader = false
+  isHeader = false,
 }) => {
   // Size mapping for different variants
   const sizeMap = {
@@ -20,22 +20,22 @@ const AlitheiaBranding: React.FC<AlitheiaLogoProps> = ({
       iconSize: 18,
       fontSize: '1rem',
       taglineSize: '0.65rem',
-      spacing: 0.75
+      spacing: 0.75,
     },
     default: {
       iconSize: 24,
       fontSize: '1.25rem',
       taglineSize: '0.75rem',
-      spacing: 1
+      spacing: 1,
     },
     large: {
       iconSize: 32,
       fontSize: '1.75rem',
       taglineSize: '0.85rem',
-      spacing: 1.5
-    }
+      spacing: 1.5,
+    },
   };
-  
+
   const { iconSize, fontSize, taglineSize, spacing } = sizeMap[variant];
 
   return (
@@ -53,19 +53,25 @@ const AlitheiaBranding: React.FC<AlitheiaLogoProps> = ({
           mb: withTagline ? 0.5 : 0,
         }}
       >
-        {/* Icon source: https://img.icons8.com/stencil/32/doctors-laboratory-coat.png colors = { #ffab00, #1976d2} */}
+        {/* Icon source: https://icons8.com/icon/ibgT7C8DSMNc/shield colors = { #ffab00, #1976d2} */}
         <img
           src="/favicon.ico"
           alt="alitheia Labs"
           style={{
             width: iconSize,
             height: iconSize,
-            marginRight: spacing * 8, 
+            marginRight: spacing * 8,
             objectFit: 'contain',
           }}
         />
         <Typography
-          variant={variant === 'large' ? 'h5' : variant === 'default' ? 'h6' : 'subtitle1'}
+          variant={
+            variant === 'large'
+              ? 'h5'
+              : variant === 'default'
+                ? 'h6'
+                : 'subtitle1'
+          }
           sx={{
             fontWeight: 600,
             fontSize: fontSize,
@@ -86,7 +92,7 @@ const AlitheiaBranding: React.FC<AlitheiaLogoProps> = ({
           </Box>
         </Typography>
       </Box>
-      
+
       {withTagline && (
         <Typography
           variant="caption"

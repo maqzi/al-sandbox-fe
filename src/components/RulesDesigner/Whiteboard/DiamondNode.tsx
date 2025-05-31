@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
+import { Typography } from '@mui/material';
 import { Handle, Position } from '@xyflow/react';
-import { Box, Typography } from '@mui/material';
+import React, { memo } from 'react';
 import './css/DiamondNode.css';
 
 interface DiamondNodeProps {

@@ -1,9 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
+
 import rulesReducer from './rulesSlice';
 import { userReducer } from './userSlice';
 import workbenchReducer from './workbenchSlice';
-
-
 
 export const store = configureStore({
   reducer: {
@@ -12,8 +11,6 @@ export const store = configureStore({
     workbench: workbenchReducer,
   },
 });
-
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

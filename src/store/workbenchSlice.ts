@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 import workbenchCases from '@/data/workbenchCases.json';
 
 // Define interfaces for our state
@@ -29,9 +30,9 @@ export interface Case {
     status: string;
     premium: number;
   };
-  person: any;  // Using 'any' for brevity, but you could define a full interface
-  health: any;  // Using 'any' for brevity
-  assessment: any;  // Using 'any' for brevity
+  person: any; // Using 'any' for brevity, but you could define a full interface
+  health: any; // Using 'any' for brevity
+  assessment: any; // Using 'any' for brevity
 }
 
 interface WorkbenchState {
@@ -42,7 +43,7 @@ interface WorkbenchState {
 // Create initial state
 const initialState: WorkbenchState = {
   cases: workbenchCases.cases,
-  selectedCaseId: null
+  selectedCaseId: null,
 };
 
 const workbenchSlice = createSlice({
@@ -52,23 +53,30 @@ const workbenchSlice = createSlice({
     setSelectedCase: (state, action: PayloadAction<string>) => {
       state.selectedCaseId = action.payload;
     },
-    setWorkbenchSection: (state, action: PayloadAction<{caseId: string, section: string}>) => {
+    setWorkbenchSection: (
+      state,
+      action: PayloadAction<{ caseId: string; section: string }>
+    ) => {
       const { caseId, section } = action.payload;
       const caseToUpdate = state.cases.find(c => c.id === caseId);
       if (caseToUpdate) {
         caseToUpdate.workbench.currentSection = section;
       }
     },
-    setActiveSource: (state, action: PayloadAction<{caseId: string, source: string}>) => {
+    setActiveSource: (
+      state,
+      action: PayloadAction<{ caseId: string; source: string }>
+    ) => {
       const { caseId, source } = action.payload;
       const caseToUpdate = state.cases.find(c => c.id === caseId);
       if (caseToUpdate) {
         caseToUpdate.workbench.activeSource = source;
       }
-    }
-  }
+    },
+  },
 });
 
 // Export actions and reducer
-export const { setSelectedCase, setWorkbenchSection, setActiveSource } = workbenchSlice.actions;
+export const { setSelectedCase, setWorkbenchSection, setActiveSource } =
+  workbenchSlice.actions;
 export default workbenchSlice.reducer;

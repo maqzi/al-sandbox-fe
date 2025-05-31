@@ -1,20 +1,42 @@
-import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Typography, Chip, Paper, Box, Divider,
-  Select, MenuItem, FormControl,
-  InputLabel, ListItemText, Checkbox, FormHelperText,
-  OutlinedInput, Stepper, Step, StepLabel
-} from '@mui/material';
-import {
-  Close, Add, SmartToy, AutoFixHigh, CloudUpload,
-  CreateNewFolder, Lock
+  Close,
+  Add,
+  SmartToy,
+  AutoFixHigh,
+  CloudUpload,
+  CreateNewFolder,
+  Lock,
 } from '@mui/icons-material';
-import { Rule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Chip,
+  Paper,
+  Box,
+  Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  Checkbox,
+  FormHelperText,
+  OutlinedInput,
+  Stepper,
+  Step,
+  StepLabel,
+} from '@mui/material';
+import React, { useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
 import ruleRecommendations from '@/data/rulesRecommendations.json';
 import datadog from '@/lib/datadog';
+import { Rule, setActiveRule, setActiveVersion } from '@/store/rulesSlice';
 
 interface CreateRuleDialogProps {
   open: boolean;
@@ -23,13 +45,13 @@ interface CreateRuleDialogProps {
 
 const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
   open,
-  onClose
+  onClose,
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const [createMode, setCreateMode] = useState<'manual' | 'ai' | null>(null);
-  const [selectedManual, setSelectedManual] = useState<string>("");
+  const [selectedManual, setSelectedManual] = useState<string>('');
   const [selectedImpairments, setSelectedImpairments] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -41,7 +63,7 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
 
   const resetState = useCallback(() => {
     setCreateMode(null);
-    setSelectedManual("");
+    setSelectedManual('');
     setSelectedImpairments([]);
     setActiveStep(0);
     setIsGenerating(false);
@@ -55,58 +77,61 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
 
   const handleGenerateRule = useCallback(() => {
     setIsGenerating(true);
-    setGenerationStatus({ phase: 'init', message: 'Initializing rule generation...', progress: 10 });
-    
+    setGenerationStatus({
+      phase: 'init',
+      message: 'Initializing rule generation...',
+      progress: 10,
+    });
+
     // Create rule name based on selected impairments
-    const ruleName = `${selectedImpairments.map(imp => 
-      imp.charAt(0).toUpperCase() + imp.slice(1).replace('_', ' ')
-    ).join(' + ')} Risk Assessment`;
-    
+    const ruleName = `${selectedImpairments
+      .map(imp => imp.charAt(0).toUpperCase() + imp.slice(1).replace('_', ' '))
+      .join(' + ')} Risk Assessment`;
+
     // Generate a unique ID
     const newRuleId = `R-${Math.floor(Math.random() * 10000)}`;
-    
+
     // Simulate the multi-step generation process
     setTimeout(() => {
-      setGenerationStatus({ 
-        phase: 'searching', 
-        message: 'Searching for rule templates...', 
-        progress: 30 
+      setGenerationStatus({
+        phase: 'searching',
+        message: 'Searching for rule templates...',
+        progress: 30,
       });
-      
+
       // Find matching rule templates from recommendations
       const matchingTemplates: any[] = [];
-      
+
       selectedImpairments.forEach(impairment => {
         // Find a template that matches the impairment
-        const template = ruleRecommendations.rules.find(rule => 
-          rule.name.toLowerCase() === impairment.replace('_', ' ')
+        const template = ruleRecommendations.rules.find(
+          rule => rule.name.toLowerCase() === impairment.replace('_', ' ')
         );
         if (template) {
           matchingTemplates.push(template);
         }
       });
-      
+
       setTimeout(() => {
         // Get the first matching template or use a default one
-        const selectedTemplate = matchingTemplates.length > 0 
-          ? matchingTemplates[0] 
-          : null;
-          
-        setGenerationStatus({ 
-          phase: selectedTemplate ? 'adapting' : 'creating', 
-          message: selectedTemplate 
-            ? `Found ${selectedTemplate.name} template! Adapting to your requirements...` 
-            : 'Creating a new rule from scratch...', 
-          progress: 60 
+        const selectedTemplate =
+          matchingTemplates.length > 0 ? matchingTemplates[0] : null;
+
+        setGenerationStatus({
+          phase: selectedTemplate ? 'adapting' : 'creating',
+          message: selectedTemplate
+            ? `Found ${selectedTemplate.name} template! Adapting to your requirements...`
+            : 'Creating a new rule from scratch...',
+          progress: 60,
         });
-        
+
         setTimeout(() => {
-          setGenerationStatus({ 
-            phase: 'finalizing', 
-            message: 'Finalizing rule definition...', 
-            progress: 90 
+          setGenerationStatus({
+            phase: 'finalizing',
+            message: 'Finalizing rule definition...',
+            progress: 90,
           });
-          
+
           setTimeout(() => {
             // Create a new rule object using the template if available
             const newRule: Rule = {
@@ -118,72 +143,76 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                   version: '1.0.0',
                   tag: 'latest',
                   note: `Initial version generated by Rule AI using ${selectedManual}`,
-                  nodes: selectedTemplate ? selectedTemplate.versions[0].nodes : [
-                    {
-                      id: 'start',
-                      type: 'start',
-                      data: { label: 'Start' },
-                      position: { x: 250, y: 5 }
-                    },
-                    {
-                      id: 'condition',
-                      type: 'condition',
-                      data: { 
-                        label: `Check ${selectedImpairments.join(' & ')}`, 
-                        condition: `has_condition(${selectedImpairments.join(')} || has_condition(')})` 
-                      },
-                      position: { x: 250, y: 100 }
-                    },
-                    {
-                      id: 'action',
-                      type: 'action',
-                      data: { 
-                        label: 'Set Risk Class', 
-                        action: 'risk_class = "Standard"'
-                      },
-                      position: { x: 250, y: 200 }
-                    },
-                    {
-                      id: 'end',
-                      type: 'end',
-                      data: { label: 'End' },
-                      position: { x: 250, y: 300 }
-                    }
-                  ],
-                  edges: selectedTemplate ? selectedTemplate.versions[0].edges : [
-                    {
-                      id: 'e-start-condition',
-                      source: 'start',
-                      target: 'condition',
-                      type: 'smoothstep'
-                    },
-                    {
-                      id: 'e-condition-action',
-                      source: 'condition',
-                      target: 'action',
-                      type: 'smoothstep',
-                      label: 'Yes'
-                    },
-                    {
-                      id: 'e-action-end',
-                      source: 'action',
-                      target: 'end',
-                      type: 'smoothstep'
-                    }
-                  ]
-                }
-              ]
+                  nodes: selectedTemplate
+                    ? selectedTemplate.versions[0].nodes
+                    : [
+                        {
+                          id: 'start',
+                          type: 'start',
+                          data: { label: 'Start' },
+                          position: { x: 250, y: 5 },
+                        },
+                        {
+                          id: 'condition',
+                          type: 'condition',
+                          data: {
+                            label: `Check ${selectedImpairments.join(' & ')}`,
+                            condition: `has_condition(${selectedImpairments.join(')} || has_condition(')})`,
+                          },
+                          position: { x: 250, y: 100 },
+                        },
+                        {
+                          id: 'action',
+                          type: 'action',
+                          data: {
+                            label: 'Set Risk Class',
+                            action: 'risk_class = "Standard"',
+                          },
+                          position: { x: 250, y: 200 },
+                        },
+                        {
+                          id: 'end',
+                          type: 'end',
+                          data: { label: 'End' },
+                          position: { x: 250, y: 300 },
+                        },
+                      ],
+                  edges: selectedTemplate
+                    ? selectedTemplate.versions[0].edges
+                    : [
+                        {
+                          id: 'e-start-condition',
+                          source: 'start',
+                          target: 'condition',
+                          type: 'smoothstep',
+                        },
+                        {
+                          id: 'e-condition-action',
+                          source: 'condition',
+                          target: 'action',
+                          type: 'smoothstep',
+                          label: 'Yes',
+                        },
+                        {
+                          id: 'e-action-end',
+                          source: 'action',
+                          target: 'end',
+                          type: 'smoothstep',
+                        },
+                      ],
+                },
+              ],
             };
-            
+
             // Dispatch the action to add the new rule to the Redux store
             dispatch({ type: 'rules/addRule', payload: newRule });
-            
-            setGenerationStatus({ 
-              phase: 'complete', 
-              message: 'Rule successfully generated!', 
-              progress: 100 
+
+            setGenerationStatus({
+              phase: 'complete',
+              message: 'Rule successfully generated!',
+              progress: 100,
             });
-            
+
             // Log rule generation
             datadog.log({
               action: 'generate_rule',
@@ -192,23 +221,22 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
               additionalData: {
                 ruleId: newRuleId,
                 impairments: selectedImpairments,
-                manual: selectedManual
-              }
+                manual: selectedManual,
+              },
             });
-            
+
             // Final delay before closing
             setTimeout(() => {
               // Set the newly created rule as selected and active
               dispatch(setActiveRule(newRule));
               dispatch(setActiveVersion(newRule.versions[0]));
-              
+
               // Close the dialog and reset state
               handleClose();
-              
+
               // Navigate to the dedicated whiteboard page for the new rule
               navigate(`/rules/${newRuleId}/version/1.0.0/whiteboard`);
             }, 1000);
-            
           }, 800);
         }, 1200);
       }, 1000);
@@ -216,36 +244,35 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
   }, [dispatch, selectedImpairments, selectedManual, handleClose, navigate]);
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={handleClose}
       maxWidth="md"
       fullWidth
       PaperProps={{
         style: {
           borderRadius: '12px',
-          padding: '8px'
-        }
+          padding: '8px',
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        bgcolor: '#f5f7fa',
-        borderRadius: '8px 8px 0 0',
-        padding: '16px 24px'
-      }}>
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          bgcolor: '#f5f7fa',
+          borderRadius: '8px 8px 0 0',
+          padding: '16px 24px',
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Add sx={{ marginRight: 1, color: '#5569ff' }} />
           <Typography variant="h6" component="span" sx={{ fontWeight: 600 }}>
             Create New Rule
           </Typography>
         </Box>
-        <Button 
-          onClick={handleClose}
-          sx={{ minWidth: '36px', padding: '6px' }}
-        >
+        <Button onClick={handleClose} sx={{ minWidth: '36px', padding: '6px' }}>
           <Close />
         </Button>
       </DialogTitle>
@@ -265,14 +292,14 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
             </Step>
           </Stepper>
         )}
-      
+
         {/* Mode Selection */}
         {!createMode && (
           <Box>
             <Typography variant="body1" sx={{ mb: 3 }}>
               Choose how to create your new rule:
             </Typography>
-            
+
             <Box sx={{ display: 'flex', gap: 3 }}>
               {/* Manual Creation Option - Locked */}
               <Paper
@@ -286,7 +313,7 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                   alignItems: 'center',
                   opacity: 0.7,
                   cursor: 'not-allowed',
-                  position: 'relative'
+                  position: 'relative',
                 }}
               >
                 <Box
@@ -304,35 +331,42 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                     borderRadius: 2,
                   }}
                 >
-                  <Chip 
-                    icon={<Lock />} 
-                    label="Coming Soon" 
-                    color="default" 
-                    sx={{ 
+                  <Chip
+                    icon={<Lock />}
+                    label="Coming Soon"
+                    color="default"
+                    sx={{
                       fontWeight: 600,
                       borderRadius: '16px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     }}
                   />
                 </Box>
-                
-                <CreateNewFolder sx={{ fontSize: 60, mb: 2, color: '#5569ff' }} />
+
+                <CreateNewFolder
+                  sx={{ fontSize: 60, mb: 2, color: '#5569ff' }}
+                />
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                   Start From Scratch
                 </Typography>
-                <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                  sx={{ mb: 2 }}
+                >
                   Build your rule tree manually using our visual editor.
                 </Typography>
-                <Button 
-                  variant="outlined" 
-                  color="inherit" 
+                <Button
+                  variant="outlined"
+                  color="inherit"
                   disabled
                   sx={{ borderRadius: 2, textTransform: 'none' }}
                 >
                   Create Manually
                 </Button>
               </Paper>
-              
+
               {/* AI Creation Option */}
               <Paper
                 elevation={3}
@@ -349,8 +383,8 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                   '&:hover': {
                     borderColor: '#5569ff',
                     transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 16px rgba(85, 105, 255, 0.2)'
-                  }
+                    boxShadow: '0 8px 16px rgba(85, 105, 255, 0.2)',
+                  },
                 }}
                 onClick={() => setCreateMode('ai')}
               >
@@ -358,16 +392,25 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                   Use Rule AI
                 </Typography>
-                <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                  sx={{ mb: 2 }}
+                >
                   Generate rules automatically from underwriting guidelines.
                 </Typography>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
+                <Button
+                  variant="contained"
+                  color="primary"
                   fullWidth
                   startIcon={<AutoFixHigh />}
                   onClick={() => setCreateMode('ai')}
-                  sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                  }}
                 >
                   Get Started with AI
                 </Button>
@@ -375,52 +418,62 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
             </Box>
           </Box>
         )}
-        
+
         {/* Step 1: Select Underwriting Manual */}
         {createMode === 'ai' && activeStep === 0 && (
           <Box>
             <Typography variant="body1" sx={{ mb: 3 }}>
               Select a source underwriting manual:
             </Typography>
-            
+
             <FormControl fullWidth sx={{ mb: 3 }}>
-              <InputLabel id="manual-select-label">Underwriting Manual</InputLabel>
+              <InputLabel id="manual-select-label">
+                Underwriting Manual
+              </InputLabel>
               <Select
                 labelId="manual-select-label"
                 value={selectedManual}
-                onChange={(e) => setSelectedManual(e.target.value as string)}
+                onChange={e => setSelectedManual(e.target.value as string)}
                 label="Underwriting Manual"
               >
-                <MenuItem value="munich_re_23">Munich Re - Medical UW Manual 2023</MenuItem>
-                <MenuItem value="munich_re_24">Munich Re - Medical UW Manual 2024</MenuItem>
+                <MenuItem value="munich_re_23">
+                  Munich Re - Medical UW Manual 2023
+                </MenuItem>
+                <MenuItem value="munich_re_24">
+                  Munich Re - Medical UW Manual 2024
+                </MenuItem>
                 <MenuItem value="upload">Upload Custom Manual...</MenuItem>
               </Select>
               <FormHelperText>
                 Select an underwriting manual to extract rules from.
               </FormHelperText>
             </FormControl>
-            
-            {selectedManual === "upload" && (
-              <Box 
-                sx={{ 
-                  border: '2px dashed #c0c8d2', 
-                  borderRadius: 2, 
-                  p: 3, 
+
+            {selectedManual === 'upload' && (
+              <Box
+                sx={{
+                  border: '2px dashed #c0c8d2',
+                  borderRadius: 2,
+                  p: 3,
                   textAlign: 'center',
                   backgroundColor: '#f5f7fa',
-                  mb: 3
+                  mb: 3,
                 }}
               >
                 <CloudUpload sx={{ fontSize: 48, color: '#5569ff', mb: 1 }} />
                 <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
                   Upload Underwriting Manual
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   PDF, DOCX, or TXT files up to 50MB
                 </Typography>
-                <Button 
-                  variant="outlined" 
-                  color="inherit" 
+                <Button
+                  variant="outlined"
+                  color="inherit"
                   disabled
                   sx={{ borderRadius: 2, textTransform: 'none' }}
                 >
@@ -428,9 +481,11 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                 </Button>
               </Box>
             )}
-            
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-              <Button 
+
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}
+            >
+              <Button
                 variant="outlined"
                 color="primary"
                 onClick={() => setCreateMode(null)}
@@ -438,7 +493,7 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
               >
                 Back
               </Button>
-              <Button 
+              <Button
                 variant="contained"
                 color="primary"
                 disabled={!selectedManual}
@@ -450,66 +505,85 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
             </Box>
           </Box>
         )}
-        
+
         {/* Step 2: Select Impairments */}
         {createMode === 'ai' && activeStep === 1 && (
           <Box>
             <Typography variant="body1" sx={{ mb: 3 }}>
               Select impairments for rule generation:
             </Typography>
-            
+
             <FormControl fullWidth sx={{ mb: 3 }}>
               <InputLabel id="impairments-label">Impairments</InputLabel>
               <Select
                 labelId="impairments-label"
                 value={selectedImpairments[0] || ''}
-                onChange={(e) => setSelectedImpairments([e.target.value as string])}
+                onChange={e =>
+                  setSelectedImpairments([e.target.value as string])
+                }
                 input={<OutlinedInput label="Impairments" />}
               >
                 {/* Available Impairments */}
                 <MenuItem value="hypertension">
-                  <Checkbox checked={selectedImpairments.indexOf('hypertension') > -1} />
-                  <ListItemText 
-                    primary="Hypertension" 
+                  <Checkbox
+                    checked={selectedImpairments.indexOf('hypertension') > -1}
+                  />
+                  <ListItemText
+                    primary="Hypertension"
                     secondary="Blood pressure exceeding 140/90 mm Hg"
                   />
                 </MenuItem>
-                
+
                 <MenuItem value="brca">
-                  <Checkbox checked={selectedImpairments.indexOf('brca') > -1} />
-                  <ListItemText 
-                    primary="BRCA Mutation" 
+                  <Checkbox
+                    checked={selectedImpairments.indexOf('brca') > -1}
+                  />
+                  <ListItemText
+                    primary="BRCA Mutation"
                     secondary="BRCA1/2 gene mutations or family history of breast/ovarian cancer"
                   />
                 </MenuItem>
-                
+
                 <Divider sx={{ my: 1 }} />
-                
+
                 {/* Locked Impairments */}
                 <MenuItem disabled sx={{ opacity: 0.7, cursor: 'not-allowed' }}>
-                  <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      width: '100%',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ fontStyle: 'italic' }}
+                    >
                       More impairments coming soon
                     </Typography>
-                    <Chip 
-                      icon={<Lock fontSize="small" />} 
-                      label="Coming Soon" 
-                      size="small" 
+                    <Chip
+                      icon={<Lock fontSize="small" />}
+                      label="Coming Soon"
+                      size="small"
                       variant="outlined"
                       sx={{ ml: 2 }}
                     />
                   </Box>
                 </MenuItem>
-                
+
                 {/* ...existing disabled menu items... */}
               </Select>
               <FormHelperText>
-                Select one or more impairments to create rules for. 
+                Select one or more impairments to create rules for.
               </FormHelperText>
             </FormControl>
-            
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-              <Button 
+
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}
+            >
+              <Button
                 variant="outlined"
                 color="primary"
                 onClick={() => setActiveStep(0)}
@@ -517,7 +591,7 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
               >
                 Back
               </Button>
-              <Button 
+              <Button
                 variant="contained"
                 color="primary"
                 disabled={selectedImpairments.length === 0}
@@ -529,32 +603,37 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
             </Box>
           </Box>
         )}
-        
+
         {/* Step 3: Generate Rule */}
         {createMode === 'ai' && activeStep === 2 && (
           <Box>
             <Typography variant="body1" sx={{ mb: 3 }}>
               Review your selections and generate your rule:
             </Typography>
-            
+
             <Paper sx={{ p: 2, mb: 3, bgcolor: '#f5f7fa', borderRadius: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                 Selected Source:
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                {selectedManual === "munich_re_23" && "Munich Re - Medical UW Manual 2023"}
-                {selectedManual === "munich_re_24" && "Munich Re - Medical UW Manual 2024"}
-                {selectedManual === "upload" && "Custom Uploaded Manual"}
+                {selectedManual === 'munich_re_23' &&
+                  'Munich Re - Medical UW Manual 2023'}
+                {selectedManual === 'munich_re_24' &&
+                  'Munich Re - Medical UW Manual 2024'}
+                {selectedManual === 'upload' && 'Custom Uploaded Manual'}
               </Typography>
-              
+
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                 Selected Impairments:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                {selectedImpairments.map((impairment) => (
-                  <Chip 
-                    key={impairment} 
-                    label={impairment.charAt(0).toUpperCase() + impairment.slice(1).replace('_', ' ')} 
+                {selectedImpairments.map(impairment => (
+                  <Chip
+                    key={impairment}
+                    label={
+                      impairment.charAt(0).toUpperCase() +
+                      impairment.slice(1).replace('_', ' ')
+                    }
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -562,19 +641,26 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
                   />
                 ))}
               </Box>
-              
+
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                 Generated Rule Name:
               </Typography>
               <Typography variant="body2">
-                {selectedImpairments.map(imp => 
-                  imp.charAt(0).toUpperCase() + imp.slice(1).replace('_', ' ')
-                ).join(' + ')} Risk Assessment
+                {selectedImpairments
+                  .map(
+                    imp =>
+                      imp.charAt(0).toUpperCase() +
+                      imp.slice(1).replace('_', ' ')
+                  )
+                  .join(' + ')}{' '}
+                Risk Assessment
               </Typography>
             </Paper>
-            
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-              <Button 
+
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}
+            >
+              <Button
                 variant="outlined"
                 color="primary"
                 onClick={() => setActiveStep(1)}
@@ -582,17 +668,17 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
               >
                 Back
               </Button>
-              <Button 
+              <Button
                 variant="contained"
                 color="primary"
                 startIcon={<AutoFixHigh />}
                 disabled={isGenerating}
                 onClick={handleGenerateRule}
-                sx={{ 
-                  borderRadius: 2, 
-                  textTransform: 'none', 
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
                   fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(85, 105, 255, 0.2)'
+                  boxShadow: '0 4px 12px rgba(85, 105, 255, 0.2)',
                 }}
               >
                 {isGenerating ? 'Generating...' : 'Generate Rule'}
@@ -601,14 +687,12 @@ const CreateRuleDialog: React.FC<CreateRuleDialogProps> = ({
           </Box>
         )}
       </DialogContent>
-      
+
       {(!createMode || activeStep !== 2) && (
-        <DialogActions sx={{ padding: '16px 24px', borderTop: '1px solid #e0e0e0' }}>
-          <Button 
-            variant="outlined" 
-            color="primary" 
-            onClick={handleClose}
-          >
+        <DialogActions
+          sx={{ padding: '16px 24px', borderTop: '1px solid #e0e0e0' }}
+        >
+          <Button variant="outlined" color="primary" onClick={handleClose}>
             Cancel
           </Button>
         </DialogActions>

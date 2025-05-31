@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { Navigate, useLocation } from 'react-router-dom';
+
 import { RootState } from '@/store/store';
 import { setStep } from '@/store/userSlice';
 

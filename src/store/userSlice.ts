@@ -23,26 +23,29 @@ const initialState: UserState = {
   step: 0,
   userInfo: {
     name: '',
-    email: ''
-  }
+    email: '',
+  },
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<{ name: string; email: string }>) => {
+    setUser: (
+      state,
+      action: PayloadAction<{ name: string; email: string }>
+    ) => {
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.userInfo = {
         name: action.payload.name,
-        email: action.payload.email
+        email: action.payload.email,
       };
     },
     setStep: (state, action: PayloadAction<number>) => {
       state.step = action.payload;
     },
-    trackActivity: (state) => {
+    trackActivity: state => {
       state.lastActivity = Date.now();
     },
     setSessionId: (state, action: PayloadAction<string>) => {
@@ -51,5 +54,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, setStep, trackActivity, setSessionId } = userSlice.actions;
+export const { setUser, setStep, trackActivity, setSessionId } =
+  userSlice.actions;
 export const userReducer = userSlice.reducer;

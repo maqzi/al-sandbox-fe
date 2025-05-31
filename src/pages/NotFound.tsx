@@ -1,5 +1,8 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Home as HomeIcon,
+  ArrowBack as ArrowBackIcon,
+  SentimentDissatisfied as SadIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -7,13 +10,10 @@ import {
   Typography,
   Paper,
   Grid,
-  useTheme
-} from "@mui/material";
-import {
-  Home as HomeIcon,
-  ArrowBack as ArrowBackIcon,
-  SentimentDissatisfied as SadIcon
-} from "@mui/icons-material";
+  useTheme,
+} from '@mui/material';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const NotFound = () => {
   const location = useLocation();
@@ -22,13 +22,13 @@ const NotFound = () => {
 
   useEffect(() => {
     console.error(
-      "404 Error: User attempted to access non-existent route:",
+      '404 Error: User attempted to access non-existent route:',
       location.pathname
     );
   }, [location.pathname]);
 
   const handleGoHome = () => {
-    navigate("/");
+    navigate('/');
   };
 
   const handleGoBack = () => {
@@ -39,13 +39,13 @@ const NotFound = () => {
     <Container maxWidth="md">
       <Box
         sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          py: 6
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+          py: 6,
         }}
       >
         <Paper
@@ -53,22 +53,22 @@ const NotFound = () => {
           sx={{
             p: 5,
             borderRadius: 3,
-            position: "relative",
-            overflow: "hidden",
-            width: "100%",
+            position: 'relative',
+            overflow: 'hidden',
+            width: '100%',
             background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-            boxShadow: "0 8px 40px rgba(0,0,0,0.12)"
+            boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
           }}
         >
           {/* Animated background elements */}
           <Box
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
-              overflow: "hidden",
+              overflow: 'hidden',
               zIndex: 0,
             }}
           >
@@ -76,22 +76,22 @@ const NotFound = () => {
               <Box
                 key={i}
                 sx={{
-                  position: "absolute",
-                  width: { xs: "80px", md: "120px" },
-                  height: { xs: "80px", md: "120px" },
+                  position: 'absolute',
+                  width: { xs: '80px', md: '120px' },
+                  height: { xs: '80px', md: '120px' },
                   background: theme.palette.primary.main,
-                  borderRadius: "50%",
-                  opacity: "0.05",
+                  borderRadius: '50%',
+                  opacity: '0.05',
                   transform: `scale(${Math.random() * 0.6 + 0.5})`,
                   top: `${Math.random() * 80}%`,
                   left: `${Math.random() * 80}%`,
                   animation: `float ${Math.random() * 10 + 10}s infinite ease-in-out`,
                   animationDelay: `${Math.random() * 2}s`,
-                  "@keyframes float": {
-                    "0%, 100%": {
+                  '@keyframes float': {
+                    '0%, 100%': {
                       transform: `translate(0, 0) scale(${Math.random() * 0.6 + 0.5})`,
                     },
-                    "50%": {
+                    '50%': {
                       transform: `translate(${Math.random() * 40 - 20}px, ${
                         Math.random() * 40 - 20
                       }px) scale(${Math.random() * 0.6 + 0.5})`,
@@ -102,37 +102,46 @@ const NotFound = () => {
             ))}
           </Box>
 
-          <Grid container spacing={4} sx={{ position: "relative", zIndex: 1 }}>
-            <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <Grid container spacing={4} sx={{ position: 'relative', zIndex: 1 }}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }}
+            >
               <Box
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: { xs: "center", md: "flex-start" },
-                  textAlign: { xs: "center", md: "left" },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: { xs: 'center', md: 'flex-start' },
+                  textAlign: { xs: 'center', md: 'left' },
                 }}
               >
                 <Typography
                   variant="h1"
                   color="primary"
                   sx={{
-                    fontSize: { xs: "4rem", sm: "8rem" },
+                    fontSize: { xs: '4rem', sm: '8rem' },
                     fontWeight: 800,
                     lineHeight: 1,
                     mb: 2,
-                    position: "relative",
-                    display: "inline-block",
+                    position: 'relative',
+                    display: 'inline-block',
                   }}
                 >
                   <span
                     style={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
                       color: theme.palette.primary.main,
                       opacity: 0.1,
-                      fontSize: "140%",
+                      fontSize: '140%',
                       zIndex: -1,
                     }}
                   >
@@ -154,19 +163,19 @@ const NotFound = () => {
                 <Typography
                   variant="body1"
                   color="text.secondary"
-                  sx={{ mb: 4, maxWidth: "500px" }}
+                  sx={{ mb: 4, maxWidth: '500px' }}
                 >
-                  The page you're looking for doesn't exist or may have been moved.
-                  Check the URL or try navigating back to the dashboard.
+                  The page you're looking for doesn't exist or may have been
+                  moved. Check the URL or try navigating back to the dashboard.
                 </Typography>
 
                 <Box
                   sx={{
-                    display: "flex",
+                    display: 'flex',
                     gap: 2,
-                    flexWrap: { xs: "wrap", sm: "nowrap" },
-                    justifyContent: { xs: "center", md: "flex-start" },
-                    width: { xs: "100%", sm: "auto" },
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                    justifyContent: { xs: 'center', md: 'flex-start' },
+                    width: { xs: '100%', sm: 'auto' },
                   }}
                 >
                   <Button
@@ -180,10 +189,10 @@ const NotFound = () => {
                       px: 3,
                       py: 1.2,
                       fontWeight: 600,
-                      textTransform: "none",
-                      boxShadow: "0 8px 16px rgba(25, 118, 210, 0.2)",
-                      "&:hover": {
-                        boxShadow: "0 12px 20px rgba(25, 118, 210, 0.3)",
+                      textTransform: 'none',
+                      boxShadow: '0 8px 16px rgba(25, 118, 210, 0.2)',
+                      '&:hover': {
+                        boxShadow: '0 12px 20px rgba(25, 118, 210, 0.3)',
                       },
                     }}
                   >
@@ -201,7 +210,7 @@ const NotFound = () => {
                       px: 3,
                       py: 1.2,
                       fontWeight: 600,
-                      textTransform: "none",
+                      textTransform: 'none',
                     }}
                   >
                     Go Back
@@ -215,23 +224,23 @@ const NotFound = () => {
               xs={12}
               md={6}
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
               <Box
                 sx={{
-                  position: "relative",
-                  width: "100%",
-                  height: { xs: "200px", sm: "300px" },
-                  animation: "pulse 3s infinite ease-in-out",
-                  "@keyframes pulse": {
-                    "0%, 100%": {
-                      transform: "translateY(0)",
+                  position: 'relative',
+                  width: '100%',
+                  height: { xs: '200px', sm: '300px' },
+                  animation: 'pulse 3s infinite ease-in-out',
+                  '@keyframes pulse': {
+                    '0%, 100%': {
+                      transform: 'translateY(0)',
                     },
-                    "50%": {
-                      transform: "translateY(-10px)",
+                    '50%': {
+                      transform: 'translateY(-10px)',
                     },
                   },
                 }}
@@ -249,10 +258,10 @@ const NotFound = () => {
                     mt: 2,
                     fontWeight: 500,
                     color: theme.palette.text.secondary,
-                    animation: "fadeInOut 3s infinite ease-in-out",
-                    "@keyframes fadeInOut": {
-                      "0%, 100%": { opacity: 0.6 },
-                      "50%": { opacity: 1 },
+                    animation: 'fadeInOut 3s infinite ease-in-out',
+                    '@keyframes fadeInOut': {
+                      '0%, 100%': { opacity: 0.6 },
+                      '50%': { opacity: 1 },
                     },
                   }}
                 >
@@ -264,12 +273,12 @@ const NotFound = () => {
         </Paper>
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: 4 }}>
-          Need help? Contact{" "}
+          Need help? Contact{' '}
           <Typography
             component="a"
             href="mailto:support@alitheia-labs.com"
             color="primary"
-            sx={{ textDecoration: "none" }}
+            sx={{ textDecoration: 'none' }}
           >
             support@alitheia-labs.com
           </Typography>

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
+
 import rulesData from '@/data/rulesTree.json';
 
 // Define TypeScript interfaces for better type safety
@@ -38,11 +39,11 @@ const processRulesData = (): Rule[] => {
         latestVersion = rule.versions[0].version;
       }
     }
-    
+
     // Return rule with activeVersionId set
     return {
       ...rule,
-      activeVersionId: rule.activeVersionId || latestVersion // Use existing activeVersionId if present
+      activeVersionId: rule.activeVersionId || latestVersion, // Use existing activeVersionId if present
     };
   });
 };
@@ -51,7 +52,7 @@ const processRulesData = (): Rule[] => {
 const initialState: RulesState = {
   rules: processRulesData(),
   activeRule: null,
-  activeVersion: null
+  activeVersion: null,
 };
 
 export const addRule = createAction<Rule>('rules/addRule');
@@ -66,17 +67,21 @@ const rulesSlice = createSlice({
     setActiveVersion(state, action: PayloadAction<RuleVersion | null>) {
       state.activeVersion = action.payload;
     },
-    updateRuleActiveVersion(state, action: PayloadAction<{ruleId: string, versionId: string}>) {
+    updateRuleActiveVersion(
+      state,
+      action: PayloadAction<{ ruleId: string; versionId: string }>
+    ) {
       const { ruleId, versionId } = action.payload;
       const rule = state.rules.find(rule => rule.id === ruleId);
-      
+
       if (rule) {
         // Update the active version for this rule
         rule.activeVersionId = versionId;
-        
+
         // If this is the active rule, also update the active version
         if (state.activeRule && state.activeRule.id === ruleId) {
-          const newActiveVersion = rule.versions.find(v => v.version === versionId) || null;
+          const newActiveVersion =
+            rule.versions.find(v => v.version === versionId) || null;
           state.activeVersion = newActiveVersion;
         }
       }
@@ -89,14 +94,19 @@ const rulesSlice = createSlice({
       }
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder.addCase(addRule, (state, action) => {
       state.rules.push(action.payload);
     });
-  }
+  },
 });
 
-export const { setActiveRule, setActiveVersion, updateRuleActiveVersion, updateRule } = rulesSlice.actions;
+export const {
+  setActiveRule,
+  setActiveVersion,
+  updateRuleActiveVersion,
+  updateRule,
+} = rulesSlice.actions;
 
 // Export the reducer as default (this was missing before)
 export default rulesSlice.reducer;

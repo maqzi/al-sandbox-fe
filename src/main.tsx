@@ -1,10 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
-import DatadogInitializer from './components/DatadogInitializer';
-import './index.css';
 
-// Initialize Datadog as early as possible
+import App from './App';
+import './index.css';
 import datadog from './lib/datadog';
 
 const startTime = performance.now(); // Track application startup time
@@ -17,12 +15,12 @@ datadog.log({
   label: 'Application Startup',
   additionalData: {
     startupTime: `${performance.now() - startTime}ms`,
-    timestamp: new Date().toISOString()
-  }
+    timestamp: new Date().toISOString(),
+  },
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-      <App />
-  </React.StrictMode>,
+    <App />
+  </React.StrictMode>
 );

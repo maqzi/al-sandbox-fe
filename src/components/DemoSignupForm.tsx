@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
-import { 
-  TextField, 
-  Button, 
-  Box, 
-  Typography, 
+import { Person as PersonIcon, Email as EmailIcon } from '@mui/icons-material';
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
   InputAdornment,
   CircularProgress,
-  Alert
+  Alert,
 } from '@mui/material';
-import { 
-  Person as PersonIcon, 
-  Email as EmailIcon 
-} from '@mui/icons-material';
+import React, { useState } from 'react';
+
 import datadog from '@/lib/datadog';
 
 interface DemoSignupFormProps {
@@ -25,7 +23,7 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
   const [emailError, setEmailError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
-  
+
   const validateName = () => {
     if (!name.trim()) {
       setNameError('Name is required');
@@ -34,14 +32,14 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
         action: 'validation_error',
         category: 'form',
         label: 'name_required',
-        additionalData: { field: 'name' }
+        additionalData: { field: 'name' },
       });
       return false;
     }
     setNameError('');
     return true;
   };
-  
+
   const validateEmail = () => {
     if (!email.trim()) {
       setEmailError('Email is required');
@@ -50,11 +48,11 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
         action: 'validation_error',
         category: 'form',
         label: 'email_required',
-        additionalData: { field: 'email' }
+        additionalData: { field: 'email' },
       });
       return false;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError('Please enter a valid email');
@@ -63,21 +61,21 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
         action: 'validation_error',
         category: 'form',
         label: 'email_invalid_format',
-        additionalData: { field: 'email' }
+        additionalData: { field: 'email' },
       });
       return false;
     }
-    
+
     setEmailError('');
     return true;
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const isNameValid = validateName();
     const isEmailValid = validateEmail();
-    
+
     // Log form submission attempt
     datadog.log({
       action: 'form_submit_attempt',
@@ -85,28 +83,28 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
       label: 'demo_signup',
       additionalData: {
         isNameValid,
-        isEmailValid
-      }
+        isEmailValid,
+      },
     });
-    
+
     if (isNameValid && isEmailValid) {
       setIsSubmitting(true);
       setFormError('');
-      
+
       // Simulate API call
       setTimeout(() => {
         // Log successful signup
         datadog.logFormSubmit('demo_signup', {
           userEmail: email,
-          userName: name
+          userName: name,
         });
-        
+
         onComplete({ name, email });
         setIsSubmitting(false);
       }, 800);
     }
   };
-  
+
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
       {formError && (
@@ -114,7 +112,7 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
           {formError}
         </Alert>
       )}
-      
+
       <TextField
         margin="normal"
         required
@@ -124,7 +122,7 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
         name="name"
         autoComplete="name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={e => setName(e.target.value)}
         onBlur={validateName}
         error={!!nameError}
         helperText={nameError}
@@ -135,14 +133,14 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
             </InputAdornment>
           ),
         }}
-        sx={{ 
+        sx={{
           mb: 2,
           '.MuiOutlinedInput-root': {
             borderRadius: 2,
-          } 
+          },
         }}
       />
-      
+
       <TextField
         margin="normal"
         required
@@ -152,7 +150,7 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
         name="email"
         autoComplete="email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={e => setEmail(e.target.value)}
         onBlur={validateEmail}
         error={!!emailError}
         helperText={emailError}
@@ -163,14 +161,14 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
             </InputAdornment>
           ),
         }}
-        sx={{ 
+        sx={{
           mb: 3,
           '.MuiOutlinedInput-root': {
             borderRadius: 2,
-          } 
+          },
         }}
       />
-      
+
       <Button
         type="submit"
         fullWidth
@@ -185,13 +183,13 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
           boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
           '&:hover': {
             boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
-          }
+          },
         }}
         onClick={() => {
           // Log button click
           datadog.logButtonClick('signup_submit', {
             hasName: !!name.trim(),
-            hasEmail: !!email.trim()
+            hasEmail: !!email.trim(),
           });
         }}
       >
@@ -201,12 +199,12 @@ const DemoSignupForm: React.FC<DemoSignupFormProps> = ({ onComplete }) => {
           'Get Started'
         )}
       </Button>
-      
-      <Typography 
-        variant="caption" 
-        color="text.secondary" 
-        display="block" 
-        align="center" 
+
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        display="block"
+        align="center"
         sx={{ mt: 2 }}
       >
         By signing up, you agree to our Terms of Service and Privacy Policy
